@@ -1,0 +1,26 @@
+{
+  "name": "dearbloom",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@dearbloom/config": "workspace:*",
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.15.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

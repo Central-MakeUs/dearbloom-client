@@ -1,0 +1,13 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+const { slug } = Astro.params;
+
+export function getStaticPaths() {
+  return [];
+}
+---
+<BaseLayout title={`스냅 ${slug}`}>
+  <h1>스냅 상세</h1>
+  <p>route: /snaps/[slug]</p>
+  <p>slug: {slug}</p>
+</BaseLayout>
