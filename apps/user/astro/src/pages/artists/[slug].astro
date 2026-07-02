@@ -1,0 +1,13 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+const { slug } = Astro.params;
+
+export function getStaticPaths() {
+  return [];
+}
+---
+<BaseLayout title={`작가 ${slug}`}>
+  <h1>작가 상세</h1>
+  <p>route: /artists/[slug]</p>
+  <p>slug: {slug}</p>
+</BaseLayout>

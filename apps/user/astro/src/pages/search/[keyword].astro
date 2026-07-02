@@ -1,0 +1,13 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+const { keyword } = Astro.params;
+
+export function getStaticPaths() {
+  return [];
+}
+---
+<BaseLayout title={`${keyword} 검색 결과`}>
+  <h1>검색 결과 페이지</h1>
+  <p>route: /search/[keyword]</p>
+  <p>keyword: {keyword}</p>
+</BaseLayout>

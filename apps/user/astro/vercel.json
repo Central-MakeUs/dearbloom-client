@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/app/:path*",
+      "destination": "https://dearbloom-app.vercel.app/app/:path*"
+    }
+  ]
+}
