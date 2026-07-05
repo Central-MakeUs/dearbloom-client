@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/app/:path*",
-      "destination": "https://dearbloom-app.vercel.app/app/:path*"
+      "destination": "https://dearbloom-next.vercel.app/app/:path*"
     }
   ]
 }
