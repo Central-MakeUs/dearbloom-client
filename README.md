@@ -71,19 +71,19 @@ admin.dearbloom.co.kr       → Next (Admin, 운영자 전용 — 완전 별도)
 
 앱별로 **각각 별도 프로젝트**로 배포합니다. Astro와 Next를 한 프로젝트에 섞지 않아요.
 
-| 앱 | Vercel 프로젝트 (예시) | Framework | Root Directory | 노출 URL | 실 배포 URL |
+| 앱 | Vercel 프로젝트 | Framework | Root Directory | 노출 URL | 실 배포 URL |
 |---|---|---|---|---|---|
-| `user-astro` | `dearbloom-web` | Astro | `apps/user/astro` | **dearbloom.co.kr** | `dearbloom-web.vercel.app` |
-| `user-next` | `dearbloom-app` | Next.js | `apps/user/next` | **dearbloom.co.kr/app/\*** | `dearbloom-app.vercel.app` |
+| `user-astro` | `dearbloom-astro` | Astro | `apps/user/astro` | **dearbloom.co.kr** | `dearbloom-astro.vercel.app` |
+| `user-next` | `dearbloom-next` | Next.js | `apps/user/next` | **dearbloom.co.kr/app/\*** | `dearbloom-next.vercel.app` |
 | `admin` | `dearbloom-admin` | Next.js | `apps/admin` | **admin.dearbloom.co.kr** | `dearbloom-admin.vercel.app` |
 
 ### 핵심 설정
 
 1. **`apps/user/next/next.config.mjs`** — `basePath: '/app'`
    - `_next/static` 등 정적 자산 경로가 자동으로 `/app/_next/static` 이 됨 → 프록시 뒤에서도 안 깨짐
-2. **`apps/user/astro/vercel.json`** — `/app/*` 를 `dearbloom-app.vercel.app/app/*` 로 rewrite
-3. **커스텀 도메인 연결**은 `user-astro` 와 `admin` 프로젝트만
-   - `user-next` 는 Vercel 기본 URL만 두고 외부 노출 X
+2. **`apps/user/astro/vercel.json`** — `/app/*` 를 `dearbloom-next.vercel.app/app/*` 로 rewrite
+3. **커스텀 도메인 연결**은 `dearbloom-astro` 와 `dearbloom-admin` 프로젝트만
+   - `dearbloom-next` 는 Vercel 기본 URL만 두고 외부 노출 X
 
 ### Vercel 프로젝트 설정 (공통)
 
@@ -105,11 +105,11 @@ admin.dearbloom.co.kr       → Next (Admin, 운영자 전용 — 완전 별도)
 
 Vercel Dashboard → 각 프로젝트 → **Settings → Domains** 에서:
 
-- `dearbloom-web` 프로젝트에 → `dearbloom.co.kr`, `www.dearbloom.co.kr`
+- `dearbloom-astro` 프로젝트에 → `dearbloom.co.kr`, `www.dearbloom.co.kr`
 - `dearbloom-admin` 프로젝트에 → `admin.dearbloom.co.kr`
-- `dearbloom-app` 프로젝트에는 **도메인 붙이지 않음** (rewrites 대상으로만 사용)
+- `dearbloom-next` 프로젝트에는 **도메인 붙이지 않음** (rewrites 대상으로만 사용)
 
-DNS(가비아/카페24 등):
+DNS (Route53, IAM 계정으로 접근):
 
 - `dearbloom.co.kr` — A 레코드 → Vercel (`76.76.21.21`)
 - `www.dearbloom.co.kr` — CNAME → `cname.vercel-dns.com`
