@@ -128,7 +128,15 @@ DNS (Route53, IAM 계정으로 접근):
 - **Preview** 환경 = `develop` 브랜치 및 기타 feature 브랜치
 - **Development** = 로컬 `pnpm dev`
 
-`NEXT_PUBLIC_API_URL` 처럼 환경별로 다른 값은 Production/Preview 를 다르게 채워두세요.
+#### 백엔드 API URL
+
+| 환경 | Value |
+|---|---|
+| Production | `https://api.dearbloom.co.kr` (예정 — 백엔드 확정 후 반영) |
+| Preview / develop | **`https://dev-api.dearbloom.co.kr`** (Route53 에 등록됨, nginx 응답 확인 완료) |
+| Development | `http://localhost:8080` |
+
+각 프로젝트 Settings → Environment Variables 에서 `NEXT_PUBLIC_API_URL` 을 **Production / Preview 각각 다르게** 넣어주세요.
 
 ---
 
