@@ -124,6 +124,74 @@ DNS (Route53, IAM 계정으로 접근):
 
 각 Vercel 프로젝트의 **Settings → Environment Variables** 에서 관리 (`.env.example` 참고).
 
+- **Production** 환경 = `main` 브랜치
+- **Preview** 환경 = `develop` 브랜치 및 기타 feature 브랜치
+- **Development** = 로컬 `pnpm dev`
+
+`NEXT_PUBLIC_API_URL` 처럼 환경별로 다른 값은 Production/Preview 를 다르게 채워두세요.
+
+---
+
+## 개발 서버 배포 (develop 브랜치)
+
+### 도메인 매핑
+
+| 환경 | 브랜치 | 노출 도메인 | 실 배포 URL |
+|---|---|---|---|
+| Production | `main` | `dearbloom.co.kr` | `dearbloom-astro.vercel.app` |
+| Production | `main` | `dearbloom.co.kr/app/*` | `dearbloom-next.vercel.app` |
+| Production | `main` | `admin.dearbloom.co.kr` | `dearbloom-admin.vercel.app` |
+| **Dev** | `develop` | **`dev.dearbloom.co.kr`** | `dearbloom-astro-git-develop-*.vercel.app` |
+| **Dev** | `develop` | **`dev.dearbloom.co.kr/app/*`** | `dearbloom-next-git-develop-*.vercel.app` |
+| **Dev** | `develop` | **`dev-admin.dearbloom.co.kr`** | `dearbloom-admin-git-develop-*.vercel.app` |
+
+### 브랜치별 vercel.json 분리
+
+`apps/user/astro/vercel.json` 은 **브랜치마다 destination 이 다릅니다**.
+동일 소스에 조건부 rewrites 를 넣는 대신, `main` 과 `develop` 브랜치에 각각 하나의 destination 만 두는 방식을 사용합니다:
+
+- `main` 브랜치 → `dearbloom-next.vercel.app` (Production Next)
+- `develop` 브랜치 → `dearbloom-next-git-develop-<team>.vercel.app` (Preview Next)
+
+`develop` 브랜치의 실제 vercel Preview URL 이 확정되면 (`dearbloom-next` 프로젝트에서 develop 브랜치 첫 배포 후 확인 가능), `develop` 브랜치의 vercel.json 을 그 값으로 갱신해야 합니다.
+
+### DNS 레코드 추가 (Route53)
+
+기존 3개 레코드에 다음 2개 추가:
+
+| 이름 | 유형 | 값 | TTL |
+|---|---|---|---|
+| `dev` | CNAME | `cname.vercel-dns.com` | 300 |
+| `dev-admin` | CNAME | `cname.vercel-dns.com` | 300 |
+
+### Vercel Dashboard 세팅
+
+각 프로젝트 → **Settings → Domains → Add** 후 도메인의 **Git Branch** 를 `develop` 로 지정.
+
+- `dearbloom-astro` → **Add `dev.dearbloom.co.kr`** → Git Branch: `develop`
+- `dearbloom-admin` → **Add `dev-admin.dearbloom.co.kr`** → Git Branch: `develop`
+- `dearbloom-next` → 도메인 add 안 함 (rewrites 대상). 다만 `develop` 브랜치가 Preview Deployment 로 배포되도록 그대로 두기.
+
+### 개발 배포 흐름
+
+```bash
+# feature 브랜치에서 작업 후 develop 에 머지
+git checkout develop
+git merge feature/xxx
+git push origin develop
+# → Vercel 이 develop 프리뷰 자동 배포 → dev.dearbloom.co.kr 갱신
+```
+
+프로덕션 배포는 `develop` → `main` 머지 (PR 권장):
+
+```bash
+# develop 이 안정되면 main 으로
+git checkout main
+git merge develop
+git push origin main
+# → Vercel 이 프로덕션 자동 배포 → dearbloom.co.kr 갱신
+```
+
 ---
 
 ## Conventions
