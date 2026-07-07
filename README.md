@@ -9,7 +9,8 @@ apps/
 ├── user/
 │   ├── astro/      # 비로그인 SEO 페이지 (Astro)
 │   └── next/       # 로그인 후 Customer + Artist 모드 (Next 16)
-└── admin/          # 운영자 (Next 16)
+├── admin/          # 운영자 (Next 16)
+└── mobile/         # RN WebView 컨테이너 (Expo)
 
 packages/
 ├── ui/             # 공통 React 컴포넌트
@@ -28,6 +29,7 @@ packages/
 - pnpm 9 + Turborepo 2
 - Next.js 16 (Customer 앱, Artist 앱, Admin 앱)
 - Astro (SEO 페이지)
+- Expo / React Native / react-native-webview (모바일 컨테이너)
 - TypeScript / Tailwind / shadcn(Radix)
 - 상태: Zustand (전역·persist) + Context (범위)
 - 서버 상태: TanStack Query
@@ -42,6 +44,7 @@ pnpm dev            # 전체 앱 동시 실행 (Turborepo 병렬)
 pnpm --filter user-astro dev
 pnpm --filter user-next dev
 pnpm --filter admin dev
+pnpm mobile
 ```
 
 ### 개발 포트
@@ -51,6 +54,49 @@ pnpm --filter admin dev
 | `user-astro` | **4321** | http://localhost:4321 |
 | `user-next` | **3000** | http://localhost:3000 |
 | `admin` | **3001** | http://localhost:3001 |
+| `mobile` | Expo DevTools | Expo Go / iOS Simulator / Android Emulator |
+
+### 모바일 WebView 컨테이너
+
+`apps/mobile`은 Expo 기반 React Native 앱입니다. 기본으로 개발 배포 도메인인
+`https://dev.dearbloom.co.kr/app/home`을 WebView로 로드합니다.
+
+다른 URL을 테스트하려면 `apps/mobile/.env`에 다음 값을 넣습니다.
+
+```bash
+EXPO_PUBLIC_WEBVIEW_URL=https://dev.dearbloom.co.kr/app/home
+```
+
+실행:
+
+```bash
+pnpm mobile
+pnpm mobile:ios
+pnpm mobile:android
+pnpm mobile:web
+```
+
+`pnpm mobile`을 실행하면 Expo 개발 서버가 뜨고 QR 코드가 표시됩니다.
+iPhone에 설치된 Expo Go로 QR을 스캔하면 `apps/mobile/App.tsx`가 실행되고, 그 안의 WebView가
+`EXPO_PUBLIC_WEBVIEW_URL`을 로드합니다.
+
+Expo Go는 개발용 미리보기입니다. App Store/Play Store에 올릴 실제 설치 파일(IPA/APK/AAB)은
+별도 빌드 단계(EAS Build 또는 native prebuild + Xcode/Gradle)가 필요합니다.
+
+개발 백엔드 도메인:
+
+```bash
+NEXT_PUBLIC_API_URL=https://dev-api.dearbloom.co.kr
+```
+
+백엔드 CORS 허용 origin:
+
+- `https://dev.dearbloom.co.kr`
+- `https://dev-admin.dearbloom.co.kr`
+- `http://localhost:3000`
+- `http://localhost:3001`
+- `http://localhost:4000`
+- `http://localhost:4321`
 
 ## 배포 & 도메인
 

@@ -5,6 +5,12 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "dev": "turbo run dev",
+    "mobile": "pnpm --filter mobile dev",
+    "mobile:android": "pnpm --filter mobile android",
+    "mobile:ios": "pnpm --filter mobile ios",
+    "mobile:ios:naver": "pnpm --filter mobile ios:naver",
+    "mobile:naver": "pnpm --filter mobile dev:naver",
+    "mobile:web": "pnpm --filter mobile web",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

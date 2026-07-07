@@ -2,11 +2,16 @@ node_modules/
 .next/
 dist/
 .turbo/
+**/.turbo/
 .astro/
+.expo/
+apps/mobile/ios/
+apps/mobile/android/
 .env
 .env.local
 .env.*.local
 *.log
+*.tsbuildinfo
 .DS_Store
 coverage/
 .vercel
