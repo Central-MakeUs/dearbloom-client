@@ -1,4 +1,4 @@
-import { Button } from '@/src/components/common/Button';
+import { Button } from '@dearbloom/ui';
 
 export default function HomePage() {
   const header = (

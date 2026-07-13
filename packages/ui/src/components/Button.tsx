@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@dearbloom/ui';
+import { cn } from '../lib/cn';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'dark';
 type ButtonSize = 'sm' | 'md' | 'lg';
