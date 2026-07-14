@@ -1,7 +1,71 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
+import AppShellLayout from '@/layouts/AppShellLayout.astro';
+
+const filters = ['전체', '졸업스냅', '우정스냅', '가족스냅', '커플스냅'];
+
+const products = [
+  { id: 'snap-1', title: '벚꽃엔딩', artist: '하늘 스튜디오', location: '서울', price: 150_000 },
+  { id: 'snap-2', title: '노을 아래', artist: '수아 필름', location: '경기', price: 120_000 },
+  { id: 'snap-3', title: '가을 프리즘', artist: '노을 필름', location: '경기', price: 180_000 },
+  { id: 'snap-4', title: '한강 라이트', artist: '나비 스튜디오', location: '서울', price: 130_000 },
+  { id: 'snap-5', title: '한강 스냅', artist: '나비 스튜디오', location: '서울', price: 130_000 },
+  { id: 'snap-6', title: '겨울 필름', artist: '무브먼트', location: '서울', price: 165_000 },
+  { id: 'snap-7', title: '캠퍼스 봄날', artist: '수아 필름', location: '서울', price: 140_000 },
+  { id: 'snap-8', title: '캠퍼스 라이트', artist: '무브먼트', location: '서울', price: 145_000 },
+];
 ---
-<BaseLayout title="스냅">
-  <h1>스냅 리스트</h1>
-  <p>route: /snaps</p>
-</BaseLayout>
+<AppShellLayout title="작품 탐색">
+  <div class="mx-auto max-w-md">
+    <header class="px-4 pt-6 pb-3">
+      <h1 class="text-head-1 text-neutral-950">작품 탐색</h1>
+      <p class="mt-1 text-caption-1 text-neutral-600">우리 캠퍼스 근처 작가부터 만나보세요</p>
+    </header>
+
+    <div class="mx-4 mb-3 flex items-center gap-2 rounded-full bg-neutral-0 px-4 py-3 shadow-elevation">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-500" aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input type="text" placeholder="작품, 작가, 장소를 검색해보세요" class="flex-1 bg-transparent text-body-4 text-neutral-950 outline-none placeholder:text-neutral-500" />
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto px-4 pb-3">
+      {filters.map((f, i) => (
+        <button
+          type="button"
+          class={`whitespace-nowrap rounded-full px-4 py-1.5 text-body-3 transition-colors ${
+            i === 0 ? 'bg-primary text-neutral-0' : 'bg-neutral-0 text-neutral-700 border border-neutral-200'
+          }`}
+        >
+          {f}
+        </button>
+      ))}
+    </div>
+
+    <label class="mx-4 mb-3 flex items-center gap-2 border-b border-neutral-200 py-3">
+      <input type="checkbox" class="h-4 w-4 accent-primary" />
+      <span class="text-body-4 text-neutral-800">우리 학교 작가만 보기</span>
+    </label>
+
+    <div class="grid grid-cols-2 gap-3 px-4 pb-6">
+      {products.map((p) => (
+        <a href={`/snaps/${p.id}`} class="flex flex-col">
+          <div class="relative mb-2 aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-primary-100 to-primary-300">
+            <button
+              type="button"
+              aria-label="저장"
+              class="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-0/85 text-neutral-800 backdrop-blur"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+          </div>
+          <div class="line-clamp-1 text-body-4 text-neutral-900">{p.title}</div>
+          <div class="text-caption-2 text-neutral-600">{p.artist} · {p.location}</div>
+          <div class="mt-1 text-body-3 text-neutral-950">{p.price.toLocaleString()}원</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</AppShellLayout>
