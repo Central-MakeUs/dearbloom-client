@@ -5,7 +5,7 @@ export const metadata = { title: 'dearBloom' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body className="font-sans text-ink p-10">{children}</body>
+      <body className="font-sans text-ink">{children}</body>
     </html>
   );
 }
