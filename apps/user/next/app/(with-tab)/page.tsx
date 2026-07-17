@@ -15,6 +15,7 @@ export default async function RootPage({ searchParams }: RootPageProps) {
   const hasAccessToken = cookieStore.has('accessToken');
   const hasRefreshToken = cookieStore.has('refreshToken');
   const isLoggedIn = hasAccessToken && hasRefreshToken;
+  const isLocalDevelopment = process.env.NODE_ENV === 'development';
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_OAUTH_API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -23,7 +24,7 @@ export default async function RootPage({ searchParams }: RootPageProps) {
     process.env.NEXT_PUBLIC_LOCAL_GOOGLE_CALLBACK_URL ??
     'http://localhost:3000/app/api/auth/callback';
   const googleLoginHref =
-    process.env.NODE_ENV === 'development'
+    isLocalDevelopment
       ? createLocalOAuthAuthorizationUrl({
           baseUrl: apiBaseUrl,
           targetUrl: localGoogleCallbackUrl,
@@ -40,8 +41,10 @@ export default async function RootPage({ searchParams }: RootPageProps) {
         <h2 className="text-head-2 text-neutral-950">{isLoggedIn ? '로그인됨' : '로그인 전'}</h2>
         <p className="text-body-5 text-neutral-600">
           {isLoggedIn
-            ? 'localhost 쿠키에 accessToken과 refreshToken이 저장되어 있습니다.'
-            : 'Google 로그인 후 oneTimeCode를 교환해 localhost 쿠키를 심습니다.'}
+            ? '브라우저 쿠키에 accessToken과 refreshToken이 저장되어 있습니다.'
+            : isLocalDevelopment
+              ? 'Google 로그인 후 oneTimeCode를 교환해 localhost 쿠키를 심습니다.'
+              : 'Google 로그인 후 백엔드가 발급한 쿠키로 로그인 상태를 확인합니다.'}
         </p>
         {authResult && <p className="text-caption-1 text-danger">최근 콜백 결과: {authResult}</p>}
       </div>
