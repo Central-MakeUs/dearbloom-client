@@ -2,10 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/auth/callback",
-      "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app/api/auth/callback"
-    },
-    {
       "source": "/app",
       "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app"
     },

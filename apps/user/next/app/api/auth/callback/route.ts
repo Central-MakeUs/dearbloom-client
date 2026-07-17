@@ -96,19 +96,10 @@ function extractTokens(body: LocalTokenExchangeResponse): ExtractedTokens {
 }
 
 function redirectHome(request: NextRequest, authStatus: string) {
-  const homeUrl = new URL(homePath, getPublicOrigin(request));
+  const homeUrl = new URL(homePath, request.url);
   homeUrl.searchParams.set('auth', authStatus);
 
   return NextResponse.redirect(homeUrl);
-}
-
-function getPublicOrigin(request: NextRequest) {
-  const forwardedHost = request.headers.get('x-forwarded-host');
-  const host = forwardedHost ?? request.headers.get('host') ?? request.nextUrl.host;
-  const forwardedProto = request.headers.get('x-forwarded-proto');
-  const protocol = forwardedProto ?? request.nextUrl.protocol.replace(':', '');
-
-  return `${protocol}://${host}`;
 }
 
 function normalizeBaseUrl(baseUrl: string) {
