@@ -21,11 +21,10 @@ const homePath = '/app';
 export async function GET(request: NextRequest) {
   const oneTimeCode =
     request.nextUrl.searchParams.get('oneTimeCode') ??
-    request.nextUrl.searchParams.get('one_time_code') ??
-    request.nextUrl.searchParams.get('code');
+    request.nextUrl.searchParams.get('one_time_code');
 
   if (!oneTimeCode) {
-    return redirectHome(request, 'missing_one_time_code');
+    return redirectHome(request, isLocalRequest(request) ? 'missing_one_time_code' : 'success');
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
@@ -109,6 +108,12 @@ function getPublicOrigin(request: NextRequest) {
   const protocol = forwardedProto ?? request.nextUrl.protocol.replace(':', '');
 
   return `${protocol}://${host}`;
+}
+
+function isLocalRequest(request: NextRequest) {
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+
+  return host.startsWith('localhost') || host.startsWith('127.0.0.1');
 }
 
 function normalizeBaseUrl(baseUrl: string) {
