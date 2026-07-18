@@ -1,0 +1,39 @@
+import { NextResponse, type NextRequest } from 'next/server';
+
+export function GET(request: NextRequest) {
+  const response = NextResponse.redirect(new URL('/app', getPublicOrigin(request)));
+
+  expireAuthCookie(request, response, 'accessToken');
+  expireAuthCookie(request, response, 'refreshToken');
+
+  return response;
+}
+
+function getPublicOrigin(request: NextRequest) {
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const host = forwardedHost ?? request.headers.get('host') ?? request.nextUrl.host;
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  const protocol = forwardedProto ?? request.nextUrl.protocol.replace(':', '');
+
+  return `${protocol}://${host}`;
+}
+
+function expireAuthCookie(request: NextRequest, response: NextResponse, name: string) {
+  const cookieOptions = {
+    expires: new Date(0),
+    maxAge: 0,
+    path: '/',
+  };
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const hostname = host.split(':')[0] ?? request.nextUrl.hostname;
+
+  response.cookies.set(name, '', cookieOptions);
+
+  if (hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr')) {
+    response.cookies.set(name, '', {
+      ...cookieOptions,
+      domain: '.dearbloom.co.kr',
+      secure: true,
+    });
+  }
+}
