@@ -33,18 +33,22 @@ export default async function RootPage({ searchParams }: RootPageProps) {
           baseUrl: apiBaseUrl,
           provider: 'google',
         });
+  const appleLoginHref = createOAuthAuthorizationUrl({
+    baseUrl: apiBaseUrl,
+    provider: 'apple',
+  });
 
   const authStatus = (
     <section className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-elevation">
       <div className="flex flex-col gap-1">
-        <p className="text-caption-1 text-neutral-500">Google OAuth 확인</p>
+        <p className="text-caption-1 text-neutral-500">소셜 OAuth 확인</p>
         <h2 className="text-head-2 text-neutral-950">{isLoggedIn ? '로그인됨' : '로그인 전'}</h2>
         <p className="text-body-5 text-neutral-600">
           {isLoggedIn
             ? '브라우저 쿠키에 accessToken과 refreshToken이 저장되어 있습니다.'
             : isLocalDevelopment
-              ? 'Google 로그인 후 oneTimeCode를 교환해 localhost 쿠키를 심습니다.'
-              : 'Google 로그인 후 백엔드가 발급한 쿠키로 로그인 상태를 확인합니다.'}
+              ? 'Google 로그인은 oneTimeCode를 교환하고, Apple 로그인은 백엔드 OAuth로 이동합니다.'
+              : '소셜 로그인 후 백엔드가 발급한 쿠키로 로그인 상태를 확인합니다.'}
         </p>
         {authResult && <p className="text-caption-1 text-danger">최근 콜백 결과: {authResult}</p>}
       </div>
@@ -57,12 +61,20 @@ export default async function RootPage({ searchParams }: RootPageProps) {
             로그아웃하고 다시 테스트
           </a>
         ) : (
-          <a
-            className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0"
-            href={googleLoginHref}
-          >
-            Google로 로그인
-          </a>
+          <div className="flex flex-col gap-2">
+            <a
+              className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0"
+              href={googleLoginHref}
+            >
+              Google로 로그인
+            </a>
+            <a
+              className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950"
+              href={appleLoginHref}
+            >
+              Apple로 로그인
+            </a>
+          </div>
         )}
         <span className="text-caption-1 text-neutral-500">
           accessToken: {hasAccessToken ? '있음' : '없음'} · refreshToken:{' '}
