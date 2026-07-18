@@ -1,47 +1,32 @@
 import { cookies } from 'next/headers';
 
-import {
-  createLocalOAuthAuthorizationUrl,
-  createOAuthAuthorizationUrl,
-} from '@dearbloom/features-auth';
-
 type RootPageProps = {
-  searchParams?: Promise<{ auth?: string }>;
+  searchParams?: Promise<{ auth?: string; provider?: string }>;
 };
 
 export default async function RootPage({ searchParams }: RootPageProps) {
-  const authResult = (await searchParams)?.auth;
+  const resolvedSearchParams = await searchParams;
+  const authResult = resolvedSearchParams?.auth;
+  const authProvider =
+    resolvedSearchParams?.provider === 'apple' || resolvedSearchParams?.provider === 'google'
+      ? resolvedSearchParams.provider
+      : undefined;
   const cookieStore = await cookies();
   const hasAccessToken = cookieStore.has('accessToken');
   const hasRefreshToken = cookieStore.has('refreshToken');
   const isLoggedIn = hasAccessToken && hasRefreshToken;
   const isLocalDevelopment = process.env.NODE_ENV === 'development';
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_OAUTH_API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    'https://dev-api.dearbloom.co.kr';
-  const localGoogleCallbackUrl =
-    process.env.NEXT_PUBLIC_LOCAL_GOOGLE_CALLBACK_URL ??
-    'http://localhost:3000/app/api/auth/callback';
-  const googleLoginHref =
-    isLocalDevelopment
-      ? createLocalOAuthAuthorizationUrl({
-          baseUrl: apiBaseUrl,
-          targetUrl: localGoogleCallbackUrl,
-        })
-      : createOAuthAuthorizationUrl({
-          baseUrl: apiBaseUrl,
-          provider: 'google',
-        });
-  const appleLoginHref = createOAuthAuthorizationUrl({
-    baseUrl: apiBaseUrl,
-    provider: 'apple',
-  });
+  const oauthLabel =
+    authProvider === 'apple'
+      ? 'Apple OAuth 확인'
+      : authProvider === 'google'
+        ? 'Google OAuth 확인'
+        : '소셜 OAuth 확인';
 
   const authStatus = (
     <section className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-elevation">
       <div className="flex flex-col gap-1">
-        <p className="text-caption-1 text-neutral-500">소셜 OAuth 확인</p>
+        <p className="text-caption-1 text-neutral-500">{oauthLabel}</p>
         <h2 className="text-head-2 text-neutral-950">{isLoggedIn ? '로그인됨' : '로그인 전'}</h2>
         <p className="text-body-5 text-neutral-600">
           {isLoggedIn
@@ -64,13 +49,13 @@ export default async function RootPage({ searchParams }: RootPageProps) {
           <div className="flex flex-col gap-2">
             <a
               className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0"
-              href={googleLoginHref}
+              href="/app/api/auth/login?provider=google"
             >
               Google로 로그인
             </a>
             <a
               className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950"
-              href={appleLoginHref}
+              href="/app/api/auth/login?provider=apple"
             >
               Apple로 로그인
             </a>
