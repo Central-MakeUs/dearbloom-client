@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import type { OAuthProvider } from '@dearbloom/features-auth';
+
 type LocalTokenExchangeResponse = {
   accessToken?: string;
   refreshToken?: string;
@@ -19,21 +21,26 @@ const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const homePath = '/app';
 
 export async function GET(request: NextRequest) {
+  const provider = getOAuthProvider(request.cookies.get('oauthProvider')?.value);
   const oneTimeCode =
     request.nextUrl.searchParams.get('oneTimeCode') ??
     request.nextUrl.searchParams.get('one_time_code');
 
   if (!oneTimeCode) {
-    return redirectHome(request, isLocalRequest(request) ? 'missing_one_time_code' : 'success');
+    return redirectHome(
+      request,
+      isLocalRequest(request) ? 'missing_one_time_code' : 'success',
+      provider,
+    );
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
 
   if (!tokenExchangeResult.ok) {
-    return redirectHome(request, tokenExchangeResult.reason);
+    return redirectHome(request, tokenExchangeResult.reason, provider);
   }
 
-  const response = redirectHome(request, 'success');
+  const response = redirectHome(request, 'success', provider);
   const cookieOptions = {
     httpOnly: true,
     path: '/',
@@ -94,11 +101,29 @@ function extractTokens(body: LocalTokenExchangeResponse): ExtractedTokens {
   };
 }
 
-function redirectHome(request: NextRequest, authStatus: string) {
+function redirectHome(
+  request: NextRequest,
+  authStatus: string,
+  provider?: OAuthProvider,
+) {
   const homeUrl = new URL(homePath, getPublicOrigin(request));
   homeUrl.searchParams.set('auth', authStatus);
+  if (provider) {
+    homeUrl.searchParams.set('provider', provider);
+  }
 
-  return NextResponse.redirect(homeUrl);
+  const response = NextResponse.redirect(homeUrl);
+  response.cookies.set('oauthProvider', '', {
+    expires: new Date(0),
+    maxAge: 0,
+    path: '/',
+  });
+
+  return response;
+}
+
+function getOAuthProvider(value?: string): OAuthProvider | undefined {
+  return value === 'apple' || value === 'google' ? value : undefined;
 }
 
 function getPublicOrigin(request: NextRequest) {
