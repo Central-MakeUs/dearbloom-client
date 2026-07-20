@@ -58,9 +58,15 @@ const surface = {
   dark: 'bg-neutral-900',
 } as const satisfies Record<BottomTabVariant, string>;
 
+// 다크 배경에선 브랜드 그린이 뭉개져 보이므로 활성 탭을 흰색으로.
+const active = {
+  light: 'text-primary',
+  dark: 'text-neutral-0',
+} as const satisfies Record<BottomTabVariant, string>;
+
 const inactive = {
   light: 'text-neutral-600 hover:text-neutral-800',
-  dark: 'text-neutral-500 hover:text-neutral-300',
+  dark: 'text-neutral-400 hover:text-neutral-200',
 } as const satisfies Record<BottomTabVariant, string>;
 
 export function BottomTab({ currentPath, variant = 'light', className }: BottomTabProps) {
@@ -80,6 +86,7 @@ export function BottomTab({ currentPath, variant = 'light', className }: BottomT
           href={tab.href}
           label={tab.label}
           active={tab.match(currentPath)}
+          activeClassName={active[variant]}
           inactiveClassName={inactive[variant]}
           icon={(active) => <tab.Icon active={active} />}
         />

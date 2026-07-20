@@ -8,6 +8,8 @@ interface TabButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   active?: boolean;
   /** active 여부에 따라 아이콘을 그리는 렌더 함수. */
   icon: (active: boolean) => ReactNode;
+  /** 활성 라벨/아이콘 색 클래스. 기본 브랜드 그린(라이트 배경용). 다크 배경에선 흰색 등으로 조정. */
+  activeClassName?: string;
   /** 비활성 라벨/아이콘 색 클래스(다크 배경 등에서 조정). 기본 neutral-600. */
   inactiveClassName?: string;
 }
@@ -21,6 +23,7 @@ export function TabButton({
   label,
   active = false,
   icon,
+  activeClassName = 'text-primary',
   inactiveClassName = 'text-neutral-600 hover:text-neutral-800',
   className,
   ...rest
@@ -31,7 +34,7 @@ export function TabButton({
       aria-current={active ? 'page' : undefined}
       className={cn(
         'flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors',
-        active ? 'text-primary' : inactiveClassName,
+        active ? activeClassName : inactiveClassName,
         className,
       )}
     >
