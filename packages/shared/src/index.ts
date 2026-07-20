@@ -4,3 +4,4 @@ export * from './api/regions';
 export * from './api/artworks';
 export * from './api/saved';
 export * from './api/artist';
+export * from './api/dev';
