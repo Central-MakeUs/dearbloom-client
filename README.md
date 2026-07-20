@@ -85,7 +85,7 @@ const { data } = useQuery(matchesQuery());
 Tailwind 프리셋(`packages/config/tailwind.preset.mjs`)에서 정의된 토큰만 사용합니다.
 
 - **색상**
-  - `primary.50` ~ `primary.900` (Primary 그린 스케일, DEFAULT = `#345F48`)
+  - `primary.50` ~ `primary.900` (Primary 그린 스케일, DEFAULT = `#296A48`)
   - `neutral.0` (white) ~ `neutral.950`
   - `error`, `danger`, `success`
 - **타이포그래피** — `text-head-1`, `text-head-2`, `text-body-1` ~ `text-body-5`, `text-caption-1` ~ `text-caption-3`
