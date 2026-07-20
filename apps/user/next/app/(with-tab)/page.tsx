@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
 
+import { SocialLoginButtons } from './SocialLoginButtons';
+
 type RootPageProps = {
   searchParams?: Promise<{ auth?: string; provider?: string }>;
 };
@@ -46,20 +48,7 @@ export default async function RootPage({ searchParams }: RootPageProps) {
             로그아웃하고 다시 테스트
           </a>
         ) : (
-          <div className="flex flex-col gap-2">
-            <a
-              className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0"
-              href="/app/api/auth/login?provider=google"
-            >
-              Google로 로그인
-            </a>
-            <a
-              className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950"
-              href="/app/api/auth/login?provider=apple"
-            >
-              Apple로 로그인
-            </a>
-          </div>
+          <SocialLoginButtons />
         )}
         <span className="text-caption-1 text-neutral-500">
           accessToken: {hasAccessToken ? '있음' : '없음'} · refreshToken:{' '}
