@@ -9,7 +9,11 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "kr.co.dearbloom.mobile",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "kr.co.dearbloom.mobile",
@@ -17,6 +21,11 @@
     },
     "web": {
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9f1decea-b9bd-4019-ba75-44e71622cd0f"
+      }
     }
   }
 }
