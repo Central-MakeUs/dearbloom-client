@@ -14,9 +14,6 @@ try {
 }
 
 const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()}만원`;
-
-// 필터/정렬은 백엔드 미지원 → 시각 UI만 (동작 없음)
-const filters = ['날짜', '지역', '가격', '인원'];
 ---
 
 <AppShellLayout title="작품 탐색" navVariant="dark">
@@ -32,24 +29,8 @@ const filters = ['날짜', '지역', '가격', '인원'];
     </header>
 
     {/* 작품탐색 헤딩 */}
-    <div class="px-4 pt-1">
+    <div class="px-4 pb-4 pt-1">
       <span class="inline-block border-b-2 border-primary pb-2 text-head-2 text-primary">작품탐색</span>
-    </div>
-
-    {/* 필터 + 정렬 */}
-    <div class="flex items-center justify-between gap-2 px-3 py-3">
-      <div class="flex gap-1 overflow-x-auto">
-        {filters.map((f) => (
-          <button type="button" class="flex shrink-0 items-center gap-0.5 rounded-md border border-neutral-400 bg-neutral-200 py-1.5 pl-3 pr-1.5 text-body-4 text-neutral-900" aria-disabled="true">
-            {f}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
-          </button>
-        ))}
-      </div>
-      <button type="button" class="flex shrink-0 items-center gap-0.5 py-1 text-body-4 text-neutral-800" aria-disabled="true">
-        추천순
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
-      </button>
     </div>
 
     {/* 작품 피드 */}
