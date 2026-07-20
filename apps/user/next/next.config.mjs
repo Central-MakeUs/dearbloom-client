@@ -7,6 +7,12 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/',
+        destination: '/app',
+        permanent: false,
+        basePath: false,
+      },
+      {
         source: '/api/auth/callback',
         destination: '/app/api/auth/callback',
         permanent: false,
