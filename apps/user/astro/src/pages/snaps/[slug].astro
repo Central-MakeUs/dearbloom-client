@@ -7,6 +7,9 @@ import { getArtwork, regionLabels, type ArtworkDetail } from '@dearbloom/shared'
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
 
+// 로그인별 isSaved 가 담기므로 CDN 공유 캐시 금지(익명 렌더가 로그인 사용자에게 새는 것 방지).
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
 let artwork: ArtworkDetail | null = null;
 try {
   artwork = await getArtwork(slug!, token ? { token } : undefined);
