@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
@@ -19,9 +12,8 @@ const DEFAULT_WEBVIEW_URL = 'https://dearbloom.co.kr/app';
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
-const environment = process.env as Record<string, string | undefined>;
-const googleWebClientId = environment.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-const googleIosClientId = environment.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}' }); true;`;
 const colors = {
   brand: 'rgb(124, 92, 255)',
