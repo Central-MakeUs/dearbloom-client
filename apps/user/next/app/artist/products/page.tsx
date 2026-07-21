@@ -18,9 +18,14 @@ export default async function ArtistProductsPage() {
   const header = (
     <header className="flex items-center justify-between px-4 pt-6">
       <h1 className="text-head-1 text-neutral-950">내 작품</h1>
-      <a href="/app/artist/products/new" className="rounded-md bg-primary px-4 py-2 text-caption-1 font-medium text-neutral-0">
-        + 새 작품
-      </a>
+      <div className="flex items-center gap-2">
+        <a href="/app/artist/profile" className="rounded-md border border-neutral-300 px-3 py-2 text-caption-1 text-neutral-700">
+          프로필
+        </a>
+        <a href="/app/artist/products/new" className="rounded-md bg-primary px-4 py-2 text-caption-1 font-medium text-neutral-0">
+          + 새 작품
+        </a>
+      </div>
     </header>
   );
 

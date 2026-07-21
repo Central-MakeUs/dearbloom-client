@@ -32,14 +32,22 @@ export function MyArtworkList({ items: initial }: { items: ArtworkListItem[] }) 
               <div className="text-body-5 text-primary">{formatPrice(a.price)}</div>
             </div>
           </a>
-          <button
-            type="button"
-            onClick={() => remove(a.artworkId)}
-            disabled={deleting === a.artworkId}
-            className="shrink-0 rounded-md border border-neutral-300 px-3 py-1.5 text-caption-1 text-neutral-600 disabled:opacity-50"
-          >
-            {deleting === a.artworkId ? '삭제 중' : '삭제'}
-          </button>
+          <div className="flex shrink-0 flex-col gap-1">
+            <a
+              href={`/app/artist/products/${a.artworkId}/edit`}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-center text-caption-1 text-neutral-700"
+            >
+              수정
+            </a>
+            <button
+              type="button"
+              onClick={() => remove(a.artworkId)}
+              disabled={deleting === a.artworkId}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-caption-1 text-neutral-600 disabled:opacity-50"
+            >
+              {deleting === a.artworkId ? '삭제 중' : '삭제'}
+            </button>
+          </div>
         </li>
       ))}
     </ul>

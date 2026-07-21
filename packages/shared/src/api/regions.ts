@@ -37,3 +37,38 @@ export const REGION_OPTIONS = Object.entries(REGION_LABELS).map(([value, label])
   value: value as RegionCode,
   label,
 }));
+
+/**
+ * 작가 프로필/활동지역용 세분화 지역 enum (작품 목록의 광역 코드와 별개).
+ * 예: 경기 → 경기북부/경기남부, 대전·세종 결합.
+ */
+export const ARTIST_REGION_LABELS = {
+  SEOUL: '서울',
+  GYEONGGI_NORTH: '경기북부',
+  GYEONGGI_SOUTH: '경기남부',
+  INCHEON: '인천',
+  BUSAN: '부산',
+  DAEGU: '대구',
+  GWANGJU: '광주',
+  DAEJEON_SEJONG: '대전·세종',
+  ULSAN: '울산',
+  GANGWON: '강원',
+  CHUNGBUK: '충북',
+  CHUNGNAM: '충남',
+  JEONBUK: '전북',
+  JEONNAM: '전남',
+  GYEONGBUK: '경북',
+  GYEONGNAM: '경남',
+  JEJU: '제주',
+} as const;
+
+export type ArtistRegionCode = keyof typeof ARTIST_REGION_LABELS;
+
+export function artistRegionLabel(code: string): string {
+  return (ARTIST_REGION_LABELS as Record<string, string>)[code] ?? code;
+}
+
+export const ARTIST_REGION_OPTIONS = Object.entries(ARTIST_REGION_LABELS).map(([value, label]) => ({
+  value: value as ArtistRegionCode,
+  label,
+}));
