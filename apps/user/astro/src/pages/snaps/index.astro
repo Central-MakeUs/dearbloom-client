@@ -3,7 +3,7 @@ export const prerender = false; // 서버 렌더 (작품 목록을 요청 시 AP
 
 import AppShellLayout from '@/layouts/AppShellLayout.astro';
 import { SaveHeart } from '@dearbloom/ui';
-import { getArtworks, regionLabels, type ArtworkListItem } from '@dearbloom/shared';
+import { getArtworks, regionLabel, type ArtworkListItem } from '@dearbloom/shared';
 
 const token = Astro.cookies.get('accessToken')?.value;
 // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지). 비로그인은 캐시 가능(SEO).
@@ -24,7 +24,12 @@ const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()
   <div class="mx-auto max-w-md">
     {/* 상단 앱바 */}
     <header class="flex h-12 items-center justify-between px-4">
-      <span class="text-head-2 text-primary">dearBloom</span>
+      <span class="flex items-center gap-1 text-head-1 font-semibold text-primary">
+        DearBloom
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="8.5" cy="8.5" r="3.8" /><circle cx="15.5" cy="8.5" r="3.8" /><circle cx="8.5" cy="15.5" r="3.8" /><circle cx="15.5" cy="15.5" r="3.8" /><path d="M12 12l-1.4 8h2.8z" />
+        </svg>
+      </span>
       <div class="flex items-center gap-3 text-neutral-800">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
           <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
@@ -33,9 +38,15 @@ const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()
     </header>
 
     {/* 작품탐색 헤딩 */}
-    <div class="px-4 pb-4 pt-1">
+    <div class="px-4 pt-1">
       <span class="inline-block border-b-2 border-primary pb-2 text-head-2 text-primary">작품탐색</span>
     </div>
+
+    {!loadFailed && artworks.length > 0 && (
+      <div class="px-4 pb-3 pt-3">
+        <span class="text-caption-1 text-neutral-600">전체 {artworks.length}</span>
+      </div>
+    )}
 
     {/* 작품 피드 */}
     {loadFailed ? (
@@ -46,23 +57,30 @@ const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()
       <div class="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
         {artworks.map((a) => (
           <div class="flex flex-col">
-            <a href={`/snaps/${a.artworkId}`} class="relative mb-2 block aspect-[4/5] overflow-hidden rounded-md bg-neutral-200">
-              <img src={a.thumbnailUrl} alt={a.title} loading="lazy" class="h-full w-full object-cover" />
-            </a>
-            <div class="flex items-start justify-between gap-2">
-              <a href={`/snaps/${a.artworkId}`} class="min-w-0 flex-1">
-                <div class="truncate text-body-3 text-neutral-950">{a.title}</div>
-                <div class="mt-0.5 flex items-center gap-1.5">
-                  <span class="truncate text-body-5 text-neutral-950">{a.artistNickname}</span>
-                  <span class="h-3 w-px shrink-0 bg-neutral-600"></span>
-                  <span class="shrink-0 text-body-3 text-primary">{formatPrice(a.price)}</span>
-                </div>
-                {a.artistRegionList?.length > 0 && (
-                  <div class="truncate text-caption-2 text-neutral-600">{regionLabels(a.artistRegionList)}</div>
-                )}
+            {/* 썸네일 + 하트 오버레이 */}
+            <div class="relative mb-2">
+              <a href={`/snaps/${a.artworkId}`} class="block aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+                <img src={a.thumbnailUrl} alt={a.title} loading="lazy" class="h-full w-full object-cover" />
               </a>
-              <SaveHeart artworkId={a.artworkId} initialSaved={!!a.isSaved} client:load />
+              <SaveHeart
+                artworkId={a.artworkId}
+                initialSaved={!!a.isSaved}
+                size={20}
+                className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-0/80 text-neutral-700 backdrop-blur transition-transform active:scale-90"
+                client:load
+              />
             </div>
+            {/* 메타: 제목 / 작가 / 가격+지역칩 */}
+            <a href={`/snaps/${a.artworkId}`} class="block">
+              <div class="truncate text-body-3 text-neutral-950">{a.title}</div>
+              <div class="mt-0.5 truncate text-body-5 text-neutral-600">{a.artistNickname}</div>
+              <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <span class="text-body-1 font-semibold text-primary">{formatPrice(a.price)}</span>
+                {a.artistRegionList?.map((code) => (
+                  <span class="rounded-sm bg-neutral-100 px-1.5 py-0.5 text-caption-2 text-neutral-600">{regionLabel(code)}</span>
+                ))}
+              </div>
+            </a>
           </div>
         ))}
       </div>
