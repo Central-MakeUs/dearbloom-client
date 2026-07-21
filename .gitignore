@@ -12,6 +12,8 @@ apps/mobile/android/
 .env.*.local
 *.log
 *.tsbuildinfo
+*.jks
+*.keystore
 .DS_Store
 coverage/
 .vercel
