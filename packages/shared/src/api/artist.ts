@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPatch, apiPut, apiDelete, type RequestOptions } from './http';
-import type { RegionCode } from './regions';
+import type { ArtistRegionCode } from './regions';
 import type { ArtworkDetail, ArtworkListItem, FileType } from './artworks';
 
 /**
@@ -13,8 +13,9 @@ export interface ArtistMe {
   artistId: number;
   nickname: string;
   intro: string;
-  artistImageUrl: string | null;
-  regionList: RegionCode[];
+  /** 조회는 imageUrl, 수정은 artistImageUrl 로 백엔드 필드명이 다름에 유의. */
+  imageUrl: string | null;
+  regionList: ArtistRegionCode[];
   travelFeeInfo: string | null;
   packageInfo: string | null;
 }
@@ -55,7 +56,7 @@ export function updateArtistImage(artistImageUrl: string, opts: RequestOptions):
   return apiPatch<void>('/api/artists/me/image', { artistImageUrl }, opts);
 }
 
-export function updateArtistRegions(regionList: RegionCode[], opts: RequestOptions): Promise<void> {
+export function updateArtistRegions(regionList: ArtistRegionCode[], opts: RequestOptions): Promise<void> {
   return apiPut<void>('/api/artists/me/regions', { regionList }, opts);
 }
 

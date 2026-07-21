@@ -1,5 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createArtwork, deleteArtwork, ApiError, type CreateArtworkPayload } from '@dearbloom/shared';
+import {
+  createArtwork,
+  updateArtwork,
+  deleteArtwork,
+  ApiError,
+  type CreateArtworkPayload,
+  type UpdateArtworkPayload,
+} from '@dearbloom/shared';
 
 function authToken(request: NextRequest) {
   return request.cookies.get('accessToken')?.value;
@@ -19,6 +26,23 @@ export async function POST(request: NextRequest) {
   try {
     const data = await createArtwork(body, { token });
     return NextResponse.json(data);
+  } catch (e) {
+    return errorResponse(e);
+  }
+}
+
+/** 작품 수정 프록시 (?id=, body: {title, price}) */
+export async function PATCH(request: NextRequest) {
+  const token = authToken(request);
+  if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  const id = request.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+  const body = (await request.json()) as UpdateArtworkPayload;
+  try {
+    await updateArtwork(id, body, { token });
+    return new NextResponse(null, { status: 204 });
   } catch (e) {
     return errorResponse(e);
   }
