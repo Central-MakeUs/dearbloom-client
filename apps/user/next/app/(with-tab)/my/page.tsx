@@ -1,31 +1,8 @@
 import { cookies } from 'next/headers';
 import { getMemberMe } from '@dearbloom/shared';
+import { MyMenu } from './MyMenu';
 
 export const dynamic = 'force-dynamic';
-
-const ChevronRight = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden
-    className="text-neutral-400"
-  >
-    <path d="m9 18 6-6-6-6" />
-  </svg>
-);
-
-/** 마이페이지 메뉴 — href 없는 항목은 아직 백엔드가 없어 노출만. */
-const menu: { label: string; href?: string }[] = [
-  { label: '예약 내역', href: '/app/my/reservations' },
-  { label: '로그아웃', href: '/app/api/auth/logout' },
-  { label: '탈퇴하기' }, // 회원 탈퇴 API 부재 — 디자인 노출만
-];
 
 export default async function MyPage() {
   const token = (await cookies()).get('accessToken')?.value;
@@ -65,33 +42,15 @@ export default async function MyPage() {
           </div>
         </div>
         <a
-          href="/app/onboarding/basic"
+          href="/app/profile/edit"
           className="shrink-0 rounded-md border border-neutral-300 px-3 py-1 text-body-1 text-neutral-950"
         >
           수정
         </a>
       </section>
 
-      {/* 메뉴 */}
-      <nav className="mt-2 flex flex-col gap-1 px-5">
-        {menu.map((m) =>
-          m.href ? (
-            <a
-              key={m.label}
-              href={m.href}
-              className="flex h-11 items-center justify-between transition-colors hover:opacity-70"
-            >
-              <span className="text-body-1 text-neutral-950">{m.label}</span>
-              <ChevronRight />
-            </a>
-          ) : (
-            <div key={m.label} className="flex h-11 items-center justify-between" aria-disabled>
-              <span className="text-body-1 text-neutral-950">{m.label}</span>
-              <ChevronRight />
-            </div>
-          ),
-        )}
-      </nav>
+      {/* 메뉴 + 로그아웃/탈퇴 모달 */}
+      <MyMenu />
     </div>
   );
 }

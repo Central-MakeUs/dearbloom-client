@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   if (token) await logoutMember({ token }).catch(() => undefined);
 
-  const response = NextResponse.redirect(new URL('/app', getPublicOrigin(request)));
+  // 로그아웃 후에는 공개 피드(astro /snaps)로 이동.
+  const response = NextResponse.redirect(new URL('/snaps', getPublicOrigin(request)));
 
   expireAuthCookie(request, response, 'accessToken');
   expireAuthCookie(request, response, 'refreshToken');
