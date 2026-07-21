@@ -26,5 +26,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config.ios,
     usesAppleSignIn: true,
   },
-  plugins: [...googleSignInPlugins, 'expo-apple-authentication'],
+  plugins: [
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          extraPods: [
+            { name: 'GoogleUtilities', modular_headers: true },
+            { name: 'RecaptchaInterop', modular_headers: true },
+          ],
+        },
+      },
+    ],
+    ...googleSignInPlugins,
+    'expo-apple-authentication',
+  ],
 });
