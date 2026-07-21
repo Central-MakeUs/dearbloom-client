@@ -3,8 +3,9 @@ import { BottomTab } from '@dearbloom/ui';
 
 interface Props {
   title: string;
+  navVariant?: 'light' | 'dark';
 }
-const { title } = Astro.props;
+const { title, navVariant = 'light' } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 <!doctype html>
@@ -16,6 +17,6 @@ const currentPath = Astro.url.pathname;
   </head>
   <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
     <slot />
-    <BottomTab currentPath={currentPath} client:load />
+    <BottomTab currentPath={currentPath} variant={navVariant} client:load />
   </body>
 </html>

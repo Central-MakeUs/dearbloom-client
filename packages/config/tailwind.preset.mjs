@@ -12,12 +12,12 @@ const primary = {
   200: '#CBD9D0',
   300: '#AFC4B7',
   400: '#7F9F8C',
-  500: '#345F48', // Primary (DEFAULT)
+  500: '#296A48', // Primary (DEFAULT) — Figma 브랜드 그린(primary/primary)
   600: '#2D533F',
   700: '#264636',
   800: '#1E382B',
   900: '#15281F',
-  DEFAULT: '#345F48',
+  DEFAULT: '#296A48',
 };
 
 const neutral = {
