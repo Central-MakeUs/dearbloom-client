@@ -1,7 +1,7 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import SaveHeart from '@/components/SaveHeart.tsx';
+import { SaveHeart } from '@dearbloom/ui';
 import { getArtwork, regionLabels, type ArtworkDetail } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
