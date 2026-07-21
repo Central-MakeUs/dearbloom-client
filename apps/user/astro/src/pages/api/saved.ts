@@ -36,6 +36,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     await saveArtwork(artworkId, { token });
     return new Response(null, { status: 204 });
   } catch (e) {
+    // 이미 저장됨(409)은 원하는 상태이므로 성공으로 처리(멱등).
+    if (e instanceof ApiError && e.status === 409) return new Response(null, { status: 204 });
     const status = e instanceof ApiError ? e.status : 500;
     return fail(status, e instanceof Error ? e.message : 'save failed');
   }
