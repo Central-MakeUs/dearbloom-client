@@ -13,7 +13,9 @@ Astro.response.headers.set('Cache-Control', 'private, no-store');
 let artwork: ArtworkDetail | null = null;
 try {
   artwork = await getArtwork(slug!, token ? { token } : undefined);
-} catch {
+} catch (e) {
+  // SSR 실패 원인은 서버 로그(Vercel Runtime Logs)에서 확인.
+  console.error('[snaps/:id] getArtwork 실패', slug, e);
   artwork = null;
 }
 
