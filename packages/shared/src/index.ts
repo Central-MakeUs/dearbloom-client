@@ -4,6 +4,7 @@ export * from './api/regions';
 export * from './api/artworks';
 export * from './api/saved';
 export * from './api/artist';
+export * from './api/schedule';
 export * from './api/member';
 export * from './api/files';
 export * from './api/university';
