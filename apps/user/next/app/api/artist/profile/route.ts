@@ -4,7 +4,7 @@ import {
   updateArtistIntro,
   updateArtistImage,
   updateArtistRegions,
-  updateArtistPricing,
+  updateArtistEtcInfo,
   ApiError,
   type ArtistRegionCode,
 } from '@dearbloom/shared';
@@ -14,8 +14,7 @@ interface ProfilePatch {
   intro?: string;
   artistImageUrl?: string;
   regionList?: ArtistRegionCode[];
-  travelFeeInfo?: string;
-  packageInfo?: string;
+  etcInfo?: string;
 }
 
 /** 작가 프로필 수정 프록시 — 제공된 필드만 각 백엔드 엔드포인트로 전달. */
@@ -31,9 +30,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof body.intro === 'string') await updateArtistIntro(body.intro, opts);
     if (typeof body.artistImageUrl === 'string') await updateArtistImage(body.artistImageUrl, opts);
     if (Array.isArray(body.regionList)) await updateArtistRegions(body.regionList, opts);
-    if (typeof body.travelFeeInfo === 'string' && typeof body.packageInfo === 'string') {
-      await updateArtistPricing({ travelFeeInfo: body.travelFeeInfo, packageInfo: body.packageInfo }, opts);
-    }
+    if (typeof body.etcInfo === 'string') await updateArtistEtcInfo(body.etcInfo, opts);
     return new NextResponse(null, { status: 204 });
   } catch (e) {
     const status = e instanceof ApiError ? e.status : 500;

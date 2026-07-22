@@ -1,20 +1,37 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ARTIST_REGION_OPTIONS, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
+import { ARTIST_REGION_OPTIONS, nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
+
+const schema = z.object({
+  nickname: nicknameSchema,
+  intro: z.string(),
+  etcInfo: z.string(),
+});
+type FormValues = z.infer<typeof schema>;
 
 export function ProfileForm({ initial }: { initial: ArtistMe }) {
   const router = useRouter();
-  const [nickname, setNickname] = useState(initial.nickname ?? '');
-  const [intro, setIntro] = useState(initial.intro ?? '');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      nickname: initial.nickname ?? '',
+      intro: initial.intro ?? '',
+      etcInfo: initial.etcInfo ?? '',
+    },
+  });
+
   const [regions, setRegions] = useState<ArtistRegionCode[]>(initial.regionList ?? []);
-  const [travelFeeInfo, setTravel] = useState(initial.travelFeeInfo ?? '');
-  const [packageInfo, setPackage] = useState(initial.packageInfo ?? '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState('');
-  const [error, setError] = useState('');
 
   function toggleRegion(code: ArtistRegionCode) {
     setRegions((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]));
@@ -33,20 +50,15 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     return fileUrl;
   }
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError('');
-    setMsg('');
-    setBusy(true);
+  const onValid = async (values: FormValues) => {
     try {
       const patch: {
         nickname: string;
         intro: string;
         regionList: ArtistRegionCode[];
-        travelFeeInfo: string;
-        packageInfo: string;
+        etcInfo: string;
         artistImageUrl?: string;
-      } = { nickname: nickname.trim(), intro, regionList: regions, travelFeeInfo, packageInfo };
+      } = { ...values, regionList: regions };
       if (imageFile) patch.artistImageUrl = await uploadImage(imageFile);
 
       const res = await fetch('/app/api/artist/profile', {
@@ -62,28 +74,28 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(b.error || '저장 실패');
       }
-      setMsg('저장되었습니다.');
+      toast.success('저장되었습니다.');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했어요');
-    } finally {
-      setBusy(false);
+      toast.error(err instanceof Error ? err.message : '오류가 발생했어요');
     }
-  }
+  };
 
   const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-5 text-neutral-950 outline-none focus:border-primary';
   const label = 'mb-1 block text-body-4 text-neutral-800';
+  const errText = 'mt-1 text-caption-1 text-danger';
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5 px-4 py-5">
+    <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
       <div>
         <label className={label} htmlFor="nickname">닉네임</label>
-        <input id="nickname" className={field} value={nickname} onChange={(e) => setNickname(e.target.value)} />
+        <input id="nickname" className={field} aria-invalid={!!errors.nickname} {...register('nickname')} />
+        {errors.nickname && <p className={errText}>{errors.nickname.message}</p>}
       </div>
 
       <div>
         <label className={label} htmlFor="intro">작가 소개</label>
-        <textarea id="intro" rows={4} className={field} value={intro} onChange={(e) => setIntro(e.target.value)} placeholder="작가님을 소개해주세요" />
+        <textarea id="intro" rows={4} className={field} placeholder="작가님을 소개해주세요" {...register('intro')} />
       </div>
 
       <div>
@@ -108,13 +120,8 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       </div>
 
       <div>
-        <label className={label} htmlFor="travel">출장비 안내</label>
-        <input id="travel" className={field} value={travelFeeInfo} onChange={(e) => setTravel(e.target.value)} placeholder="예: 지역별 2~5만원" />
-      </div>
-
-      <div>
-        <label className={label} htmlFor="package">촬영 구성/패키지</label>
-        <textarea id="package" rows={4} className={field} value={packageInfo} onChange={(e) => setPackage(e.target.value)} placeholder="촬영 시간, 원본/보정본 수 등" />
+        <label className={label} htmlFor="etc">기타 안내</label>
+        <textarea id="etc" rows={4} className={field} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />
       </div>
 
       <div>
@@ -123,11 +130,8 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         <input id="image" type="file" accept="image/*" className={field} onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
       </div>
 
-      {error && <p className="text-caption-1 text-danger">{error}</p>}
-      {msg && <p className="text-caption-1 text-success">{msg}</p>}
-
-      <button type="submit" disabled={busy} className="mt-2 flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0 disabled:opacity-50">
-        {busy ? '저장 중…' : '저장'}
+      <button type="submit" disabled={isSubmitting} className="mt-2 flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0 disabled:opacity-50">
+        {isSubmitting ? '저장 중…' : '저장'}
       </button>
     </form>
   );
