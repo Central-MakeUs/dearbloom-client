@@ -88,9 +88,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const editIcon = (
     <button type="button" onClick={() => setEditing(true)} aria-label="편집" className="flex h-11 w-11 items-center justify-center text-neutral-950">
-      <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M12 20h9" />
-        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      <svg width={24} height={24} viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M20.0002 13H17.2002C16.0801 13 15.5196 13 15.0918 13.218C14.7155 13.4097 14.4097 13.7155 14.218 14.0918C14 14.5196 14 15.0801 14 16.2002V25.8002C14 26.9203 14 27.4801 14.218 27.9079C14.4097 28.2842 14.7155 28.5905 15.0918 28.7822C15.5192 29 16.079 29 17.1969 29H26.8031C27.921 29 28.48 29 28.9074 28.7822C29.2837 28.5905 29.5905 28.2839 29.7822 27.9076C30 27.4802 30 26.921 30 25.8031V23M26 14L20 20V23H23L29 17M26 14L29 11L32 14L29 17M26 14L29 17" />
       </svg>
     </button>
   );
