@@ -13,6 +13,7 @@ const TABS = [
   { key: 'requests', label: '신청', href: '/app/artist/requests', match: (p: string) => p.startsWith('/artist/requests'), Icon: InboxIcon },
   { key: 'products', label: '작품', href: '/app/artist/products', match: (p: string) => p.startsWith('/artist/products'), Icon: GridIcon },
   { key: 'chats', label: '채팅', href: '/app/artist/chats', match: (p: string) => p.startsWith('/artist/chats'), Icon: ChatIcon },
+  { key: 'points', label: '포인트', href: '/app/artist/points', match: (p: string) => p.startsWith('/artist/points'), Icon: PointIcon },
   { key: 'my', label: '마이', href: '/app/artist/my', match: (p: string) => p.startsWith('/artist/my') || p.startsWith('/artist/profile'), Icon: UserIcon },
 ];
 
@@ -94,6 +95,15 @@ function ChatIcon({ active }: { active: boolean }) {
   return (
     <svg {...svgProps(active)} fill={active ? 'currentColor' : 'none'}>
       <path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L3 21l1.7-5.1A8.5 8.5 0 1 1 21 11.5z" />
+    </svg>
+  );
+}
+
+function PointIcon({ active }: { active: boolean }) {
+  return (
+    <svg {...svgProps(active)}>
+      <circle cx={12} cy={12} r={9} />
+      <path d="m9 8.5 3 4 3-4M8.5 12.5h7M8.5 15h7" />
     </svg>
   );
 }

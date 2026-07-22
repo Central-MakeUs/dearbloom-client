@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
 import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
 
@@ -74,8 +75,10 @@ export function ScheduleManager({
     }));
     const ok = await send(`${BASE}/weekly`, 'PUT', { availabilityList });
     setBusy(false);
-    if (ok) router.refresh();
-    else alert('저장에 실패했어요. 시간을 다시 확인해주세요.');
+    if (ok) {
+      toast.success('저장되었어요.');
+      router.refresh();
+    } else toast.error('저장에 실패했어요. 시간을 다시 확인해주세요.');
   };
 
   // 반복 예약 불가 추가 폼
@@ -94,8 +97,10 @@ export function ScheduleManager({
       endTime: hhmmss(recEnd),
     });
     setBusy(false);
-    if (ok) router.refresh();
-    else alert('추가에 실패했어요.');
+    if (ok) {
+      toast.success('추가되었어요.');
+      router.refresh();
+    } else toast.error('추가에 실패했어요.');
   };
 
   // 개인 예약 불가 추가 폼
@@ -107,7 +112,7 @@ export function ScheduleManager({
     if (blkEnd <= v) setBlkEnd(nextSlot(v));
   };
   const addDate = async () => {
-    if (!blkDate) return alert('날짜를 선택해주세요.');
+    if (!blkDate) { toast.error('날짜를 선택해주세요.'); return; }
     setBusy(true);
     const ok = await send(`${BASE}/date-blocks`, 'POST', {
       date: blkDate,
@@ -115,16 +120,20 @@ export function ScheduleManager({
       endTime: hhmmss(blkEnd),
     });
     setBusy(false);
-    if (ok) router.refresh();
-    else alert('추가에 실패했어요.');
+    if (ok) {
+      toast.success('추가되었어요.');
+      router.refresh();
+    } else toast.error('추가에 실패했어요.');
   };
 
   const remove = async (kind: 'recurring-blocks' | 'date-blocks', id: number) => {
     setBusy(true);
     const ok = await send(`${BASE}/${kind}?id=${id}`, 'DELETE');
     setBusy(false);
-    if (ok) router.refresh();
-    else alert('삭제에 실패했어요.');
+    if (ok) {
+      toast.success('삭제되었어요.');
+      router.refresh();
+    } else toast.error('삭제에 실패했어요.');
   };
 
   const dateInput = 'rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 text-body-5 text-neutral-950';

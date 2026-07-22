@@ -16,8 +16,8 @@ export interface ArtistMe {
   /** 조회는 imageUrl, 수정은 artistImageUrl 로 백엔드 필드명이 다름에 유의. */
   imageUrl: string | null;
   regionList: ArtistRegionCode[];
-  travelFeeInfo: string | null;
-  packageInfo: string | null;
+  /** 작가 기타 안내(우천 정책 등) */
+  etcInfo: string | null;
 }
 
 /** 작품 등록/사진교체 시 넘기는 사진 1건 (업로드 완료된 fileUrl 참조) */
@@ -60,20 +60,9 @@ export function updateArtistRegions(regionList: ArtistRegionCode[], opts: Reques
   return apiPut<void>('/api/artists/me/regions', { regionList }, opts);
 }
 
-/** 촬영 정보(출장비/패키지) — 둘 다 자유 텍스트 */
-export function updateArtistPricing(
-  payload: { travelFeeInfo: string; packageInfo: string },
-  opts: RequestOptions,
-): Promise<void> {
-  return apiPatch<void>('/api/artists/me/pricing', payload, opts);
-}
-
-export function deleteArtistTravelFee(opts: RequestOptions): Promise<void> {
-  return apiDelete<void>('/api/artists/me/pricing/travel-fee', undefined, opts);
-}
-
-export function deleteArtistPackage(opts: RequestOptions): Promise<void> {
-  return apiDelete<void>('/api/artists/me/pricing/package', undefined, opts);
+/** 작가 기타 안내(우천 정책 등) 수정. (기존 출장비/패키지는 작품 패키지로 이동됨) */
+export function updateArtistEtcInfo(etcInfo: string, opts: RequestOptions): Promise<void> {
+  return apiPatch<void>('/api/artists/me/etc-info', { etcInfo }, opts);
 }
 
 // ---- 작가 본인 작품 ----
