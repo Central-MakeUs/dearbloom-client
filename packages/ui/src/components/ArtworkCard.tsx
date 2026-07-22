@@ -64,8 +64,8 @@ export function ArtworkCard({
 
   const meta = (
     <div className="min-w-0">
-      <div className="truncate text-body-3 text-neutral-950">{title}</div>
-      <div className="mt-0.5 truncate text-body-5 text-neutral-600">{artistNickname}</div>
+      <div className="truncate text-body-4 text-neutral-950">{title}</div>
+      <div className="mt-0.5 truncate text-body-6 text-neutral-600">{artistNickname}</div>
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
         {regions?.map((r) => (

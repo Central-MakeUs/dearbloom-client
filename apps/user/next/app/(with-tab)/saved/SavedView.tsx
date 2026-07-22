@@ -90,7 +90,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
           key={key}
           type="button"
           onClick={() => setTab(key)}
-          className={cn('relative flex-1 py-3 text-body-3 transition-colors', tab === key ? 'text-neutral-950' : 'text-neutral-500')}
+          className={cn('relative flex-1 py-3 text-body-4 transition-colors', tab === key ? 'text-neutral-950' : 'text-neutral-500')}
         >
           {label}
           {tab === key && <span className="absolute inset-x-0 bottom-[-1px] h-0.5 bg-primary" aria-hidden />}
@@ -101,8 +101,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const emptySaved = (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-      <p className="text-body-4 text-neutral-500">아직 저장한 작품이 없어요.</p>
-      <a href="/snaps" className="rounded-md bg-primary px-5 py-2.5 text-body-4 text-neutral-0">
+      <p className="text-body-5 text-neutral-500">아직 저장한 작품이 없어요.</p>
+      <a href="/snaps" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
         작품 탐색하기
       </a>
     </div>
@@ -116,7 +116,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
           artworkId={a.artworkId}
           title={a.title}
           artistNickname={a.artistNickname}
-          price={a.price}
+          price={a.lowestPrice}
           thumbnailUrl={a.thumbnailUrl}
           regions={a.artistRegionList?.map(regionLabel)}
           initialSaved
@@ -138,8 +138,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   const boardBody = (
     <div className="relative min-h-[60vh]">
       <div className="flex flex-col items-center gap-2 px-6 py-24 text-center">
-        <p className="text-body-3 text-neutral-950">공동보드가 없어요</p>
-        <p className="text-body-4 text-neutral-500">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
+        <p className="text-body-4 text-neutral-950">공동보드가 없어요</p>
+        <p className="text-body-5 text-neutral-500">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
       </div>
       <button
         type="button"
@@ -157,7 +157,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const editBar = editing ? (
     <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md items-center gap-3 border-t border-neutral-200 bg-neutral-0 px-4 py-3">
-      <button type="button" onClick={toggleAll} className="flex items-center gap-1.5 text-body-4 text-neutral-700">
+      <button type="button" onClick={toggleAll} className="flex items-center gap-1.5 text-body-5 text-neutral-700">
         <span
           aria-hidden
           className={cn(
@@ -174,14 +174,14 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         전체 {selected.size}
       </button>
       <div className="flex-1" />
-      <button type="button" disabled title="준비 중" className="rounded-md border border-neutral-300 px-4 py-2 text-body-4 text-neutral-400">
+      <button type="button" disabled title="준비 중" className="rounded-md border border-neutral-300 px-4 py-2 text-body-5 text-neutral-400">
         보드에 추가하기
       </button>
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={selected.size === 0}
-        className="rounded-md bg-primary px-4 py-2 text-body-4 text-neutral-0 disabled:bg-neutral-300 disabled:text-neutral-500"
+        className="rounded-md bg-primary px-4 py-2 text-body-5 text-neutral-0 disabled:bg-neutral-300 disabled:text-neutral-500"
       >
         삭제하기
       </button>
@@ -193,10 +193,10 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
       <div className="w-full max-w-xs rounded-xl bg-neutral-0 px-5 py-6 text-center">
         <p className="text-body-2 text-neutral-950">선택하신 목록을 삭제하시겠어요?</p>
         <div className="mt-5 flex gap-2">
-          <button type="button" onClick={() => setConfirmOpen(false)} className="flex-1 rounded-md bg-neutral-100 py-2.5 text-body-3 text-neutral-700">
+          <button type="button" onClick={() => setConfirmOpen(false)} className="flex-1 rounded-md bg-neutral-100 py-2.5 text-body-4 text-neutral-700">
             취소
           </button>
-          <button type="button" onClick={deleteSelected} disabled={busy} className="flex-1 rounded-md bg-primary py-2.5 text-body-3 text-neutral-0 disabled:opacity-60">
+          <button type="button" onClick={deleteSelected} disabled={busy} className="flex-1 rounded-md bg-primary py-2.5 text-body-4 text-neutral-0 disabled:opacity-60">
             삭제
           </button>
         </div>
