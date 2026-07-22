@@ -10,14 +10,26 @@ interface SaveHeartProps {
   className?: string;
   /** 토글 결과 콜백(낙관적/롤백 포함한 최종 상태). 목록에서 언세이브 시 제거용. */
   onChange?: (saved: boolean) => void;
+  /**
+   * 저장 프록시 엔드포인트. 앱별 basePath 차이 대응.
+   * astro(루트) '/api/saved' 기본값, next(basePath '/app')는 '/app/api/saved' 를 넘기세요.
+   */
+  endpoint?: string;
 }
 
 /**
  * 작품 저장(찜) 토글 — 클라이언트 island. astro/next 공용.
- * 같은 도메인 프록시(/api/saved)로 요청(쿠키 자동 전송) → 서버가 Bearer 로 백엔드 호출.
+ * 같은 도메인 프록시(endpoint)로 요청(쿠키 자동 전송) → 서버가 Bearer 로 백엔드 호출.
  * 낙관적 업데이트 후 실패 시 롤백. 비로그인(401)이면 로그인 페이지로 유도.
  */
-export function SaveHeart({ artworkId, initialSaved = false, size = 24, className, onChange }: SaveHeartProps) {
+export function SaveHeart({
+  artworkId,
+  initialSaved = false,
+  size = 24,
+  className,
+  onChange,
+  endpoint = '/api/saved',
+}: SaveHeartProps) {
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
 
@@ -31,7 +43,7 @@ export function SaveHeart({ artworkId, initialSaved = false, size = 24, classNam
     onChange?.(next);
 
     try {
-      const res = await fetch('/api/saved', {
+      const res = await fetch(endpoint, {
         method: next ? 'POST' : 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ artworkId }),
