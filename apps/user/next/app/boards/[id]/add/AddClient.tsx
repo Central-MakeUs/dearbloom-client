@@ -10,7 +10,7 @@ const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
   artworkId: a.artworkId,
   title: a.title,
   artistNickname: a.artistNickname,
-  price: a.price,
+  price: a.lowestPrice,
   thumbnailUrl: a.thumbnailUrl,
   regions: a.artistRegionList?.map(regionLabel) ?? [],
 });
@@ -50,7 +50,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
             artworkId={a.artworkId}
             title={a.title}
             artistNickname={a.artistNickname}
-            price={a.price}
+            price={a.lowestPrice}
             thumbnailUrl={a.thumbnailUrl}
             regions={a.artistRegionList?.map(regionLabel)}
             selectable
