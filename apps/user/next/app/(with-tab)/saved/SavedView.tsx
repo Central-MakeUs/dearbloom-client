@@ -159,7 +159,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   );
 
   const editBar = editing ? (
-    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md items-center gap-3 border-t border-neutral-200 bg-neutral-0 px-4 py-3">
+    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md items-center gap-3 border-t border-neutral-200 bg-neutral-0 px-4 py-3">
       <button type="button" onClick={toggleAll} className="flex items-center gap-1.5 text-body-5 text-neutral-700">
         <span
           aria-hidden
@@ -192,7 +192,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   ) : null;
 
   const confirmDialog = confirmOpen ? (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-neutral-950/50 px-8">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-neutral-950/50 px-8">
       <div className="w-full max-w-xs rounded-xl bg-neutral-0 px-5 py-6 text-center">
         <p className="text-body-2 text-neutral-950">선택하신 목록을 삭제하시겠어요?</p>
         <div className="mt-5 flex gap-2">
