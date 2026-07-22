@@ -3,16 +3,26 @@
 import { useState } from 'react';
 import { ArtworkCard, Header, cn } from '@dearbloom/ui';
 import { regionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
+import { BoardCollage } from '@/src/components/common/BoardCollage';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
 const SAVED_ENDPOINT = '/app/api/saved';
 
 type Tab = 'saved' | 'board';
 
+const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
+  artworkId: a.artworkId,
+  title: a.title,
+  artistNickname: a.artistNickname,
+  price: a.price,
+  thumbnailUrl: a.thumbnailUrl,
+  regions: a.artistRegionList?.map(regionLabel) ?? [],
+});
+
 /**
- * 저장 화면 — 헤더('저장 목록' + 편집) / 탭(내 저장·공동보드) / 편집 모드(다중 선택 삭제).
- * 서버가 넘긴 초기 목록을 클라이언트에서 관리. 카드는 탐색 피드와 동일한 공용 ArtworkCard 사용.
- * 공동보드는 백엔드 API 미제공 상태라 빈 상태만 표시(생성 FAB 비활성).
+ * 저장 화면 — 헤더('저장 목록' + 편집) / 탭(내 저장·공동보드) / 편집 모드(다중 선택 삭제·보드에 추가).
+ * 내 저장은 서버 목록, 공동보드는 목(zustand) 스토어로 관리한다.
  */
 export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] }) {
   const [items, setItems] = useState(initialItems);
@@ -20,7 +30,12 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const boards = useBoardStore((s) => s.boards);
+  const addArtworks = useBoardStore((s) => s.addArtworks);
 
   const exitEdit = () => {
     setEditing(false);
@@ -60,6 +75,15 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
     } finally {
       setBusy(false);
     }
+  }
+
+  function addSelectedToBoard(boardId: string) {
+    const chosen = items.filter((a) => selected.has(a.artworkId)).map(toBoardArtwork);
+    addArtworks(boardId, chosen);
+    setPickerOpen(false);
+    exitEdit();
+    setToast(`${chosen.length}개 작품을 보드에 추가했어요.`);
+    setTimeout(() => setToast(null), 2000);
   }
 
   const editIcon = (
@@ -134,24 +158,38 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const savedBody = items.length === 0 ? emptySaved : grid;
 
-  // 공동보드 — API 미제공. 빈 상태 + 생성 FAB(준비 중, 비활성).
+  // 공동보드 목록 — 목 스토어. 보드 카드(콜라주) + 생성 FAB.
+  const createFab = (
+    <a
+      href="/app/boards/new"
+      aria-label="공동보드 만들기"
+      className="fixed bottom-24 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-neutral-0 shadow-elevation"
+    >
+      <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </a>
+  );
+
   const boardBody = (
     <div className="relative min-h-[60vh]">
-      <div className="flex flex-col items-center gap-2 px-6 py-24 text-center">
-        <p className="text-body-3 text-neutral-950">공동보드가 없어요</p>
-        <p className="text-body-4 text-neutral-500">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
-      </div>
-      <button
-        type="button"
-        disabled
-        aria-label="공동보드 만들기 (준비 중)"
-        title="준비 중"
-        className="fixed bottom-24 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-300 text-neutral-500 shadow-elevation"
-      >
-        <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      </button>
+      {boards.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 px-6 py-24 text-center">
+          <p className="text-body-3 text-neutral-950">공동보드가 없어요</p>
+          <p className="text-body-4 text-neutral-500">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
+          {boards.map((b) => (
+            <a key={b.id} href={`/app/boards/${b.id}`} className="flex flex-col">
+              <BoardCollage artworks={b.artworks} className="mb-2" />
+              <div className="truncate text-body-3 text-neutral-950">{b.name}</div>
+              <div className="text-caption-2 text-neutral-600">{b.artworks.length}개의 작품</div>
+            </a>
+          ))}
+        </div>
+      )}
+      {createFab}
     </div>
   );
 
@@ -174,7 +212,12 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         전체 {selected.size}
       </button>
       <div className="flex-1" />
-      <button type="button" disabled title="준비 중" className="rounded-md border border-neutral-300 px-4 py-2 text-body-4 text-neutral-400">
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        disabled={selected.size === 0}
+        className="rounded-md border border-primary px-4 py-2 text-body-4 text-primary disabled:border-neutral-300 disabled:text-neutral-400"
+      >
         보드에 추가하기
       </button>
       <button
@@ -204,6 +247,47 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
     </div>
   ) : null;
 
+  // 보드에 추가 — 보드 선택 시트(보드 없으면 생성 유도)
+  const boardPicker = pickerOpen ? (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-neutral-950/50" onClick={() => setPickerOpen(false)}>
+      <div className="mx-auto w-full max-w-md rounded-t-xl bg-neutral-0 px-5 pb-8 pt-5" onClick={(e) => e.stopPropagation()}>
+        <p className="mb-3 text-body-2 text-neutral-950">보드에 추가</p>
+        {boards.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <p className="text-body-4 text-neutral-500">공동보드가 없어요. 먼저 보드를 만들어 주세요.</p>
+            <a href="/app/boards/new" className="rounded-md bg-primary px-5 py-2.5 text-body-4 text-neutral-0">
+              공동보드 만들기
+            </a>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {boards.map((b) => (
+              <li key={b.id}>
+                <button
+                  type="button"
+                  onClick={() => addSelectedToBoard(b.id)}
+                  className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-neutral-100"
+                >
+                  <BoardCollage artworks={b.artworks} className="h-12 w-12" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-body-3 text-neutral-950">{b.name}</span>
+                    <span className="block text-caption-2 text-neutral-600">{b.artworks.length}개의 작품</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  ) : null;
+
+  const toastEl = toast ? (
+    <div className="fixed inset-x-0 bottom-28 z-50 mx-auto w-max max-w-[80%] rounded-full bg-neutral-950/85 px-4 py-2 text-caption-1 text-neutral-0">
+      {toast}
+    </div>
+  ) : null;
+
   return (
     <div className="mx-auto max-w-md">
       {header}
@@ -211,6 +295,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
       {tab === 'saved' ? savedBody : boardBody}
       {editBar}
       {confirmDialog}
+      {boardPicker}
+      {toastEl}
     </div>
   );
 }
