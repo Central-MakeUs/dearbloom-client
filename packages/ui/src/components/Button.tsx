@@ -21,7 +21,7 @@ const base = {
 } as const satisfies Record<ButtonVariant, string>;
 
 const slide = {
-  primary: 'bg-primary-800',
+  primary: 'bg-primary-hover',
   secondary: 'bg-primary text-neutral-0',
   ghost: 'bg-primary text-neutral-0',
   dark: 'bg-primary',
@@ -29,7 +29,7 @@ const slide = {
 
 const size = {
   sm: { padding: 'px-4 py-2', text: 'text-caption-1', gap: 'gap-1.5', icon: 14 },
-  md: { padding: 'px-6 py-3', text: 'text-body-3', gap: 'gap-2', icon: 16 },
+  md: { padding: 'px-6 py-3', text: 'text-body-4', gap: 'gap-2', icon: 16 },
   lg: { padding: 'px-8 py-4', text: 'text-body-1', gap: 'gap-2.5', icon: 18 },
 } as const satisfies Record<ButtonSize, { padding: string; text: string; gap: string; icon: number }>;
 

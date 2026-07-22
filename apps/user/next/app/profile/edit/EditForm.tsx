@@ -16,7 +16,7 @@ export function EditForm({ initialName }: { initialName: string }) {
     <>
       {/* 입력 필드 */}
       <div className="flex flex-col gap-1.5 px-4 pt-4">
-        <label htmlFor="username" className="text-body-3 text-neutral-950">
+        <label htmlFor="username" className="text-body-4 text-neutral-950">
           사용자 이름
         </label>
         <div className="flex h-14 items-center gap-2 rounded-md bg-neutral-0 px-4">

@@ -32,7 +32,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   const showClear = !trailing && !!onClear && hasValue && !disabled;
 
   const labelNode = label ? (
-    <label htmlFor={id} className="text-body-3 text-neutral-950">
+    <label htmlFor={id} className="text-body-4 text-neutral-950">
       {label}
     </label>
   ) : null;

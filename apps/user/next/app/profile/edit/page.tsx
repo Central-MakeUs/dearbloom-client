@@ -11,7 +11,7 @@ const Header = () => (
         <path d="m15 18-6-6 6-6" />
       </svg>
     </a>
-    <h1 className="absolute left-1/2 -translate-x-1/2 text-head-2 text-neutral-950">프로필 수정하기</h1>
+    <h1 className="absolute left-1/2 -translate-x-1/2 text-head-3 text-neutral-950">프로필 수정하기</h1>
   </header>
 );
 
@@ -23,8 +23,8 @@ export default async function ProfileEditPage() {
       <div className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
         <Header />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-          <p className="text-body-4 text-neutral-500">로그인이 필요해요.</p>
-          <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-4 text-neutral-0">
+          <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
+          <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
             로그인
           </a>
         </div>

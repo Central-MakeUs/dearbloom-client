@@ -17,7 +17,7 @@ interface SearchResultItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
 export const SearchResultItem = forwardRef<HTMLButtonElement, SearchResultItemProps>(
   function SearchResultItem({ title, description, className, ...rest }, ref) {
     const descriptionNode = description ? (
-      <span className="text-body-5 text-neutral-600">{description}</span>
+      <span className="text-body-6 text-neutral-600">{description}</span>
     ) : null;
 
     return (

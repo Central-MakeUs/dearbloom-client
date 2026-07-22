@@ -36,8 +36,8 @@ function ConfirmModal({
       <button type="button" aria-label="닫기" className="absolute inset-0 bg-neutral-950/70" onClick={onCancel} />
       <div className="relative w-[303px] rounded-md bg-neutral-0 p-4">
         <div className="flex flex-col items-center gap-2.5 pb-6 pt-3">
-          <h2 className="text-head-2 text-neutral-950">{title}</h2>
-          <p className="text-center text-body-5 text-neutral-800">{message}</p>
+          <h2 className="text-head-3 text-neutral-950">{title}</h2>
+          <p className="text-center text-body-6 text-neutral-800">{message}</p>
         </div>
         <div className="flex gap-2.5">
           <button

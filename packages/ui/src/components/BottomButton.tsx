@@ -10,7 +10,7 @@ interface BottomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const colorClass = {
-  green: 'bg-primary text-neutral-0 hover:bg-primary-600',
+  green: 'bg-primary text-neutral-0 hover:bg-primary-hover',
   black: 'bg-neutral-800 text-neutral-0 hover:bg-neutral-700',
 } as const satisfies Record<BottomButtonColor, string>;
 

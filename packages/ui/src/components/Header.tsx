@@ -47,7 +47,7 @@ export function Header({ title, onBack, showBack = true, right, className }: Hea
   );
 
   const titleNode = title ? (
-    <h1 className="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-2 text-neutral-950">
+    <h1 className="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">
       {title}
     </h1>
   ) : null;
