@@ -9,3 +9,4 @@ export * from './components/SearchResultItem';
 export * from './components/TabButton';
 export * from './components/BottomTab';
 export * from './components/SaveHeart';
+export * from './components/ArtworkCard';
