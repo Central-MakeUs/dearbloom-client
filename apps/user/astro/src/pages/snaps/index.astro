@@ -13,7 +13,9 @@ let artworks: ArtworkListItem[] = [];
 let loadFailed = false;
 try {
   artworks = await getArtworks(token ? { token } : undefined);
-} catch {
+} catch (e) {
+  // SSR 실패 원인은 서버 로그(Vercel Runtime Logs)에서 확인.
+  console.error('[snaps] getArtworks 실패', e);
   loadFailed = true;
 }
 
