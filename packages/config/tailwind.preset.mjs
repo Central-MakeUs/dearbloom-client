@@ -6,18 +6,16 @@
 
 /* eslint-disable no-restricted-syntax -- 디자인 토큰 정의는 이 파일에서만 허용 */
 
+// Figma 최종 컬러 시스템: primary 6단계(50~500) + hover. 채도 미세 조정 반영.
 const primary = {
-  50: '#F4F7F5',
-  100: '#E6EDE8',
-  200: '#CBD9D0',
-  300: '#AFC4B7',
-  400: '#7F9F8C',
+  50: '#EEF3F0',
+  100: '#E5EBE8',
+  200: '#C9D9D1',
+  300: '#A6C9B7',
+  400: '#7AB898',
   500: '#296A48', // Primary (DEFAULT) — Figma 브랜드 그린(primary/primary)
-  600: '#2D533F',
-  700: '#264636',
-  800: '#1E382B',
-  900: '#15281F',
   DEFAULT: '#296A48',
+  hover: '#245E40', // 버튼 hover/pressed 상태
 };
 
 const neutral = {
@@ -53,20 +51,23 @@ export default {
       fontFamily: {
         sans: ['Pretendard', 'Pretendard Variable', 'system-ui', 'Apple SD Gothic Neo', 'sans-serif'],
       },
+      // Figma 최종 폰트 시스템(Pretendard). 볼드 2종(head-1, body-3) 추가 + 자간 조정.
       fontSize: {
-        // Head — 굵고 큰 제목
-        'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '600' }],
-        'head-2': ['16px', { lineHeight: '1.5em', letterSpacing: '-0.01em', fontWeight: '600' }],
-        // Body
-        'body-1': ['16px', { lineHeight: '1.5em', fontWeight: '500' }],
-        'body-2': ['16px', { lineHeight: '1.5em', fontWeight: '400' }],
-        'body-3': ['14px', { lineHeight: '1.5em', letterSpacing: '-0.005em', fontWeight: '600' }],
-        'body-4': ['14px', { lineHeight: '1.5em', fontWeight: '500' }],
-        'body-5': ['14px', { lineHeight: '1.5em', fontWeight: '400' }],
-        // Caption
-        'caption-1': ['12px', { lineHeight: '1.5em', fontWeight: '500' }],
-        'caption-2': ['12px', { lineHeight: '1.5em', fontWeight: '400' }],
-        'caption-3': ['11px', { lineHeight: '1.5em', fontWeight: '400' }],
+        // Head — 140% line-height
+        'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '700' }], // Head1_b_20
+        'head-2': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '600' }], // Head2_sb_20
+        'head-3': ['16px', { lineHeight: '1.5em', letterSpacing: '-0.01em', fontWeight: '600' }], // Head3_sb_16
+        // Body — 150%
+        'body-1': ['16px', { lineHeight: '1.5em', fontWeight: '500' }], // Body1_m_16
+        'body-2': ['16px', { lineHeight: '1.5em', fontWeight: '400' }], // Body2_r_16
+        'body-3': ['14px', { lineHeight: '1.5em', letterSpacing: '-0.005em', fontWeight: '700' }], // Body3_b_14
+        'body-4': ['14px', { lineHeight: '1.5em', letterSpacing: '-0.005em', fontWeight: '600' }], // Body4_sb_14
+        'body-5': ['14px', { lineHeight: '1.5em', fontWeight: '500' }], // Body5_m_14
+        'body-6': ['14px', { lineHeight: '1.5em', fontWeight: '400' }], // Body6_r_14
+        // Caption — 150%
+        'caption-1': ['12px', { lineHeight: '1.5em', fontWeight: '500' }], // Caption1_m_12
+        'caption-2': ['12px', { lineHeight: '1.5em', fontWeight: '400' }], // Caption2_r_12
+        'caption-3': ['11px', { lineHeight: '1.5em', fontWeight: '400' }], // Caption3_r_11
       },
       borderRadius: {
         sm: '4px',

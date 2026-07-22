@@ -118,7 +118,7 @@ export function SocialLoginButtons() {
 
   const googleButton = nativePlatform ? (
     <button
-      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0 disabled:opacity-40"
+      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-4 font-medium text-neutral-0 disabled:opacity-40"
       disabled={isLoggingIn}
       onClick={() => requestNativeLogin('GOOGLE')}
       type="button"
@@ -127,7 +127,7 @@ export function SocialLoginButtons() {
     </button>
   ) : (
     <a
-      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-3 font-medium text-neutral-0"
+      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-4 font-medium text-neutral-0"
       href="/app/api/auth/login?provider=google"
     >
       Google로 로그인
@@ -137,7 +137,7 @@ export function SocialLoginButtons() {
   const appleButton =
     nativePlatform === 'android' ? null : nativePlatform === 'ios' ? (
       <button
-        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950 disabled:opacity-40"
+        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-4 font-medium text-neutral-950 disabled:opacity-40"
         disabled={isLoggingIn}
         onClick={() => requestNativeLogin('APPLE')}
         type="button"
@@ -146,7 +146,7 @@ export function SocialLoginButtons() {
       </button>
     ) : (
       <a
-        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950"
+        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-4 font-medium text-neutral-950"
         href="/app/api/auth/login?provider=apple"
       >
         Apple로 로그인

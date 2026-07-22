@@ -27,7 +27,7 @@ const statusLabel: Record<Status, string> = {
 
 const statusStyle: Record<Status, string> = {
   pending: 'bg-neutral-200 text-neutral-700',
-  in_progress: 'bg-primary-100 text-primary-700',
+  in_progress: 'bg-primary-100 text-primary',
   reserved: 'bg-primary text-neutral-0',
   done: 'bg-neutral-100 text-neutral-500',
 };
@@ -72,7 +72,7 @@ const reservations: Reservation[] = [
 export default function ReservationsPage() {
   const header = (
     <header className="px-4 pt-6">
-      <h1 className="text-head-1 text-neutral-950">예약·문의 내역</h1>
+      <h1 className="text-head-2 text-neutral-950">예약·문의 내역</h1>
     </header>
   );
 
@@ -82,7 +82,7 @@ export default function ReservationsPage() {
         <button
           key={t.key}
           type="button"
-          className={`whitespace-nowrap rounded-full px-4 py-1.5 text-body-3 transition-colors ${
+          className={`whitespace-nowrap rounded-full px-4 py-1.5 text-body-4 transition-colors ${
             i === 0 ? 'bg-primary text-neutral-0' : 'bg-neutral-0 text-neutral-700 border border-neutral-200'
           }`}
         >
@@ -104,7 +104,7 @@ export default function ReservationsPage() {
           <div className="flex-1 min-w-0">
             <div className="mb-1 flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="line-clamp-1 text-body-3 text-neutral-950">{r.title}</div>
+                <div className="line-clamp-1 text-body-4 text-neutral-950">{r.title}</div>
                 <div className="text-caption-2 text-neutral-600">{r.artist}</div>
               </div>
               <span className={`shrink-0 rounded-md px-2 py-0.5 text-caption-3 ${statusStyle[r.status]}`}>

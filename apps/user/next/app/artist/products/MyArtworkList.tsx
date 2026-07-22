@@ -28,8 +28,8 @@ export function MyArtworkList({ items: initial }: { items: ArtworkListItem[] }) 
           <a href={`/snaps/${a.artworkId}`} className="flex min-w-0 flex-1 items-center gap-3">
             <img src={a.thumbnailUrl} alt={a.title} className="h-16 w-16 shrink-0 rounded-md object-cover" />
             <div className="min-w-0">
-              <div className="truncate text-body-3 text-neutral-950">{a.title}</div>
-              <div className="text-body-5 text-primary">{formatPrice(a.price)}</div>
+              <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
+              <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>
             </div>
           </a>
           <div className="flex shrink-0 flex-col gap-1">

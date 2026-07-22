@@ -25,11 +25,11 @@ export function SavedGrid({ items: initial }: { items: ArtworkListItem[] }) {
           </a>
           <div className="flex items-start justify-between gap-2">
             <a href={`/snaps/${a.artworkId}`} className="min-w-0 flex-1">
-              <div className="truncate text-body-3 text-neutral-950">{a.title}</div>
+              <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
               <div className="mt-0.5 flex items-center gap-1.5">
-                <span className="truncate text-body-5 text-neutral-950">{a.artistNickname}</span>
+                <span className="truncate text-body-6 text-neutral-950">{a.artistNickname}</span>
                 <span className="h-3 w-px shrink-0 bg-neutral-600" />
-                <span className="shrink-0 text-body-3 text-primary">{formatPrice(a.price)}</span>
+                <span className="shrink-0 text-body-4 text-primary">{formatPrice(a.price)}</span>
               </div>
               {a.artistRegionList?.length > 0 && (
                 <div className="truncate text-caption-2 text-neutral-600">{regionLabels(a.artistRegionList)}</div>
