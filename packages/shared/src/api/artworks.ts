@@ -11,7 +11,7 @@ export interface ArtworkListItem {
   title: string;
   /** 패키지 중 최저가 */
   lowestPrice: number;
-  /** 인원 범위 (min~max) */
+  /** 촬영 인원 (min~max) */
   minHeadCount: number;
   maxHeadCount: number;
   artistNickname: string;
@@ -19,16 +19,6 @@ export interface ArtworkListItem {
   thumbnailUrl: string;
   /** 비로그인 시 null */
   isSaved: boolean | null;
-}
-
-/** 촬영 패키지 (작품 귀속). 가격/시간/보정 장수 포함. */
-export interface ArtworkPackage {
-  artworkPackageId: number;
-  packageName: string;
-  price: number;
-  durationMinutes: number;
-  finalPhotoCount: number;
-  extraInfo: string | null;
 }
 
 export interface ArtworkPhoto {
@@ -45,23 +35,37 @@ export interface ArtworkArtist {
   nickname: string;
   intro: string;
   regionList: RegionCode[];
+  /** 작가 기타 안내(우천 정책 등) */
+  etcInfo?: string | null;
 }
 
 export interface OtherArtwork {
   artworkId: number;
+  title?: string;
+  artistNickname?: string;
   imageUrl: string;
+}
+
+/** 촬영 패키지 (가격/구성) */
+export interface ArtworkPackage {
+  artworkPackageId: number;
+  packageName: string;
+  price: number;
+  durationMinutes: number;
+  finalPhotoCount: number;
+  extraInfo: string | null;
 }
 
 /** GET /api/artworks/{id} 상세 */
 export interface ArtworkDetail {
   artworkId: number;
   title: string;
-  /** 인원 범위 (min~max) */
-  minHeadCount: number;
-  maxHeadCount: number;
+  /** 촬영 인원 (min~max, max 는 null 가능) */
+  minHeadCount: number | null;
+  maxHeadCount: number | null;
   photoList: ArtworkPhoto[];
   schoolNameList: string[];
-  /** 촬영 구성 = 패키지 목록 (기존 price/travelFeeInfo/packageInfo 대체) */
+  /** 촬영 패키지 목록 (가격/촬영시간/보정본수 등) */
   packageList: ArtworkPackage[];
   artist: ArtworkArtist;
   otherArtworkList: OtherArtwork[];
