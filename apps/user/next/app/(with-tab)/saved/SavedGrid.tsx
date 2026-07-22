@@ -29,7 +29,7 @@ export function SavedGrid({ items: initial }: { items: ArtworkListItem[] }) {
               <div className="mt-0.5 flex items-center gap-1.5">
                 <span className="truncate text-body-6 text-neutral-950">{a.artistNickname}</span>
                 <span className="h-3 w-px shrink-0 bg-neutral-600" />
-                <span className="shrink-0 text-body-4 text-primary">{formatPrice(a.price)}</span>
+                <span className="shrink-0 text-body-4 text-primary">{formatPrice(a.lowestPrice)}</span>
               </div>
               {a.artistRegionList?.length > 0 && (
                 <div className="truncate text-caption-2 text-neutral-600">{regionLabels(a.artistRegionList)}</div>

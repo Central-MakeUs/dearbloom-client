@@ -9,12 +9,26 @@ export type FileType = 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 export interface ArtworkListItem {
   artworkId: number;
   title: string;
-  price: number;
+  /** 패키지 중 최저가 */
+  lowestPrice: number;
+  /** 인원 범위 (min~max) */
+  minHeadCount: number;
+  maxHeadCount: number;
   artistNickname: string;
   artistRegionList: RegionCode[];
   thumbnailUrl: string;
   /** 비로그인 시 null */
   isSaved: boolean | null;
+}
+
+/** 촬영 패키지 (작품 귀속). 가격/시간/보정 장수 포함. */
+export interface ArtworkPackage {
+  artworkPackageId: number;
+  packageName: string;
+  price: number;
+  durationMinutes: number;
+  finalPhotoCount: number;
+  extraInfo: string | null;
 }
 
 export interface ArtworkPhoto {
@@ -42,13 +56,13 @@ export interface OtherArtwork {
 export interface ArtworkDetail {
   artworkId: number;
   title: string;
-  price: number;
+  /** 인원 범위 (min~max) */
+  minHeadCount: number;
+  maxHeadCount: number;
   photoList: ArtworkPhoto[];
   schoolNameList: string[];
-  /** 자유 텍스트 (구조화 안 됨) */
-  travelFeeInfo: string;
-  /** 자유 텍스트 (촬영 구성 세부는 이 문자열 하나에 담김) */
-  packageInfo: string;
+  /** 촬영 구성 = 패키지 목록 (기존 price/travelFeeInfo/packageInfo 대체) */
+  packageList: ArtworkPackage[];
   artist: ArtworkArtist;
   otherArtworkList: OtherArtwork[];
   isSaved: boolean | null;

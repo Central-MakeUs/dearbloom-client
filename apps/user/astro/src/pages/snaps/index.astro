@@ -65,7 +65,7 @@ const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()
               <div class="truncate text-body-4 text-neutral-950">{a.title}</div>
               <div class="mt-0.5 truncate text-body-6 text-neutral-600">{a.artistNickname}</div>
               <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-                <span class="text-body-1 font-semibold text-primary">{formatPrice(a.price)}</span>
+                <span class="text-body-1 font-semibold text-primary">{formatPrice(a.lowestPrice)}</span>
                 {a.artistRegionList?.map((code) => (
                   <span class="rounded-sm bg-neutral-200 px-1.5 py-0.5 text-caption-2 text-neutral-700">{regionLabel(code)}</span>
                 ))}

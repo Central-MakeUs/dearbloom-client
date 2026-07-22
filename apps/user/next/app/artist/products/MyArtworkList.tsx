@@ -29,7 +29,7 @@ export function MyArtworkList({ items: initial }: { items: ArtworkListItem[] }) 
             <img src={a.thumbnailUrl} alt={a.title} className="h-16 w-16 shrink-0 rounded-md object-cover" />
             <div className="min-w-0">
               <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
-              <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>
+              <div className="text-body-6 text-primary">{formatPrice(a.lowestPrice)}</div>
             </div>
           </a>
           <div className="flex shrink-0 flex-col gap-1">
