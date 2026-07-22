@@ -42,7 +42,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto max-w-md">
       {header}
-      <EditForm id={art.artworkId} title={art.title} price={art.price} />
+      <EditForm id={art.artworkId} title={art.title} price={art.packageList?.[0]?.price ?? 0} />
     </div>
   );
 }
