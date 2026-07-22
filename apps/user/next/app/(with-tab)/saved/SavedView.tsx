@@ -109,6 +109,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   );
 
   const grid = (
+    <>
+    {!editing && <p className="px-4 pb-3 pt-3 text-caption-1 text-neutral-600">전체 {items.length}</p>}
     <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
       {items.map((a) => (
         <ArtworkCard
@@ -130,6 +132,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         />
       ))}
     </div>
+    </>
   );
 
   const savedBody = items.length === 0 ? emptySaved : grid;
@@ -174,9 +177,6 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         전체 {selected.size}
       </button>
       <div className="flex-1" />
-      <button type="button" disabled title="준비 중" className="rounded-md border border-neutral-300 px-4 py-2 text-body-5 text-neutral-400">
-        보드에 추가하기
-      </button>
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
@@ -184,6 +184,9 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         className="rounded-md bg-primary px-4 py-2 text-body-5 text-neutral-0 disabled:bg-neutral-300 disabled:text-neutral-500"
       >
         삭제하기
+      </button>
+      <button type="button" disabled title="준비 중" className="rounded-md border border-neutral-300 px-4 py-2 text-body-5 text-neutral-400">
+        보드에 추가하기 {selected.size}
       </button>
     </div>
   ) : null;

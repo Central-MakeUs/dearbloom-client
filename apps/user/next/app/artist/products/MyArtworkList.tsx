@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { type ArtworkListItem } from '@dearbloom/shared';
+import { type MyArtworkListItem } from '@dearbloom/shared';
 
 const formatPrice = (won: number) => `${won.toLocaleString()}원`;
 
-export function MyArtworkList({ items: initial }: { items: ArtworkListItem[] }) {
+export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }) {
   const [items, setItems] = useState(initial);
   const [deleting, setDeleting] = useState<number | null>(null);
 
@@ -29,7 +29,8 @@ export function MyArtworkList({ items: initial }: { items: ArtworkListItem[] }) 
             <img src={a.thumbnailUrl} alt={a.title} className="h-16 w-16 shrink-0 rounded-md object-cover" />
             <div className="min-w-0">
               <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
-              <div className="text-body-6 text-primary">{formatPrice(a.lowestPrice)}</div>
+              <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>
+              <div className="mt-0.5 text-caption-2 text-neutral-500">저장 {a.savedCount} · 조회 {a.viewCount}</div>
             </div>
           </a>
           <div className="flex shrink-0 flex-col gap-1">

@@ -175,14 +175,18 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
-            {/* 이 작가의 다른 작품 */}
+            {/* 다른 작업 보기 */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-3">
-                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">이 작가의 다른 작품</h3>
+                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">다른 작업 보기</h3>
                 <div class="grid grid-cols-3 gap-2 px-4">
                   {artwork.otherArtworkList.map((o) => (
-                    <a href={`/snaps/${o.artworkId}`} class="block aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
-                      <img src={o.imageUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
+                    <a href={`/snaps/${o.artworkId}`} class="block">
+                      <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
+                        <img src={o.imageUrl} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
+                      </div>
+                      {o.title && <p class="mt-1 truncate text-body-6 text-neutral-950">{o.title}</p>}
+                      {o.artistNickname && <p class="truncate text-caption-2 text-neutral-600">{o.artistNickname}</p>}
                     </a>
                   ))}
                 </div>
@@ -190,10 +194,10 @@ const packages = artwork?.packageList ?? [];
             )}
           </div>
 
-          {/* 하단 액션바 */}
+          {/* 하단 액션바 — 스마트 문의 기능(백엔드 문의/채팅 API)은 준비 중이라 비활성 */}
           <div class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4">
             <div class="mx-auto max-w-md">
-              <a href="/app/chats" class="flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0">스마트 문의하기</a>
+              <button type="button" disabled aria-disabled="true" title="준비 중" class="flex h-[52px] w-full items-center justify-center rounded-md bg-neutral-300 text-body-1 text-neutral-500">스마트 문의하기 (준비 중)</button>
             </div>
           </div>
 
