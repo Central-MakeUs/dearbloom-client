@@ -84,8 +84,8 @@ export function ArtworkForm() {
     }
   }
 
-  const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-4 text-neutral-950 outline-none focus:border-primary';
-  const label = 'mb-1 block text-body-3 text-neutral-800';
+  const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-5 text-neutral-950 outline-none focus:border-primary';
+  const label = 'mb-1 block text-body-4 text-neutral-800';
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5 px-4 py-5">
@@ -103,7 +103,7 @@ export function ArtworkForm() {
         <label className={label} htmlFor="uni">촬영 학교</label>
         {uni ? (
           <div className="flex items-center justify-between rounded-md border border-primary bg-primary-50 px-3 py-2.5">
-            <span className="text-body-4 text-neutral-950">{uni.name} <span className="text-caption-2 text-neutral-500">{uni.region}</span></span>
+            <span className="text-body-5 text-neutral-950">{uni.name} <span className="text-caption-2 text-neutral-500">{uni.region}</span></span>
             <button type="button" className="text-caption-1 text-neutral-500 underline" onClick={() => { setUni(null); setUniQuery(''); }}>변경</button>
           </div>
         ) : (
@@ -114,7 +114,7 @@ export function ArtworkForm() {
                 {uniResults.map((u) => (
                   <li key={u.universityId}>
                     <button type="button" className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-100" onClick={() => { setUni(u); setUniResults([]); }}>
-                      <span className="text-body-4 text-neutral-950">{u.name}</span>
+                      <span className="text-body-5 text-neutral-950">{u.name}</span>
                       <span className="text-caption-2 text-neutral-500">{u.region}</span>
                     </button>
                   </li>

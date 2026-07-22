@@ -71,8 +71,8 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     }
   }
 
-  const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-4 text-neutral-950 outline-none focus:border-primary';
-  const label = 'mb-1 block text-body-3 text-neutral-800';
+  const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-5 text-neutral-950 outline-none focus:border-primary';
+  const label = 'mb-1 block text-body-4 text-neutral-800';
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5 px-4 py-5">

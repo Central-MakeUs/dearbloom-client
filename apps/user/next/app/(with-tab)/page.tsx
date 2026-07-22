@@ -29,8 +29,8 @@ export default async function RootPage({ searchParams }: RootPageProps) {
     <section className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-elevation">
       <div className="flex flex-col gap-1">
         <p className="text-caption-1 text-neutral-500">{oauthLabel}</p>
-        <h2 className="text-head-2 text-neutral-950">{isLoggedIn ? '로그인됨' : '로그인 전'}</h2>
-        <p className="text-body-5 text-neutral-600">
+        <h2 className="text-head-3 text-neutral-950">{isLoggedIn ? '로그인됨' : '로그인 전'}</h2>
+        <p className="text-body-6 text-neutral-600">
           {isLoggedIn
             ? '브라우저 쿠키에 accessToken과 refreshToken이 저장되어 있습니다.'
             : isLocalDevelopment
@@ -42,7 +42,7 @@ export default async function RootPage({ searchParams }: RootPageProps) {
       <div className="flex flex-col gap-3">
         {isLoggedIn ? (
           <a
-            className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-3 font-medium text-neutral-950"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-4 font-medium text-neutral-950"
             href="/app/api/auth/logout"
           >
             로그아웃하고 다시 테스트
@@ -60,7 +60,7 @@ export default async function RootPage({ searchParams }: RootPageProps) {
 
   return (
     <main className="mx-auto max-w-md px-4 pt-6">
-      <h1 className="text-head-1 text-neutral-950">user-next 루트</h1>
+      <h1 className="text-head-2 text-neutral-950">user-next 루트</h1>
       <p className="mt-1 text-caption-1 text-neutral-600">route: /</p>
       {authStatus}
     </main>
