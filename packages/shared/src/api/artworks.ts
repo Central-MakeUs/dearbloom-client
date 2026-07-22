@@ -9,7 +9,11 @@ export type FileType = 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 export interface ArtworkListItem {
   artworkId: number;
   title: string;
-  price: number;
+  /** 패키지 중 최저가 */
+  lowestPrice: number;
+  /** 촬영 인원 (min~max) */
+  minHeadCount: number;
+  maxHeadCount: number;
   artistNickname: string;
   artistRegionList: RegionCode[];
   thumbnailUrl: string;
