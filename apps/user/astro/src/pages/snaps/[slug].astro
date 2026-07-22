@@ -26,6 +26,16 @@ const shootPlaces = artwork
     ? artwork.schoolNameList
     : [...new Set(photos.map((p) => p.universityName).filter(Boolean))]
   : [];
+
+// 촬영 인원 (min~max)
+const headCount =
+  artwork == null || artwork.minHeadCount == null
+    ? ''
+    : artwork.maxHeadCount != null
+      ? `${artwork.minHeadCount}~${artwork.maxHeadCount}명`
+      : `${artwork.minHeadCount}명 이상`;
+
+const packages = artwork?.packageList ?? [];
 ---
 
 <!doctype html>
@@ -98,40 +108,63 @@ const shootPlaces = artwork
 
           <div class="pb-28 pt-4">
             {/* 촬영 정보 */}
-            {shootPlaces.length > 0 && (
+            {(shootPlaces.length > 0 || headCount) && (
               <section class="mb-3">
                 <h3 class="mb-2 px-4 text-head-2 text-neutral-800">촬영 정보</h3>
                 <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <div class="flex items-start justify-between gap-4">
-                    <span class="shrink-0 text-body-5 text-neutral-600">촬영 장소</span>
-                    <span class="text-right text-body-3 text-neutral-950">{shootPlaces.join(', ')}</span>
-                  </div>
+                  <dl class="flex flex-col gap-3">
+                    {shootPlaces.length > 0 && (
+                      <div class="flex items-start justify-between gap-4">
+                        <dt class="shrink-0 text-body-5 text-neutral-600">촬영 장소</dt>
+                        <dd class="text-right text-body-3 text-neutral-950">{shootPlaces.join(', ')}</dd>
+                      </div>
+                    )}
+                    {headCount && (
+                      <div class="flex items-start justify-between gap-4">
+                        <dt class="shrink-0 text-body-5 text-neutral-600">촬영 인원</dt>
+                        <dd class="text-right text-body-3 text-neutral-950">{headCount}</dd>
+                      </div>
+                    )}
+                  </dl>
                 </div>
               </section>
             )}
 
-            {/* 촬영 구성 */}
-            <section class="mb-3">
-              <h3 class="mb-2 px-4 text-head-2 text-neutral-800">촬영 구성</h3>
-              <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                <dl class="flex flex-col gap-3">
-                  <div class="flex items-start justify-between gap-4">
-                    <dt class="shrink-0 text-body-5 text-neutral-600">가격</dt>
-                    <dd class="text-right text-body-3 text-neutral-950">{won(artwork.price)}</dd>
-                  </div>
-                  {artwork.travelFeeInfo && (
-                    <div class="flex items-start justify-between gap-4">
-                      <dt class="shrink-0 text-body-5 text-neutral-600">출장비</dt>
-                      <dd class="text-right text-body-3 text-neutral-950">{artwork.travelFeeInfo}</dd>
+            {/* 촬영 구성 (패키지) */}
+            {packages.length > 0 && (
+              <section class="mb-3">
+                <h3 class="mb-2 px-4 text-head-2 text-neutral-800">촬영 구성</h3>
+                <div class="mx-4 flex flex-col gap-3">
+                  {packages.map((pkg) => (
+                    <div class="rounded-lg bg-neutral-0 p-4">
+                      <div class="flex items-center justify-between gap-3">
+                        <span class="text-body-3 text-neutral-950">{pkg.packageName}</span>
+                        <span class="shrink-0 text-body-1 font-semibold text-primary">{won(pkg.price)}</span>
+                      </div>
+                      <dl class="mt-3 flex flex-col gap-2 border-t border-neutral-200 pt-3">
+                        <div class="flex items-start justify-between gap-4">
+                          <dt class="text-body-5 text-neutral-600">촬영 시간</dt>
+                          <dd class="text-body-4 text-neutral-950">{pkg.durationMinutes}분</dd>
+                        </div>
+                        <div class="flex items-start justify-between gap-4">
+                          <dt class="text-body-5 text-neutral-600">보정본 수</dt>
+                          <dd class="text-body-4 text-neutral-950">{pkg.finalPhotoCount}장</dd>
+                        </div>
+                        {pkg.extraInfo && (
+                          <div class="flex items-start justify-between gap-4">
+                            <dt class="shrink-0 text-body-5 text-neutral-600">추가</dt>
+                            <dd class="text-right text-body-4 text-neutral-950">{pkg.extraInfo}</dd>
+                          </div>
+                        )}
+                      </dl>
                     </div>
-                  )}
-                </dl>
-                {artwork.packageInfo && (
-                  <p class="mt-3 whitespace-pre-line border-t border-neutral-200 pt-3 text-body-5 text-neutral-800">{artwork.packageInfo}</p>
+                  ))}
+                </div>
+                {artwork.artist.etcInfo && (
+                  <p class="mt-2 px-4 text-caption-2 text-neutral-500">{artwork.artist.etcInfo}</p>
                 )}
-              </div>
-              <p class="mt-2 px-4 text-caption-2 text-neutral-500">출장비는 모델의 위치와 촬영 장소에 따라 달라질 수 있습니다.</p>
-            </section>
+              </section>
+            )}
 
             {/* 이 작가의 다른 작품 */}
             {artwork.otherArtworkList?.length > 0 && (
