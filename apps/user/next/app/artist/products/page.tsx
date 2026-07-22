@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { getMyArtworks, type ArtworkListItem } from '@dearbloom/shared';
+import { getMyArtworks, type MyArtworkListItem } from '@dearbloom/shared';
 import { MyArtworkList } from './MyArtworkList';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function ArtistProductsPage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  let items: ArtworkListItem[] = [];
+  let items: MyArtworkListItem[] = [];
   let needLogin = false;
   if (!token) {
     needLogin = true;

@@ -2,12 +2,12 @@ import { apiGet, apiPut, apiPost, apiDelete, type RequestOptions } from './http'
 
 /**
  * 작가 일정(Schedule) API — 모두 로그인(작가) 필요.
- * 규칙(rule) 기반: 기본 촬영 가능(WEEKLY_AVAILABLE) / 반복 예약 불가(RECURRING_BLOCK) / 개인 예약 불가(DATE_BLOCK).
+ * 규칙(rule) 기반: 기본 촬영 가능(WEEKLY_AVAILABLE) / 반복(요일) 예약 불가(WEEKLY_BLOCK) / 개인(날짜) 예약 불가(DATE_BLOCK).
  * 시간은 'HH:MM:SS', 날짜는 'YYYY-MM-DD'.
  */
 
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
-export type ScheduleRuleType = 'WEEKLY_AVAILABLE' | 'RECURRING_BLOCK' | 'DATE_BLOCK';
+export type ScheduleRuleType = 'WEEKLY_AVAILABLE' | 'WEEKLY_BLOCK' | 'DATE_BLOCK';
 
 export interface ScheduleRule {
   scheduleRuleId: number;
