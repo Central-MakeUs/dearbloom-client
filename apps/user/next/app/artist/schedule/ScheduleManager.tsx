@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
+import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
 
 const DAYS: { key: DayOfWeek; label: string }[] = [
   { key: 'MONDAY', label: '월' },
@@ -58,6 +59,12 @@ export function ScheduleManager({
     return init;
   });
 
+  const toggleDay = (key: DayOfWeek) =>
+    setDays((p) => ({ ...p, [key]: { ...p[key], enabled: !p[key].enabled } }));
+  const setDayStart = (key: DayOfWeek, v: string) =>
+    setDays((p) => ({ ...p, [key]: { ...p[key], start: v, end: p[key].end <= v ? nextSlot(v) : p[key].end } }));
+  const setDayEnd = (key: DayOfWeek, v: string) => setDays((p) => ({ ...p, [key]: { ...p[key], end: v } }));
+
   const saveWeekly = async () => {
     setBusy(true);
     const availabilityList = DAYS.filter((d) => days[d.key].enabled).map((d) => ({
@@ -68,13 +75,17 @@ export function ScheduleManager({
     const ok = await send(`${BASE}/weekly`, 'PUT', { availabilityList });
     setBusy(false);
     if (ok) router.refresh();
-    else alert('저장에 실패했어요.');
+    else alert('저장에 실패했어요. 시간을 다시 확인해주세요.');
   };
 
-  // 추가 폼 상태
+  // 반복 예약 불가 추가 폼
   const [recDay, setRecDay] = useState<DayOfWeek>('MONDAY');
   const [recStart, setRecStart] = useState('12:00');
   const [recEnd, setRecEnd] = useState('13:00');
+  const setRecStartV = (v: string) => {
+    setRecStart(v);
+    if (recEnd <= v) setRecEnd(nextSlot(v));
+  };
   const addRecurring = async () => {
     setBusy(true);
     const ok = await send(`${BASE}/recurring-blocks`, 'POST', {
@@ -87,9 +98,14 @@ export function ScheduleManager({
     else alert('추가에 실패했어요.');
   };
 
+  // 개인 예약 불가 추가 폼
   const [blkDate, setBlkDate] = useState('');
   const [blkStart, setBlkStart] = useState('09:00');
   const [blkEnd, setBlkEnd] = useState('18:00');
+  const setBlkStartV = (v: string) => {
+    setBlkStart(v);
+    if (blkEnd <= v) setBlkEnd(nextSlot(v));
+  };
   const addDate = async () => {
     if (!blkDate) return alert('날짜를 선택해주세요.');
     setBusy(true);
@@ -111,12 +127,14 @@ export function ScheduleManager({
     else alert('삭제에 실패했어요.');
   };
 
-  const timeInput = 'rounded-md border border-neutral-300 bg-neutral-0 px-2 py-1 text-body-5 text-neutral-950';
+  const dateInput = 'rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 text-body-5 text-neutral-950';
 
   return (
     <div className="flex flex-col gap-3 pb-6">
+      <p className="px-4 text-caption-1 text-neutral-500">촬영 시간은 09:00~21:00, 30분 단위로 선택할 수 있어요.</p>
+
       {/* 기본 촬영 가능 일정 */}
-      <section className="mt-2">
+      <section>
         <div className="flex items-center justify-between px-4">
           <h2 className="text-head-3 text-neutral-950">기본 촬영 가능 일정</h2>
           <button
@@ -135,15 +153,15 @@ export function ScheduleManager({
               <div key={d.key} className="flex items-center gap-3 px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setDays((prev) => ({ ...prev, [d.key]: { ...prev[d.key], enabled: !prev[d.key].enabled } }))}
+                  onClick={() => toggleDay(d.key)}
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-body-4 ${s.enabled ? 'bg-primary text-neutral-0' : 'bg-neutral-200 text-neutral-500'}`}
                 >
                   {d.label}
                 </button>
-                <div className={`flex flex-1 items-center gap-2 ${s.enabled ? '' : 'opacity-40'}`}>
-                  <input type="time" value={s.start} disabled={!s.enabled} onChange={(e) => setDays((p) => ({ ...p, [d.key]: { ...p[d.key], start: e.target.value } }))} className={timeInput} />
+                <div className={`flex flex-1 items-center gap-2 ${s.enabled ? '' : 'pointer-events-none opacity-40'}`}>
+                  <TimeSelect value={s.start} options={START_SLOTS} disabled={!s.enabled} onChange={(v) => setDayStart(d.key, v)} ariaLabel={`${d.label} 시작 시간`} />
                   <span className="text-body-6 text-neutral-500">~</span>
-                  <input type="time" value={s.end} disabled={!s.enabled} onChange={(e) => setDays((p) => ({ ...p, [d.key]: { ...p[d.key], end: e.target.value } }))} className={timeInput} />
+                  <TimeSelect value={s.end} options={endSlotsAfter(s.start)} disabled={!s.enabled} onChange={(v) => setDayEnd(d.key, v)} ariaLabel={`${d.label} 종료 시간`} />
                 </div>
               </div>
             );
@@ -166,12 +184,12 @@ export function ScheduleManager({
             </ul>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <select value={recDay} onChange={(e) => setRecDay(e.target.value as DayOfWeek)} className={timeInput}>
+            <select value={recDay} onChange={(e) => setRecDay(e.target.value as DayOfWeek)} className={dateInput}>
               {DAYS.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}
             </select>
-            <input type="time" value={recStart} onChange={(e) => setRecStart(e.target.value)} className={timeInput} />
+            <TimeSelect value={recStart} options={START_SLOTS} onChange={setRecStartV} ariaLabel="반복 시작 시간" />
             <span className="text-body-6 text-neutral-500">~</span>
-            <input type="time" value={recEnd} onChange={(e) => setRecEnd(e.target.value)} className={timeInput} />
+            <TimeSelect value={recEnd} options={endSlotsAfter(recStart)} onChange={setRecEnd} ariaLabel="반복 종료 시간" />
             <button type="button" onClick={addRecurring} disabled={busy} className="ml-auto rounded-md bg-neutral-800 px-3 py-1.5 text-body-5 text-neutral-0 disabled:opacity-40">추가</button>
           </div>
         </div>
@@ -192,10 +210,10 @@ export function ScheduleManager({
             </ul>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <input type="date" value={blkDate} onChange={(e) => setBlkDate(e.target.value)} className={timeInput} />
-            <input type="time" value={blkStart} onChange={(e) => setBlkStart(e.target.value)} className={timeInput} />
+            <input type="date" value={blkDate} onChange={(e) => setBlkDate(e.target.value)} className={dateInput} />
+            <TimeSelect value={blkStart} options={START_SLOTS} onChange={setBlkStartV} ariaLabel="개인 예약불가 시작 시간" />
             <span className="text-body-6 text-neutral-500">~</span>
-            <input type="time" value={blkEnd} onChange={(e) => setBlkEnd(e.target.value)} className={timeInput} />
+            <TimeSelect value={blkEnd} options={endSlotsAfter(blkStart)} onChange={setBlkEnd} ariaLabel="개인 예약불가 종료 시간" />
             <button type="button" onClick={addDate} disabled={busy} className="ml-auto rounded-md bg-neutral-800 px-3 py-1.5 text-body-5 text-neutral-0 disabled:opacity-40">추가</button>
           </div>
         </div>
