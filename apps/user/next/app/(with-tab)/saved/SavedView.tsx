@@ -50,9 +50,6 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
       return next;
     });
 
-  const allSelected = items.length > 0 && selected.size === items.length;
-  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(items.map((i) => i.artworkId)));
-
   async function deleteSelected() {
     if (selected.size === 0 || busy) return;
     setBusy(true);
@@ -88,8 +85,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const editIcon = (
     <button type="button" onClick={() => setEditing(true)} aria-label="편집" className="flex h-11 w-11 items-center justify-center text-neutral-950">
-      <svg width={24} height={24} viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M20.0002 13H17.2002C16.0801 13 15.5196 13 15.0918 13.218C14.7155 13.4097 14.4097 13.7155 14.218 14.0918C14 14.5196 14 15.0801 14 16.2002V25.8002C14 26.9203 14 27.4801 14.218 27.9079C14.4097 28.2842 14.7155 28.5905 15.0918 28.7822C15.5192 29 16.079 29 17.1969 29H26.8031C27.921 29 28.48 29 28.9074 28.7822C29.2837 28.5905 29.5905 28.2839 29.7822 27.9076C30 27.4802 30 26.921 30 25.8031V23M26 14L20 20V23H23L29 17M26 14L29 11L32 14L29 17M26 14L29 17" />
+      <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M10.0002 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2839 19.7822 18.9076C20 18.4802 20 17.921 20 16.8031V14M16 5L10 11V14H13L19 8M16 5L19 2L22 5L19 8M16 5L19 8" />
       </svg>
     </button>
   );
@@ -196,40 +193,28 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   );
 
   const editBar = editing ? (
-    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md items-center gap-3 border-t border-neutral-200 bg-neutral-0 px-4 py-3">
-      <button type="button" onClick={toggleAll} className="flex items-center gap-1.5 text-body-5 text-neutral-700">
-        <span
-          aria-hidden
-          className={cn(
-            'flex h-5 w-5 items-center justify-center rounded-full border',
-            allSelected ? 'border-primary bg-primary text-neutral-0' : 'border-neutral-400',
-          )}
+    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md border-t border-neutral-200 bg-neutral-0 px-4 pb-4 pt-3">
+      {selected.size > 0 && (
+        <p className="mb-3 text-center text-body-5 text-neutral-600">{selected.size}개의 작품이 선택되었습니다.</p>
+      )}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          disabled={selected.size === 0}
+          className="flex-1 rounded-md border border-neutral-300 bg-neutral-0 py-3 text-body-4 text-neutral-800 disabled:border-neutral-200 disabled:bg-neutral-100 disabled:text-neutral-400"
         >
-          {allSelected && (
-            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          )}
-        </span>
-        전체 {selected.size}
-      </button>
-      <div className="flex-1" />
-      <button
-        type="button"
-        onClick={() => setPickerOpen(true)}
-        disabled={selected.size === 0}
-        className="rounded-md border border-primary px-4 py-2 text-body-5 text-primary disabled:border-neutral-300 disabled:text-neutral-400"
-      >
-        보드에 추가하기
-      </button>
-      <button
-        type="button"
-        onClick={() => setConfirmOpen(true)}
-        disabled={selected.size === 0}
-        className="rounded-md bg-primary px-4 py-2 text-body-5 text-neutral-0 disabled:bg-neutral-300 disabled:text-neutral-500"
-      >
-        삭제하기
-      </button>
+          삭제하기
+        </button>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          disabled={selected.size === 0}
+          className="flex-1 rounded-md border border-neutral-300 bg-neutral-0 py-3 text-body-4 text-neutral-800 disabled:border-neutral-200 disabled:bg-neutral-100 disabled:text-neutral-400"
+        >
+          보드에 추가하기
+        </button>
+      </div>
     </div>
   ) : null;
 
