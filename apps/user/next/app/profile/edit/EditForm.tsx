@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { nicknameSchema } from '@dearbloom/shared';
 
 const schema = z.object({ name: nicknameSchema });
@@ -14,7 +15,7 @@ export function EditForm({ initialName }: { initialName: string }) {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: 'onChange',
@@ -22,9 +23,19 @@ export function EditForm({ initialName }: { initialName: string }) {
   });
   const name = watch('name');
 
-  const onValid = () => {
-    // TODO: 사용자 이름 수정 API 나오면 연결(현재 백엔드 부재). 지금은 마이로 복귀만.
-    window.location.href = '/app/my';
+  const onValid = async (values: FormValues) => {
+    const res = await fetch('/app/api/customer/name', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: values.name }),
+    });
+    if (res.ok) {
+      toast.success('저장되었습니다.');
+      window.location.href = '/app/my';
+    } else {
+      const b = (await res.json().catch(() => ({}))) as { error?: string };
+      toast.error(b.error || '저장에 실패했어요.');
+    }
   };
 
   return (
@@ -64,7 +75,7 @@ export function EditForm({ initialName }: { initialName: string }) {
       <div className="mt-auto px-4 py-2">
         <button
           type="submit"
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
           className="h-[52px] w-full rounded-md bg-neutral-800 text-body-1 text-neutral-0 disabled:opacity-40"
         >
           완료

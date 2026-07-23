@@ -5,6 +5,8 @@ export * from './api/artworks';
 export * from './api/saved';
 export * from './api/artist';
 export * from './api/schedule';
+export * from './api/inquiry';
+export * from './api/customer';
 export * from './api/member';
 export * from './validation';
 export * from './api/files';
