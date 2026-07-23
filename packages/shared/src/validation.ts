@@ -7,10 +7,20 @@ import { z } from 'zod';
 
 const NICKNAME_MSG = '2-12자의 한글, 영문, 숫자만 가능합니다';
 
-/** 닉네임 / 사용자 이름: 2-12자, 한글·영문·숫자만. (작가 닉네임·고객 이름 공용) */
+/** 작가 닉네임: 2-12자, 한글·영문·숫자. */
 export const nicknameSchema = z
   .string()
   .trim()
   .min(2, NICKNAME_MSG)
   .max(12, NICKNAME_MSG)
   .regex(/^[가-힣a-zA-Z0-9]+$/, NICKNAME_MSG);
+
+const CUSTOMER_NAME_MSG = '이름은 2-5자의 한글 또는 영문만 가능합니다';
+
+/** 고객 이름: 2-5자, 한글 또는 영문(숫자 불가). 백엔드 규칙과 일치. */
+export const customerNameSchema = z
+  .string()
+  .trim()
+  .min(2, CUSTOMER_NAME_MSG)
+  .max(5, CUSTOMER_NAME_MSG)
+  .regex(/^[가-힣a-zA-Z]+$/, CUSTOMER_NAME_MSG);

@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { nicknameSchema } from '@dearbloom/shared';
+import { customerNameSchema } from '@dearbloom/shared';
 
-const schema = z.object({ name: nicknameSchema });
+const schema = z.object({ name: customerNameSchema });
 type FormValues = z.infer<typeof schema>;
 
 export function EditForm({ initialName }: { initialName: string }) {
@@ -68,7 +68,7 @@ export function EditForm({ initialName }: { initialName: string }) {
         {errors.name ? (
           <p className="text-caption-1 text-danger">{errors.name.message}</p>
         ) : (
-          <p className="text-caption-2 text-neutral-500">2-12자의 한글, 영문, 숫자만 가능합니다</p>
+          <p className="text-caption-2 text-neutral-500">2-5자의 한글 또는 영문만 가능합니다</p>
         )}
       </div>
 
