@@ -35,9 +35,12 @@ export interface ArtworkPhoto {
 export interface ArtworkArtist {
   artistId: number;
   nickname: string;
-  intro: string;
+  /** 작가 소개. 미등록 시 null */
+  intro: string | null;
   regionList: RegionCode[];
-  /** 작가 기타 안내(우천 정책 등) */
+  /** 작가 출장비 안내(자유 텍스트). 미등록 시 null */
+  travelFee?: string | null;
+  /** 작가 기타 안내(우천 정책 등). 미등록 시 null */
   etcInfo?: string | null;
 }
 
@@ -62,6 +65,8 @@ export interface ArtworkPackage {
 export interface ArtworkDetail {
   artworkId: number;
   title: string;
+  /** 작품 설명(자유 텍스트). 미등록 시 null */
+  description: string | null;
   /** 촬영 인원 (min~max, max 는 null 가능) */
   minHeadCount: number | null;
   maxHeadCount: number | null;
