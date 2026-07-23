@@ -75,7 +75,7 @@ export function ArtworkForm() {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(b.error || '작품 등록 실패');
       }
-      router.push('/app/artist/products');
+      router.push('/artist/products');
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류가 발생했어요');
     } finally {
