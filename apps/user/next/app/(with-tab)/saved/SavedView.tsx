@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArtworkCard, Header, cn } from '@dearbloom/ui';
+import { ArtworkCard, BottomSheet, Header, cn } from '@dearbloom/ui';
 import { regionLabel, type ArtworkListItem } from '@dearbloom/shared';
 import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
@@ -235,39 +235,42 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   ) : null;
 
   // 보드에 추가 — 보드 선택 시트(보드 없으면 생성 유도)
-  const boardPicker = pickerOpen ? (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-neutral-950/50" onClick={() => setPickerOpen(false)}>
-      <div className="mx-auto w-full max-w-md rounded-t-xl bg-neutral-0 px-5 pb-8 pt-5" onClick={(e) => e.stopPropagation()}>
-        <p className="mb-3 text-body-2 text-neutral-950">보드에 추가</p>
-        {boards.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <p className="text-body-4 text-neutral-500">공동보드가 없어요. 먼저 보드를 만들어 주세요.</p>
-            <a href="/app/boards/new" className="rounded-md bg-primary px-5 py-2.5 text-body-4 text-neutral-0">
-              공동보드 만들기
+  const boardPicker = (
+    <BottomSheet open={pickerOpen} onOpenChange={setPickerOpen} title="보드에 추가하기">
+      {boards.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 px-5 pb-2 pt-6 text-center">
+          <p className="text-body-3 text-neutral-950">공동보드가 없어요</p>
+          <p className="text-body-5 text-neutral-500">새 보드를 만들고 선택한 작품을 바로 추가해 보세요.</p>
+          <a href="/app/boards/new" className="mt-4 w-full rounded-md bg-primary py-3 text-center text-body-2 text-neutral-0">
+            공동보드 만들기
+          </a>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between px-5 pb-1 pt-1">
+            <span className="text-body-2 text-neutral-950">보드에 추가하기</span>
+            <a href="/app/boards/new" className="text-body-4 text-primary">
+              새 보드
             </a>
           </div>
-        ) : (
-          <ul className="flex flex-col gap-1">
+          <ul className="overflow-y-auto">
             {boards.map((b) => (
-              <li key={b.id}>
+              <li key={b.id} className="border-t border-neutral-100 first:border-t-0">
                 <button
                   type="button"
                   onClick={() => addSelectedToBoard(b.id)}
-                  className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-neutral-100"
+                  className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
-                  <BoardCollage artworks={b.artworks} className="h-12 w-12" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-body-3 text-neutral-950">{b.name}</span>
-                    <span className="block text-caption-2 text-neutral-600">{b.artworks.length}개의 작품</span>
-                  </span>
+                  <span className="truncate text-body-3 text-neutral-950">{b.name}</span>
+                  <span aria-hidden className="h-5 w-5 shrink-0 rounded-full border-2 border-neutral-300" />
                 </button>
               </li>
             ))}
           </ul>
-        )}
-      </div>
-    </div>
-  ) : null;
+        </>
+      )}
+    </BottomSheet>
+  );
 
   const toastEl = toast ? (
     <div className="fixed inset-x-0 bottom-28 z-50 mx-auto w-max max-w-[80%] rounded-full bg-neutral-950/85 px-4 py-2 text-caption-1 text-neutral-0">
