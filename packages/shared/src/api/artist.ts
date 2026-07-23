@@ -33,9 +33,10 @@ export interface CreateArtworkPayload {
   photoList: ArtworkPhotoInput[];
 }
 
+/** 작품 기본 정보 수정. title·description 모두 선택(미전송/null=미변경, description=''=설명 비움). */
 export interface UpdateArtworkPayload {
-  title: string;
-  price: number;
+  title?: string;
+  description?: string;
 }
 
 // ---- 작가 프로필 ----
@@ -101,7 +102,7 @@ export function createArtwork(payload: CreateArtworkPayload, opts: RequestOption
   return apiPost<{ artworkId: number }>('/api/artworks', payload, opts);
 }
 
-/** 작품 기본 정보(제목/가격) 수정 */
+/** 작품 기본 정보(작품명·설명) 수정. PATCH /api/artworks/{id} */
 export function updateArtwork(
   artworkId: number | string,
   payload: UpdateArtworkPayload,

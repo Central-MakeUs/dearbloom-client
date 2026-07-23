@@ -62,6 +62,8 @@ export interface ArtworkPackage {
 export interface ArtworkDetail {
   artworkId: number;
   title: string;
+  /** 작품 설명 (없으면 null) */
+  description: string | null;
   /** 촬영 인원 (min~max, max 는 null 가능) */
   minHeadCount: number | null;
   maxHeadCount: number | null;
