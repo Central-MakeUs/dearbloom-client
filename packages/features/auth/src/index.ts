@@ -1,8 +1,10 @@
 export type OAuthProvider = 'apple' | 'google';
+export type AuthRole = 'ARTIST' | 'CUSTOMER';
 
 type CreateOAuthAuthorizationUrlParams = {
   baseUrl?: string;
   provider: OAuthProvider;
+  role: AuthRole;
 };
 
 type CreateLocalOAuthAuthorizationUrlParams = {
@@ -13,10 +15,12 @@ type CreateLocalOAuthAuthorizationUrlParams = {
 export function createOAuthAuthorizationUrl({
   baseUrl,
   provider,
+  role,
 }: CreateOAuthAuthorizationUrlParams) {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+  const searchParams = new URLSearchParams({ role });
 
-  return `${normalizedBaseUrl}/oauth2/${provider}/authorize`;
+  return `${normalizedBaseUrl}/oauth2/${provider}/authorize?${searchParams.toString()}`;
 }
 
 export function createLocalOAuthAuthorizationUrl({

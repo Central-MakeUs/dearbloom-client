@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { cn } from '@dearbloom/ui';
+import type { AuthRole } from '@dearbloom/features-auth';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -17,6 +19,15 @@ type NativeLoginResult = {
   socialToken?: string;
   status: 'cancelled' | 'error' | 'success';
   type: typeof NATIVE_SOCIAL_LOGIN_RESULT;
+};
+
+type NativeLoginResponse = {
+  success: boolean;
+  data?: {
+    selectedRole: AuthRole;
+    needsOnboarding: boolean;
+  };
+  error?: { message?: string };
 };
 
 declare global {
@@ -36,7 +47,10 @@ function getNativeAppPlatform(): NativeAppPlatform | null {
   return platform === 'android' || platform === 'ios' ? platform : null;
 }
 
-export function SocialLoginButtons() {
+const socialButtonClassName =
+  'inline-flex h-[52px] w-full items-center justify-center rounded-md px-[14px] text-body-5 disabled:pointer-events-none disabled:opacity-40';
+
+export function SocialLoginButtons({ role }: { role: AuthRole }) {
   const [nativePlatform, setNativePlatform] = useState<NativeAppPlatform | null>();
   const [loginError, setLoginError] = useState<string>();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -69,6 +83,7 @@ export function SocialLoginButtons() {
           body: JSON.stringify({
             socialProvider: result.provider,
             socialToken: result.socialToken,
+            role,
           }),
           credentials: 'include',
           headers: {
@@ -77,11 +92,21 @@ export function SocialLoginButtons() {
           method: 'POST',
         });
 
-        if (!response.ok) {
-          throw new Error(`로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
+        const body = (await response.json()) as NativeLoginResponse;
+
+        if (!response.ok || !body.data) {
+          throw new Error(body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
         }
 
-        window.location.replace('/app');
+        const destination = body.data.needsOnboarding
+          ? body.data.selectedRole === 'CUSTOMER'
+            ? '/app/onboarding'
+            : '/app/onboarding/artist'
+          : body.data.selectedRole === 'CUSTOMER'
+            ? '/snaps'
+            : '/app/artist/dashboard';
+
+        window.location.replace(destination);
       } catch (error) {
         setLoginError(error instanceof Error ? error.message : '로그인 서버 요청에 실패했습니다.');
         setIsLoggingIn(false);
@@ -93,7 +118,7 @@ export function SocialLoginButtons() {
     return () => {
       window.removeEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
     };
-  }, []);
+  }, [role]);
 
   const requestNativeLogin = (provider: NativeSocialProvider) => {
     const bridge = window.ReactNativeWebView;
@@ -118,46 +143,52 @@ export function SocialLoginButtons() {
 
   const googleButton = nativePlatform ? (
     <button
-      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-4 font-medium text-neutral-0 disabled:opacity-40"
+      className={cn(socialButtonClassName, 'bg-neutral-0 text-neutral-950')}
       disabled={isLoggingIn}
       onClick={() => requestNativeLogin('GOOGLE')}
       type="button"
     >
-      Google로 로그인
+      Google로 시작하기
     </button>
   ) : (
     <a
-      className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-5 text-body-4 font-medium text-neutral-0"
-      href="/app/api/auth/login?provider=google"
+      className={cn(socialButtonClassName, 'bg-neutral-0 text-neutral-950')}
+      href={`/app/api/auth/login?provider=google&role=${role}`}
     >
-      Google로 로그인
+      Google로 시작하기
     </a>
   );
 
   const appleButton =
     nativePlatform === 'android' ? null : nativePlatform === 'ios' ? (
       <button
-        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-4 font-medium text-neutral-950 disabled:opacity-40"
+        className={cn(socialButtonClassName, 'bg-neutral-950 text-neutral-0')}
         disabled={isLoggingIn}
         onClick={() => requestNativeLogin('APPLE')}
         type="button"
       >
-        Apple로 로그인
+        Apple로 시작하기
       </button>
     ) : (
       <a
-        className="inline-flex h-12 items-center justify-center rounded-md bg-neutral-100 px-5 text-body-4 font-medium text-neutral-950"
-        href="/app/api/auth/login?provider=apple"
+        className={cn(socialButtonClassName, 'bg-neutral-950 text-neutral-0')}
+        href={`/app/api/auth/login?provider=apple&role=${role}`}
       >
-        Apple로 로그인
+        Apple로 시작하기
       </a>
     );
 
+  const errorMessage = loginError ? (
+    <p className="text-center text-caption-1 text-danger" role="alert">
+      {loginError}
+    </p>
+  ) : null;
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {googleButton}
       {appleButton}
-      {loginError && <p className="text-caption-1 text-danger">{loginError}</p>}
+      {errorMessage}
     </div>
   );
 }

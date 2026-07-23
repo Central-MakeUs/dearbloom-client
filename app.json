@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "244a4ef6-cc07-4288-bd51-ffdb4635f901"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.soapsoup.dearbloom",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -2,11 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { devLogin, type DevRole } from '@dearbloom/shared';
 
 /** 로그인한 역할에 맞는 착지 화면. 작가는 대시보드, 고객은 공개 피드, 미온보딩은 온보딩. */
-const landingByRole: Record<DevRole, string> = {
-  ARTIST: '/app/artist/dashboard',
-  CUSTOMER: '/snaps',
-  ONBOARDING: '/app/onboarding/basic',
-};
+// const landingByRole: Record<DevRole, string> = {
+//   ARTIST: '/app/artist/dashboard',
+//   CUSTOMER: '/snaps',
+//   ONBOARDING: '/app/onboarding',
+// };
 
 function parseRole(value: FormDataEntryValue | string | null): DevRole | undefined {
   return value === 'ARTIST' || value === 'CUSTOMER' || value === 'ONBOARDING' ? value : undefined;
@@ -41,9 +41,7 @@ async function handleLogin(request: NextRequest, memberId: number, role?: DevRol
     return redirectRelative('/app/dev/login?error=login_failed');
   }
 
-  // 역할 지정 시 해당 역할 화면으로, 없으면 기존처럼 dev/login 에 머무름.
-  const location = role ? landingByRole[role] : '/app/dev/login?ok=1';
-  return redirectRelative(location, tokens, request.nextUrl.protocol === 'https:');
+  return redirectRelative('/app/role', tokens, request.nextUrl.protocol === 'https:');
 }
 
 export async function POST(request: NextRequest) {
