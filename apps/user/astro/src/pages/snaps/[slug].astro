@@ -142,8 +142,8 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
-            {/* 촬영 구성 (패키지) */}
-            {packages.length > 0 && (
+            {/* 촬영 구성 (패키지 + 출장비) */}
+            {(packages.length > 0 || artwork.artist.travelFee) && (
               <section class="mb-3">
                 <h3 class="mb-2 px-4 text-head-3 text-neutral-800">촬영 구성</h3>
                 <div class="mx-4 flex flex-col gap-3">
@@ -171,16 +171,17 @@ const packages = artwork?.packageList ?? [];
                       </dl>
                     </div>
                   ))}
-                </div>
-              </section>
-            )}
 
-            {/* 출장비 */}
-            {artwork.artist.travelFee && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">출장비</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.travelFee}</p>
+                  {/* 출장비 — 촬영 구성에 포함(Figma) */}
+                  {artwork.artist.travelFee && (
+                    <div class="rounded-lg bg-neutral-0 p-4">
+                      <div class="flex items-start justify-between gap-4">
+                        <span class="shrink-0 text-body-6 text-neutral-600">출장비</span>
+                        <span class="whitespace-pre-line text-right text-body-5 text-neutral-950">{artwork.artist.travelFee}</span>
+                      </div>
+                      <p class="mt-2 text-caption-2 text-neutral-500">출장비는 모델의 위치와 촬영 장소에 따라 달라질 수 있습니다.</p>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -195,10 +196,10 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
-            {/* 작가 정보 */}
+            {/* 작가 소개 */}
             {artwork.artist.intro && (
               <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 정보</h3>
+                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 소개</h3>
                 <div class="mx-4 rounded-lg bg-neutral-0 p-4">
                   <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
                   <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
