@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import type { OAuthProvider } from '@dearbloom/features-auth';
+import type { AuthRole } from '@dearbloom/features-auth';
+import { getMemberMe } from '@dearbloom/shared';
 
 type LocalTokenExchangeResponse = {
   accessToken?: string;
@@ -18,29 +19,34 @@ type ExtractedTokens = {
 };
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
-const homePath = '/app';
 
 export async function GET(request: NextRequest) {
-  const provider = getOAuthProvider(request.cookies.get('oauthProvider')?.value);
+  const role =
+    getAuthRole(request.nextUrl.searchParams.get('role')) ??
+    getAuthRole(request.cookies.get('oauthRole')?.value);
+  const needsOnboarding = getBoolean(request.nextUrl.searchParams.get('needsOnboarding'));
   const oneTimeCode =
     request.nextUrl.searchParams.get('oneTimeCode') ??
     request.nextUrl.searchParams.get('one_time_code');
 
   if (!oneTimeCode) {
-    return redirectHome(
-      request,
-      isLocalRequest(request) ? 'missing_one_time_code' : 'success',
-      provider,
-    );
+    if (isLocalRequest(request)) {
+      return redirectLoginError(request, 'missing_one_time_code', role);
+    }
+
+    return redirectAfterLogin(request, role, needsOnboarding);
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
 
   if (!tokenExchangeResult.ok) {
-    return redirectHome(request, tokenExchangeResult.reason, provider);
+    return redirectLoginError(request, tokenExchangeResult.reason, role);
   }
 
-  const response = redirectHome(request, 'success', provider);
+  const localNeedsOnboarding =
+    needsOnboarding ??
+    (role ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role) : undefined);
+  const response = redirectAfterLogin(request, role, localNeedsOnboarding);
   const cookieOptions = {
     httpOnly: true,
     path: '/',
@@ -101,19 +107,52 @@ function extractTokens(body: LocalTokenExchangeResponse): ExtractedTokens {
   };
 }
 
-function redirectHome(
+async function getLocalOnboardingState(accessToken: string, role: AuthRole) {
+  try {
+    const member = await getMemberMe({ token: accessToken });
+
+    return role === 'CUSTOMER' ? !member.hasCustomer : !member.hasArtist;
+  } catch {
+    return undefined;
+  }
+}
+
+function redirectAfterLogin(
   request: NextRequest,
-  authStatus: string,
-  provider?: OAuthProvider,
+  role?: AuthRole,
+  needsOnboarding?: boolean,
 ) {
-  const homeUrl = new URL(homePath, getPublicOrigin(request));
-  homeUrl.searchParams.set('auth', authStatus);
-  if (provider) {
-    homeUrl.searchParams.set('provider', provider);
+  if (!role || needsOnboarding === undefined) {
+    return redirectLoginError(request, 'missing_onboarding_state', role);
   }
 
-  const response = NextResponse.redirect(homeUrl);
+  const destination =
+    role === 'CUSTOMER'
+      ? needsOnboarding
+        ? '/app/onboarding'
+        : '/snaps'
+      : needsOnboarding
+        ? '/app/onboarding/artist'
+        : '/app/artist/dashboard';
+
+  return clearOAuthCookies(NextResponse.redirect(new URL(destination, getPublicOrigin(request))));
+}
+
+function redirectLoginError(request: NextRequest, reason: string, role?: AuthRole) {
+  const url = new URL('/app/login', getPublicOrigin(request));
+  url.searchParams.set('auth', reason);
+  if (role) url.searchParams.set('role', role);
+
+  return clearOAuthCookies(NextResponse.redirect(url));
+}
+
+function clearOAuthCookies(response: NextResponse) {
   response.cookies.set('oauthProvider', '', {
+    expires: new Date(0),
+    maxAge: 0,
+    path: '/',
+  });
+  response.cookies.set('oauthRole', '', {
     expires: new Date(0),
     maxAge: 0,
     path: '/',
@@ -122,8 +161,12 @@ function redirectHome(
   return response;
 }
 
-function getOAuthProvider(value?: string): OAuthProvider | undefined {
-  return value === 'apple' || value === 'google' ? value : undefined;
+function getAuthRole(value?: string | null): AuthRole | undefined {
+  return value === 'ARTIST' || value === 'CUSTOMER' ? value : undefined;
+}
+
+function getBoolean(value: string | null): boolean | undefined {
+  return value === 'true' ? true : value === 'false' ? false : undefined;
 }
 
 function getPublicOrigin(request: NextRequest) {
