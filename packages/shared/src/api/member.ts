@@ -12,10 +12,10 @@ export interface MemberMe {
   memberId: number;
   email: string;
   name: string;
-  /** 마지막으로 활성화한 역할 */
-  recentRole: MemberRole;
-  /** 가입/로그인에 사용한 소셜 제공자 */
-  recentSocialProvider: SocialProvider;
+  /** 마지막으로 활성화한 역할. 역할 미선택(온보딩 전) 계정은 null */
+  recentRole: MemberRole | null;
+  /** 가입/로그인에 사용한 소셜 제공자. 미확정 시 null */
+  recentSocialProvider: SocialProvider | null;
   /** 고객 프로필 보유 여부 */
   hasCustomer: boolean;
   /** 작가 프로필 보유 여부 */

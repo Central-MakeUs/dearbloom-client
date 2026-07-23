@@ -8,8 +8,9 @@ const items: { label: string; desc: string; href?: string }[] = [
   { label: '일정 관리', desc: '촬영 가능 일정 · 예약 불가 관리', href: '/app/artist/schedule' },
   { label: '작품 관리', desc: '작품 등록 · 수정 · 삭제', href: '/app/artist/products' },
   { label: '작가 프로필', desc: '소개 · 활동 지역 · 촬영 정보', href: '/app/artist/profile' },
-  { label: '신청 현황', desc: '준비중' },
-  { label: '포인트 현황', desc: '준비중' },
+  // 신청/포인트는 하단탭에도 노출되므로 대시보드에서도 동일하게 진입 가능(도착 페이지가 '준비 중' 안내).
+  { label: '신청 현황', desc: '준비중', href: '/app/artist/requests' },
+  { label: '포인트 현황', desc: '준비중', href: '/app/artist/points' },
 ];
 
 export default function ArtistDashboardPage() {

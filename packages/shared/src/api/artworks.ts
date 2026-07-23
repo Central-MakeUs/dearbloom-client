@@ -25,8 +25,10 @@ export interface ArtworkPhoto {
   portfolioFileId: number;
   fileUrl: string;
   fileType: FileType;
-  universityId: number;
-  universityName: string;
+  /** 학교 미지정 사진이면 null */
+  universityId: number | null;
+  /** 학교 미지정 사진이면 null */
+  universityName: string | null;
   sortOrder: number;
 }
 

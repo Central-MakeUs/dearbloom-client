@@ -1,6 +1,6 @@
 import { apiGet, apiPost, apiPatch, apiPut, apiDelete, type RequestOptions } from './http';
 import type { ArtistRegionCode } from './regions';
-import type { ArtworkDetail, ArtworkListItem, FileType } from './artworks';
+import type { ArtworkDetail, FileType } from './artworks';
 
 /**
  * 작가(Artist) API — 모두 로그인(작가) 필요. token 을 넘겨야 합니다.
@@ -67,8 +67,27 @@ export function updateArtistEtcInfo(etcInfo: string, opts: RequestOptions): Prom
 
 // ---- 작가 본인 작품 ----
 
-export function getMyArtworks(opts: RequestOptions): Promise<ArtworkListItem[]> {
-  return apiGet<ArtworkListItem[]>('/api/artists/me/artworks', opts);
+/**
+ * GET /api/artists/me/artworks 목록 아이템. 공개 목록(ArtworkListItem)과 달리
+ * `price`(단일 대표가), `savedCount`/`viewCount`(작가 통계)를 주며 `isSaved`가 없음.
+ */
+export interface MyArtworkListItem {
+  artworkId: number;
+  title: string;
+  price: number;
+  minHeadCount: number | null;
+  maxHeadCount: number | null;
+  artistNickname: string;
+  artistRegionList: ArtistRegionCode[];
+  thumbnailUrl: string;
+  /** 저장(찜)된 횟수 */
+  savedCount: number;
+  /** 조회수 */
+  viewCount: number;
+}
+
+export function getMyArtworks(opts: RequestOptions): Promise<MyArtworkListItem[]> {
+  return apiGet<MyArtworkListItem[]>('/api/artists/me/artworks', opts);
 }
 
 export function getMyArtwork(artworkId: number | string, opts: RequestOptions): Promise<ArtworkDetail> {
