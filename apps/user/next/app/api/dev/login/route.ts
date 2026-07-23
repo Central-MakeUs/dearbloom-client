@@ -1,16 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { devLogin, type DevRole } from '@dearbloom/shared';
-
-/** 로그인한 역할에 맞는 착지 화면. 작가는 대시보드, 고객은 공개 피드, 미온보딩은 온보딩. */
-// const landingByRole: Record<DevRole, string> = {
-//   ARTIST: '/app/artist/dashboard',
-//   CUSTOMER: '/snaps',
-//   ONBOARDING: '/app/onboarding',
-// };
-
-function parseRole(value: FormDataEntryValue | string | null): DevRole | undefined {
-  return value === 'ARTIST' || value === 'CUSTOMER' || value === 'ONBOARDING' ? value : undefined;
-}
+import { devLogin } from '@dearbloom/shared';
 
 /**
  * 개발용 로그인 — 소셜 로그인 없이 테스트 계정(memberId, 음수)으로 로그인.
@@ -31,12 +20,12 @@ function redirectRelative(location: string, cookies?: { accessToken: string; ref
   return response;
 }
 
-async function handleLogin(request: NextRequest, memberId: number, role?: DevRole) {
+async function handleLogin(request: NextRequest, memberId: number) {
   if (!Number.isFinite(memberId)) return redirectRelative('/app/dev/login?error=invalid');
 
   let tokens;
   try {
-    tokens = await devLogin(memberId, role);
+    tokens = await devLogin(memberId);
   } catch {
     return redirectRelative('/app/dev/login?error=login_failed');
   }
@@ -46,10 +35,9 @@ async function handleLogin(request: NextRequest, memberId: number, role?: DevRol
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
-  return handleLogin(request, Number(formData.get('memberId')), parseRole(formData.get('role')));
+  return handleLogin(request, Number(formData.get('memberId')));
 }
 
 export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  return handleLogin(request, Number(params.get('memberId')), parseRole(params.get('role')));
+  return handleLogin(request, Number(request.nextUrl.searchParams.get('memberId')));
 }

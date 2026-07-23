@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { getDevAccounts, type DevAccount, type DevRole } from '@dearbloom/shared';
+import { getDevAccounts, type DevAccount } from '@dearbloom/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,15 +35,6 @@ export default async function DevLoginPage({
     if (a.hasCustomer) badges.push({ label: '고객', cls: 'bg-neutral-200 text-neutral-700' });
     if (badges.length === 0) badges.push({ label: '미온보딩', cls: 'bg-neutral-100 text-neutral-500' });
     return badges;
-  };
-
-  // 계정이 가진 역할에 맞춰 로그인 버튼 구성. 선택한 역할로 로그인 후 해당 화면으로 이동.
-  const loginRoles = (a: DevAccount): { role: DevRole; label: string; cls: string }[] => {
-    const roles: { role: DevRole; label: string; cls: string }[] = [];
-    if (a.hasArtist) roles.push({ role: 'ARTIST', label: '작가로 로그인', cls: 'bg-primary text-neutral-0' });
-    if (a.hasCustomer) roles.push({ role: 'CUSTOMER', label: '고객으로 로그인', cls: 'bg-neutral-800 text-neutral-0' });
-    if (roles.length === 0) roles.push({ role: 'ONBOARDING', label: '온보딩 로그인', cls: 'bg-neutral-200 text-neutral-800' });
-    return roles;
   };
 
   const status = (
@@ -84,20 +75,15 @@ export default async function DevLoginPage({
               {a.email} · id {a.memberId}
             </div>
           </div>
-          <div className="flex shrink-0 flex-col items-stretch gap-1.5">
-            {loginRoles(a).map(({ role, label, cls }) => (
-              <form key={role} action="/app/api/dev/login" method="post">
-                <input type="hidden" name="memberId" value={a.memberId} />
-                <input type="hidden" name="role" value={role} />
-                <button
-                  type="submit"
-                  className={`w-full whitespace-nowrap rounded-md px-3 py-2 text-caption-1 font-medium ${cls}`}
-                >
-                  {label}
-                </button>
-              </form>
-            ))}
-          </div>
+          <form action="/app/api/dev/login" method="post" className="shrink-0">
+            <input type="hidden" name="memberId" value={a.memberId} />
+            <button
+              type="submit"
+              className="rounded-md bg-primary px-4 py-2 text-caption-1 font-medium text-neutral-0"
+            >
+              로그인
+            </button>
+          </form>
         </li>
       ))}
     </ul>
