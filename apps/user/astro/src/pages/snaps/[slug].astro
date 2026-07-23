@@ -109,6 +109,16 @@ const packages = artwork?.packageList ?? [];
           </div>
 
           <div class="pb-28 pt-4">
+            {/* 작품 설명 */}
+            {artwork.description && (
+              <section class="mb-3">
+                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작품 설명</h3>
+                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.description}</p>
+                </div>
+              </section>
+            )}
+
             {/* 촬영 정보 */}
             {(shootPlaces.length > 0 || headCount) && (
               <section class="mb-3">
@@ -165,12 +175,33 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
+            {/* 출장비 */}
+            {artwork.artist.travelFee && (
+              <section class="mb-3">
+                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">출장비</h3>
+                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.travelFee}</p>
+                </div>
+              </section>
+            )}
+
             {/* 기타 안내 */}
             {artwork.artist.etcInfo && (
               <section class="mb-3">
                 <h3 class="mb-2 px-4 text-head-3 text-neutral-800">기타 안내</h3>
                 <div class="mx-4 rounded-lg bg-neutral-0 p-4">
                   <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
+                </div>
+              </section>
+            )}
+
+            {/* 작가 정보 */}
+            {artwork.artist.intro && (
+              <section class="mb-3">
+                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 정보</h3>
+                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                  <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
+                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
                 </div>
               </section>
             )}
