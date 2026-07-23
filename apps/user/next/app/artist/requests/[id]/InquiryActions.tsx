@@ -20,7 +20,7 @@ export function InquiryActions({ id, status }: { id: number; status?: string }) 
     setBusy(false);
     if (res.ok) {
       toast.success(successMsg);
-      router.push('/app/artist/requests');
+      router.push('/artist/requests');
       router.refresh();
     } else {
       const b = (await res.json().catch(() => ({}))) as { error?: string };

@@ -14,7 +14,7 @@ export function CancelInquiry({ id }: { id: number }) {
     setBusy(false);
     if (res.ok) {
       toast.success('문의를 취소했어요.');
-      router.push('/app/my/reservations');
+      router.push('/my/reservations');
       router.refresh();
     } else {
       const b = (await res.json().catch(() => ({}))) as { error?: string };

@@ -43,7 +43,7 @@ export function EditForm({
     }
     if (res.ok) {
       toast.success('저장되었습니다.');
-      router.push('/app/artist/products');
+      router.push('/artist/products');
       router.refresh();
     } else {
       const b = (await res.json().catch(() => ({}))) as { error?: string };
