@@ -31,7 +31,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
   const submit = () => {
     const chosen = items.filter((a) => selected.has(a.artworkId)).map(toBoardArtwork);
     addArtworks(boardId, chosen);
-    router.replace(`/app/boards/${boardId}`);
+    router.replace(`/boards/${boardId}`);
   };
 
   const body =

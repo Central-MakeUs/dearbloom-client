@@ -33,7 +33,7 @@ export default function BoardDetailPage() {
   if (!board) {
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
-        <Header showBack onBack={() => router.replace('/app/saved')} title="공동보드" />
+        <Header showBack onBack={() => router.replace('/saved')} title="공동보드" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-500">보드를 찾을 수 없어요.</p>
       </div>
     );
@@ -192,7 +192,7 @@ export default function BoardDetailPage() {
           <button type="button" onClick={() => setDeleteOpen(false)} className="flex-1 rounded-md bg-neutral-100 py-2.5 text-body-3 text-neutral-700">
             취소
           </button>
-          <button type="button" onClick={() => { deleteBoard(board.id); router.replace('/app/saved'); }} className="flex-1 rounded-md bg-danger py-2.5 text-body-3 text-neutral-0">
+          <button type="button" onClick={() => { deleteBoard(board.id); router.replace('/saved'); }} className="flex-1 rounded-md bg-danger py-2.5 text-body-3 text-neutral-0">
             삭제
           </button>
         </div>
@@ -220,7 +220,7 @@ export default function BoardDetailPage() {
 
   return (
     <div className="relative mx-auto min-h-screen max-w-md bg-neutral-100">
-      <Header showBack onBack={() => router.replace('/app/saved')} title={board.name} right={menu} />
+      <Header showBack onBack={() => router.replace('/saved')} title={board.name} right={menu} />
       {menuSheet}
       {board.artworks.length === 0 ? emptyBody : grid}
       {addBar}
