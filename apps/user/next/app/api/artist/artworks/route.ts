@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** 작품 수정 프록시 (?id=, body: {title, price}) */
+/** 작품 수정 프록시 (?id=, body: {title?, description?}) */
 export async function PATCH(request: NextRequest) {
   const token = authToken(request);
   if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
