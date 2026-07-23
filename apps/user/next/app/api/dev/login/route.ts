@@ -30,7 +30,7 @@ async function handleLogin(request: NextRequest, memberId: number) {
     return redirectRelative('/app/dev/login?error=login_failed');
   }
 
-  return redirectRelative('/app/dev/login?ok=1', tokens, request.nextUrl.protocol === 'https:');
+  return redirectRelative('/app/role', tokens, request.nextUrl.protocol === 'https:');
 }
 
 export async function POST(request: NextRequest) {
