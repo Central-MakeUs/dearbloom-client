@@ -1,6 +1,6 @@
 import { apiGet, apiPost, apiPatch, apiPut, apiDelete, type RequestOptions } from './http';
 import type { ArtistRegionCode } from './regions';
-import type { ArtworkDetail, ArtworkListItem, FileType } from './artworks';
+import type { ArtworkDetail, FileType } from './artworks';
 
 /**
  * 작가(Artist) API — 모두 로그인(작가) 필요. token 을 넘겨야 합니다.
@@ -16,8 +16,8 @@ export interface ArtistMe {
   /** 조회는 imageUrl, 수정은 artistImageUrl 로 백엔드 필드명이 다름에 유의. */
   imageUrl: string | null;
   regionList: ArtistRegionCode[];
-  travelFeeInfo: string | null;
-  packageInfo: string | null;
+  /** 작가 기타 안내(우천 정책 등) */
+  etcInfo: string | null;
 }
 
 /** 작품 등록/사진교체 시 넘기는 사진 1건 (업로드 완료된 fileUrl 참조) */
@@ -33,9 +33,10 @@ export interface CreateArtworkPayload {
   photoList: ArtworkPhotoInput[];
 }
 
+/** 작품 기본 정보 수정. title·description 모두 선택(미전송/null=미변경, description=''=설명 비움). */
 export interface UpdateArtworkPayload {
-  title: string;
-  price: number;
+  title?: string;
+  description?: string;
 }
 
 // ---- 작가 프로필 ----
@@ -60,26 +61,34 @@ export function updateArtistRegions(regionList: ArtistRegionCode[], opts: Reques
   return apiPut<void>('/api/artists/me/regions', { regionList }, opts);
 }
 
-/** 촬영 정보(출장비/패키지) — 둘 다 자유 텍스트 */
-export function updateArtistPricing(
-  payload: { travelFeeInfo: string; packageInfo: string },
-  opts: RequestOptions,
-): Promise<void> {
-  return apiPatch<void>('/api/artists/me/pricing', payload, opts);
-}
-
-export function deleteArtistTravelFee(opts: RequestOptions): Promise<void> {
-  return apiDelete<void>('/api/artists/me/pricing/travel-fee', undefined, opts);
-}
-
-export function deleteArtistPackage(opts: RequestOptions): Promise<void> {
-  return apiDelete<void>('/api/artists/me/pricing/package', undefined, opts);
+/** 작가 기타 안내(우천 정책 등) 수정. (기존 출장비/패키지는 작품 패키지로 이동됨) */
+export function updateArtistEtcInfo(etcInfo: string, opts: RequestOptions): Promise<void> {
+  return apiPatch<void>('/api/artists/me/etc-info', { etcInfo }, opts);
 }
 
 // ---- 작가 본인 작품 ----
 
-export function getMyArtworks(opts: RequestOptions): Promise<ArtworkListItem[]> {
-  return apiGet<ArtworkListItem[]>('/api/artists/me/artworks', opts);
+/**
+ * GET /api/artists/me/artworks 목록 아이템. 공개 목록(ArtworkListItem)과 달리
+ * `price`(단일 대표가), `savedCount`/`viewCount`(작가 통계)를 주며 `isSaved`가 없음.
+ */
+export interface MyArtworkListItem {
+  artworkId: number;
+  title: string;
+  price: number;
+  minHeadCount: number | null;
+  maxHeadCount: number | null;
+  artistNickname: string;
+  artistRegionList: ArtistRegionCode[];
+  thumbnailUrl: string;
+  /** 저장(찜)된 횟수 */
+  savedCount: number;
+  /** 조회수 */
+  viewCount: number;
+}
+
+export function getMyArtworks(opts: RequestOptions): Promise<MyArtworkListItem[]> {
+  return apiGet<MyArtworkListItem[]>('/api/artists/me/artworks', opts);
 }
 
 export function getMyArtwork(artworkId: number | string, opts: RequestOptions): Promise<ArtworkDetail> {
@@ -93,7 +102,7 @@ export function createArtwork(payload: CreateArtworkPayload, opts: RequestOption
   return apiPost<{ artworkId: number }>('/api/artworks', payload, opts);
 }
 
-/** 작품 기본 정보(제목/가격) 수정 */
+/** 작품 기본 정보(작품명·설명) 수정. PATCH /api/artworks/{id} */
 export function updateArtwork(
   artworkId: number | string,
   payload: UpdateArtworkPayload,

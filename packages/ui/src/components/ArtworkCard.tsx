@@ -69,7 +69,7 @@ export function ArtworkCard({
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
         {regions?.map((r) => (
-          <span key={r} className="rounded-sm bg-neutral-100 px-1.5 py-0.5 text-caption-2 text-neutral-600">
+          <span key={r} className="rounded-sm bg-neutral-200 px-1.5 py-0.5 text-caption-2 text-neutral-700">
             {r}
           </span>
         ))}

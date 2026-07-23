@@ -2,7 +2,7 @@
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
 import { SaveHeart } from '@dearbloom/ui';
-import { getArtwork, regionLabels, type ArtworkDetail } from '@dearbloom/shared';
+import { getArtwork, regionLabel, type ArtworkDetail } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -92,11 +92,11 @@ const packages = artwork?.packageList ?? [];
 
             {/* 제목 + 지역칩 + 작가 */}
             <div class="px-4 pt-3">
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <h2 class="text-head-3 text-neutral-950">{artwork.title}</h2>
-                {artwork.artist.regionList?.length > 0 && (
-                  <span class="rounded-sm bg-neutral-200 px-2 py-1 text-body-6 text-neutral-700">{regionLabels(artwork.artist.regionList)}</span>
-                )}
+                {artwork.artist.regionList?.map((code) => (
+                  <span class="rounded-sm bg-neutral-200 px-2 py-1 text-body-6 text-neutral-700">{regionLabel(code)}</span>
+                ))}
               </div>
               <p class="mt-1 text-body-6 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
@@ -109,6 +109,16 @@ const packages = artwork?.packageList ?? [];
           </div>
 
           <div class="pb-28 pt-4">
+            {/* 작품 설명 */}
+            {artwork.description && (
+              <section class="mb-3">
+                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작품 설명</h3>
+                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.description}</p>
+                </div>
+              </section>
+            )}
+
             {/* 촬영 정보 */}
             {(shootPlaces.length > 0 || headCount) && (
               <section class="mb-3">
@@ -132,8 +142,8 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
-            {/* 촬영 구성 (패키지) */}
-            {packages.length > 0 && (
+            {/* 촬영 구성 (패키지 + 출장비) */}
+            {(packages.length > 0 || artwork.artist.travelFee) && (
               <section class="mb-3">
                 <h3 class="mb-2 px-4 text-head-3 text-neutral-800">촬영 구성</h3>
                 <div class="mx-4 flex flex-col gap-3">
@@ -161,21 +171,71 @@ const packages = artwork?.packageList ?? [];
                       </dl>
                     </div>
                   ))}
+
+                  {/* 출장비 — 촬영 구성에 포함(Figma) */}
+                  {artwork.artist.travelFee && (
+                    <div class="rounded-lg bg-neutral-0 p-4">
+                      <div class="flex items-start justify-between gap-4">
+                        <span class="shrink-0 text-body-6 text-neutral-600">출장비</span>
+                        <span class="whitespace-pre-line text-right text-body-5 text-neutral-950">{artwork.artist.travelFee}</span>
+                      </div>
+                      <p class="mt-2 text-caption-2 text-neutral-500">출장비는 모델의 위치와 촬영 장소에 따라 달라질 수 있습니다.</p>
+                    </div>
+                  )}
                 </div>
-                {artwork.artist.etcInfo && (
-                  <p class="mt-2 px-4 text-caption-2 text-neutral-500">{artwork.artist.etcInfo}</p>
-                )}
               </section>
             )}
 
-            {/* 이 작가의 다른 작품 */}
+            {/* 상세 정보 — 기본 접힘, '상세 정보 더보기' 토글로 기타 안내 + 작가 소개 노출 (Figma) */}
+            {(artwork.artist.etcInfo || artwork.artist.intro) && (
+              <div class="mb-3">
+                <div id="detail-more" class="hidden flex-col gap-3">
+                  {/* 기타 안내 */}
+                  {artwork.artist.etcInfo && (
+                    <section>
+                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">기타 안내</h3>
+                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
+                      </div>
+                    </section>
+                  )}
+                  {/* 작가 소개 */}
+                  {artwork.artist.intro && (
+                    <section>
+                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 소개</h3>
+                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                        <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
+                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
+                      </div>
+                    </section>
+                  )}
+                </div>
+                <button
+                  id="detail-more-btn"
+                  type="button"
+                  aria-expanded="false"
+                  class="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-lg border border-neutral-300 bg-neutral-0 py-3 text-body-5 text-neutral-700"
+                >
+                  <span id="detail-more-label">상세 정보 더보기</span>
+                  <svg id="detail-more-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden class="transition-transform">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* 다른 작업 보기 */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-3">
-                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">이 작가의 다른 작품</h3>
+                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">다른 작업 보기</h3>
                 <div class="grid grid-cols-3 gap-2 px-4">
                   {artwork.otherArtworkList.map((o) => (
-                    <a href={`/snaps/${o.artworkId}`} class="block aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
-                      <img src={o.imageUrl} alt="" loading="lazy" class="h-full w-full object-cover" />
+                    <a href={`/snaps/${o.artworkId}`} class="block">
+                      <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
+                        <img src={o.imageUrl} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
+                      </div>
+                      {o.title && <p class="mt-1 truncate text-body-6 text-neutral-950">{o.title}</p>}
+                      {o.artistNickname && <p class="truncate text-caption-2 text-neutral-600">{o.artistNickname}</p>}
                     </a>
                   ))}
                 </div>
@@ -183,10 +243,10 @@ const packages = artwork?.packageList ?? [];
             )}
           </div>
 
-          {/* 하단 액션바 */}
+          {/* 하단 액션바 — 스마트 문의 기능(백엔드 문의/채팅 API)은 준비 중이라 비활성 */}
           <div class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4">
             <div class="mx-auto max-w-md">
-              <a href="/app/chats" class="flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0">스마트 문의하기</a>
+              <button type="button" disabled aria-disabled="true" title="준비 중" class="flex h-[52px] w-full items-center justify-center rounded-md bg-neutral-300 text-body-1 text-neutral-500">스마트 문의하기 (준비 중)</button>
             </div>
           </div>
 
@@ -200,6 +260,23 @@ const packages = artwork?.packageList ?? [];
                 /* 사용자 취소 무시 */
               }
             });
+
+            // 상세 정보 더보기/접기 토글 (기타 안내 + 작가 소개 섹션 단위 show/hide)
+            (function () {
+              const btn = document.getElementById('detail-more-btn');
+              const content = document.getElementById('detail-more');
+              const label = document.getElementById('detail-more-label');
+              const chevron = document.getElementById('detail-more-chevron');
+              if (!btn || !content) return;
+              btn.addEventListener('click', () => {
+                const open = content.classList.contains('hidden');
+                content.classList.toggle('hidden', !open);
+                content.classList.toggle('flex', open);
+                btn.setAttribute('aria-expanded', String(open));
+                if (label) label.textContent = open ? '상세 정보 접기' : '상세 정보 더보기';
+                if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
+              });
+            })();
           </script>
         </>
       )

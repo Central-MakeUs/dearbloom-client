@@ -19,12 +19,16 @@ export interface DevTokens {
   refreshToken: string;
 }
 
+/** 로그인 시 활성화할 역할. 토큰의 activeRole 로 반영됨. */
+export type DevRole = 'CUSTOMER' | 'ARTIST' | 'ONBOARDING';
+
 /** 테스트 계정 목록 */
 export function getDevAccounts(): Promise<DevAccount[]> {
   return apiGet<DevAccount[]>('/dev/member/accounts');
 }
 
-/** 테스트 계정으로 로그인 → accessToken/refreshToken 반환 */
-export function devLogin(memberId: number): Promise<DevTokens> {
-  return apiPost<DevTokens>(`/dev/member/login/${memberId}`);
+/** 테스트 계정으로 로그인 → accessToken/refreshToken 반환. role 지정 시 해당 역할로 활성화. */
+export function devLogin(memberId: number, role?: DevRole): Promise<DevTokens> {
+  const query = role ? `?role=${role}` : '';
+  return apiPost<DevTokens>(`/dev/member/login/${memberId}${query}`);
 }
