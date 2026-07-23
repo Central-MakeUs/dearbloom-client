@@ -98,15 +98,7 @@ export function SocialLoginButtons({ role }: { role: AuthRole }) {
           throw new Error(body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
         }
 
-        const destination = body.data.needsOnboarding
-          ? body.data.selectedRole === 'CUSTOMER'
-            ? '/app/onboarding'
-            : '/app/onboarding/artist'
-          : body.data.selectedRole === 'CUSTOMER'
-            ? '/snaps'
-            : '/app/artist/dashboard';
-
-        window.location.replace(destination);
+        window.location.replace('/app/role');
       } catch (error) {
         setLoginError(error instanceof Error ? error.message : '로그인 서버 요청에 실패했습니다.');
         setIsLoggingIn(false);
