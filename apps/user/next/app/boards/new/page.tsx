@@ -29,7 +29,7 @@ export default function NewBoardPage() {
 
   const submit = () => {
     const board = createBoard(name, code || undefined);
-    router.replace(`/app/boards/${board.id}`);
+    router.replace(`/boards/${board.id}`);
   };
 
   const nameField = (
