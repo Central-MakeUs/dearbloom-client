@@ -14,7 +14,7 @@ export default async function MyPage() {
       </header>
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
-        <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
+        <a href="/app/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
           로그인
         </a>
       </div>
