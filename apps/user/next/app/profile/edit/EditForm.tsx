@@ -4,12 +4,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { customerNameSchema } from '@dearbloom/shared';
+import { customerNameSchema, REGION_OPTIONS } from '@dearbloom/shared';
 
-const schema = z.object({ name: customerNameSchema });
+const schema = z.object({ name: customerNameSchema, region: z.string() });
 type FormValues = z.infer<typeof schema>;
 
-export function EditForm({ initialName }: { initialName: string }) {
+export function EditForm({ initialName, initialRegion }: { initialName: string; initialRegion: string }) {
   const {
     register,
     handleSubmit,
@@ -19,15 +19,17 @@ export function EditForm({ initialName }: { initialName: string }) {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: 'onChange',
-    defaultValues: { name: initialName },
+    defaultValues: { name: initialName, region: initialRegion },
   });
   const name = watch('name');
 
   const onValid = async (values: FormValues) => {
-    const res = await fetch('/app/api/customer/name', {
+    const body: { name: string; region?: string } = { name: values.name };
+    if (values.region) body.region = values.region;
+    const res = await fetch('/app/api/customer/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: values.name }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       toast.success('저장되었습니다.');
@@ -70,6 +72,24 @@ export function EditForm({ initialName }: { initialName: string }) {
         ) : (
           <p className="text-caption-2 text-neutral-500">2-5자의 한글 또는 영문만 가능합니다</p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-1.5 px-4 pt-5">
+        <label htmlFor="region" className="text-body-4 text-neutral-950">
+          지역 <span className="text-caption-1 text-neutral-400">(선택)</span>
+        </label>
+        <select
+          id="region"
+          {...register('region')}
+          className="h-14 rounded-md bg-neutral-0 px-4 text-body-2 text-neutral-950 outline-none"
+        >
+          <option value="">지역 선택</option>
+          {REGION_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-auto px-4 py-2">
