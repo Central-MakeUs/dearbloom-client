@@ -2,7 +2,7 @@
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
 import { SaveHeart } from '@dearbloom/ui';
-import { getArtwork, regionLabel, type ArtworkDetail } from '@dearbloom/shared';
+import { getArtwork, fetchPublicWithAuthFallback, regionLabel, type ArtworkDetail } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -12,7 +12,10 @@ Astro.response.headers.set('Cache-Control', 'private, no-store');
 
 let artwork: ArtworkDetail | null = null;
 try {
-  artwork = await getArtwork(slug!, token ? { token } : undefined);
+  // 만료 토큰(401)이면 익명으로 재시도 → public 상세는 항상 노출(만료 쿠키 하나로 에러 방지).
+  const { data, tokenExpired } = await fetchPublicWithAuthFallback((o) => getArtwork(slug!, o), token);
+  artwork = data;
+  if (tokenExpired) Astro.cookies.delete('accessToken', { path: '/' });
 } catch (e) {
   // SSR 실패 원인은 서버 로그(Vercel Runtime Logs)에서 확인.
   console.error('[snaps/:id] getArtwork 실패', slug, e);

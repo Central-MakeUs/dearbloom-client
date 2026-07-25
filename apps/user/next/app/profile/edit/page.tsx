@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { getMemberMe } from '@dearbloom/shared';
+import { getCustomerMe } from '@dearbloom/shared';
 import { EditForm } from './EditForm';
 
 export const dynamic = 'force-dynamic';
@@ -32,12 +32,12 @@ export default async function ProfileEditPage() {
     );
   }
 
-  const me = await getMemberMe({ token }).catch(() => null);
+  const me = await getCustomerMe({ token }).catch(() => null);
 
   return (
     <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
       <Header />
-      <EditForm initialName={me?.name ?? ''} />
+      <EditForm initialName={me?.name ?? ''} initialRegion={me?.region ?? ''} />
     </div>
   );
 }
