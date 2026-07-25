@@ -63,6 +63,30 @@ async function request<T>(method: Method, path: string, body?: unknown, opts?: R
   return (json.data !== undefined ? json.data : (json as unknown)) as T;
 }
 
+/**
+ * public(비로그인 가능) 엔드포인트용 인증 폴백.
+ * token 으로 시도 → 401(만료/무효 accessToken)이면 토큰 없이 익명으로 1회 재시도.
+ * 반환의 tokenExpired=true 면 호출측(SSR)에서 만료된 accessToken 쿠키를 정리하세요.
+ *
+ * NOTE: 백엔드 재발급(reissue) 엔드포인트가 생기면, 401 캐치 시 익명 재시도 '앞'에
+ * refreshToken 재발급→새 토큰으로 재시도를 끼워넣으면 isSaved 등 로그인 상태를 보존할 수 있습니다.
+ */
+export async function fetchPublicWithAuthFallback<T>(
+  fetcher: (opts?: RequestOptions) => Promise<T>,
+  token?: string,
+): Promise<{ data: T; tokenExpired: boolean }> {
+  if (!token) return { data: await fetcher(), tokenExpired: false };
+  try {
+    return { data: await fetcher({ token }), tokenExpired: false };
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      // 만료/무효 토큰 → 익명으로 재시도(public 엔드포인트이므로 콘텐츠는 정상 노출)
+      return { data: await fetcher(), tokenExpired: true };
+    }
+    throw e;
+  }
+}
+
 export const apiGet = <T>(path: string, opts?: RequestOptions) => request<T>('GET', path, undefined, opts);
 export const apiPost = <T>(path: string, body?: unknown, opts?: RequestOptions) => request<T>('POST', path, body, opts);
 export const apiPatch = <T>(path: string, body?: unknown, opts?: RequestOptions) => request<T>('PATCH', path, body, opts);
