@@ -25,21 +25,13 @@ function getPublicOrigin(request: NextRequest) {
 }
 
 function expireAuthCookie(request: NextRequest, response: NextResponse, name: string) {
-  const cookieOptions = {
-    expires: new Date(0),
-    maxAge: 0,
-    path: '/',
-  };
+  const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
   const hostname = host.split(':')[0] ?? request.nextUrl.hostname;
 
-  response.cookies.set(name, '', cookieOptions);
+  response.headers.append('Set-Cookie', expiredCookie);
 
   if (hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr')) {
-    response.cookies.set(name, '', {
-      ...cookieOptions,
-      domain: '.dearbloom.co.kr',
-      secure: true,
-    });
+    response.headers.append('Set-Cookie', `${expiredCookie}; Domain=.dearbloom.co.kr; Secure`);
   }
 }
