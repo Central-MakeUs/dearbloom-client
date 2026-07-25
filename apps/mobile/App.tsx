@@ -8,7 +8,6 @@ import {
 } from '@react-native-google-signin/google-signin';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
-const DEFAULT_WEBVIEW_URL = 'https://dearbloom.co.kr/app';
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
@@ -49,7 +48,11 @@ type WebViewHttpLoadErrorEvent = {
 };
 
 function getWebViewUrl() {
-  return process.env.EXPO_PUBLIC_WEBVIEW_URL ?? DEFAULT_WEBVIEW_URL;
+  const webViewUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
+
+  if (!webViewUrl) throw new Error('EXPO_PUBLIC_WEBVIEW_URL이 설정되지 않았습니다.');
+
+  return webViewUrl;
 }
 
 function parseNativeLoginRequest(message: string): NativeLoginRequest | undefined {

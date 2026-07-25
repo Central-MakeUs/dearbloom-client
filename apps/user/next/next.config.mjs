@@ -1,3 +1,5 @@
+/* global process */
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -19,6 +21,19 @@ const nextConfig = {
         basePath: false,
       },
     ];
+  },
+  async rewrites() {
+    if (process.env.NODE_ENV !== 'development') return [];
+
+    return {
+      fallback: [
+        {
+          source: '/:path*',
+          destination: 'http://localhost:4321/:path*',
+          basePath: false,
+        },
+      ],
+    };
   },
   transpilePackages: [
     '@dearbloom/ui',
