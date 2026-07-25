@@ -1,5 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export function GET(request: NextRequest) {
-  return NextResponse.redirect(new URL('/snaps', request.url));
+export function GET() {
+  return new NextResponse(null, {
+    headers: { Location: '/snaps' },
+    status: 307,
+  });
 }
