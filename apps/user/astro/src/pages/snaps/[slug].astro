@@ -186,25 +186,42 @@ const packages = artwork?.packageList ?? [];
               </section>
             )}
 
-            {/* 기타 안내 */}
-            {artwork.artist.etcInfo && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">기타 안내</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
+            {/* 상세 정보 — 기본 접힘, '상세 정보 더보기' 토글로 기타 안내 + 작가 소개 노출 (Figma) */}
+            {(artwork.artist.etcInfo || artwork.artist.intro) && (
+              <div class="mb-3">
+                <div id="detail-more" class="hidden flex-col gap-3">
+                  {/* 기타 안내 */}
+                  {artwork.artist.etcInfo && (
+                    <section>
+                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">기타 안내</h3>
+                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
+                      </div>
+                    </section>
+                  )}
+                  {/* 작가 소개 */}
+                  {artwork.artist.intro && (
+                    <section>
+                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 소개</h3>
+                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
+                        <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
+                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
+                      </div>
+                    </section>
+                  )}
                 </div>
-              </section>
-            )}
-
-            {/* 작가 소개 */}
-            {artwork.artist.intro && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 소개</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
-                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
-                </div>
-              </section>
+                <button
+                  id="detail-more-btn"
+                  type="button"
+                  aria-expanded="false"
+                  class="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-lg border border-neutral-300 bg-neutral-0 py-3 text-body-5 text-neutral-700"
+                >
+                  <span id="detail-more-label">상세 정보 더보기</span>
+                  <svg id="detail-more-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden class="transition-transform">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
             )}
 
             {/* 다른 작업 보기 */}
@@ -243,6 +260,23 @@ const packages = artwork?.packageList ?? [];
                 /* 사용자 취소 무시 */
               }
             });
+
+            // 상세 정보 더보기/접기 토글 (기타 안내 + 작가 소개 섹션 단위 show/hide)
+            (function () {
+              const btn = document.getElementById('detail-more-btn');
+              const content = document.getElementById('detail-more');
+              const label = document.getElementById('detail-more-label');
+              const chevron = document.getElementById('detail-more-chevron');
+              if (!btn || !content) return;
+              btn.addEventListener('click', () => {
+                const open = content.classList.contains('hidden');
+                content.classList.toggle('hidden', !open);
+                content.classList.toggle('flex', open);
+                btn.setAttribute('aria-expanded', String(open));
+                if (label) label.textContent = open ? '상세 정보 접기' : '상세 정보 더보기';
+                if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
+              });
+            })();
           </script>
         </>
       )

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
   createLocalOAuthAuthorizationUrl,
   createOAuthAuthorizationUrl,
+  type AuthRole,
   type OAuthProvider,
 } from '@dearbloom/features-auth';
 
@@ -10,9 +11,11 @@ const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 
 export function GET(request: NextRequest) {
   const provider = getOAuthProvider(request.nextUrl.searchParams.get('provider'));
+  const role = getAuthRole(request.nextUrl.searchParams.get('role'));
 
-  if (!provider) {
-    return NextResponse.redirect(new URL('/app?auth=invalid_provider', getPublicOrigin(request)));
+  if (!provider || !role) {
+    const reason = provider ? 'invalid_role' : 'invalid_provider';
+    return NextResponse.redirect(new URL(`/app/login?auth=${reason}`, getPublicOrigin(request)));
   }
 
   const apiBaseUrl =
@@ -23,11 +26,13 @@ export function GET(request: NextRequest) {
     provider === 'google' && process.env.NODE_ENV === 'development'
       ? createLocalOAuthAuthorizationUrl({
           baseUrl: apiBaseUrl,
-          targetUrl:
+          targetUrl: addRoleToCallbackUrl(
             process.env.NEXT_PUBLIC_LOCAL_GOOGLE_CALLBACK_URL ??
-            'http://localhost:3000/app/api/auth/callback',
+              'http://localhost:3000/app/api/auth/callback',
+            role,
+          ),
         })
-      : createOAuthAuthorizationUrl({ baseUrl: apiBaseUrl, provider });
+      : createOAuthAuthorizationUrl({ baseUrl: apiBaseUrl, provider, role });
   const response = NextResponse.redirect(authorizationUrl);
 
   response.cookies.set('oauthProvider', provider, {
@@ -37,8 +42,26 @@ export function GET(request: NextRequest) {
     sameSite: 'lax',
     secure: request.nextUrl.protocol === 'https:',
   });
+  response.cookies.set('oauthRole', role, {
+    httpOnly: true,
+    maxAge: 60 * 10,
+    path: '/',
+    sameSite: 'lax',
+    secure: request.nextUrl.protocol === 'https:',
+  });
 
   return response;
+}
+
+function getAuthRole(value: string | null): AuthRole | undefined {
+  return value === 'ARTIST' || value === 'CUSTOMER' ? value : undefined;
+}
+
+function addRoleToCallbackUrl(callbackUrl: string, role: AuthRole) {
+  const url = new URL(callbackUrl);
+  url.searchParams.set('role', role);
+
+  return url.toString();
 }
 
 function getOAuthProvider(value: string | null): OAuthProvider | undefined {
