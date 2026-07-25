@@ -51,7 +51,7 @@ const socialButtonClassName =
   'inline-flex h-[52px] w-full items-center justify-center rounded-md px-[14px] text-body-5 disabled:pointer-events-none disabled:opacity-40';
 
 export function SocialLoginButtons({ role }: { role: AuthRole }) {
-  const [nativePlatform, setNativePlatform] = useState<NativeAppPlatform | null>();
+  const [nativePlatform, setNativePlatform] = useState<NativeAppPlatform | null>(null);
   const [loginError, setLoginError] = useState<string>();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -128,10 +128,6 @@ export function SocialLoginButtons({ role }: { role: AuthRole }) {
       }),
     );
   };
-
-  if (nativePlatform === undefined) {
-    return null;
-  }
 
   const googleButton = nativePlatform ? (
     <button
