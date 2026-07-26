@@ -1,20 +1,154 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
+import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
 import { BottomButton, cn, Header } from '@dearbloom/ui';
 
-export function RoleSelectionForm() {
+const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
+const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
+const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
+const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
+
+type NativeSocialProvider = 'APPLE' | 'GOOGLE';
+type NativeLoginResult = {
+  authorizationCode?: string;
+  message?: string;
+  provider: NativeSocialProvider;
+  socialToken?: string;
+  status: 'cancelled' | 'error' | 'success';
+  type: typeof NATIVE_SOCIAL_LOGIN_RESULT;
+};
+
+type NativeLoginResponse = {
+  data?: {
+    needsOnboarding: boolean;
+    selectedRole: AuthRole;
+  };
+  error?: { message?: string };
+};
+
+declare global {
+  interface Window {
+    __DEARBLOOM_NATIVE_APP__?: {
+      platform?: string;
+    };
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
+export function RoleSelectionForm({
+  forceOnboarding,
+  provider,
+}: {
+  forceOnboarding: boolean;
+  provider?: OAuthProvider;
+}) {
   const [role, setRole] = useState<MemberRole>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    if (!provider) return;
+
+    const handleNativeLoginResult = async (event: Event) => {
+      const result = (event as CustomEvent<NativeLoginResult>).detail;
+      const expectedProvider = provider.toUpperCase();
+
+      if (
+        !result ||
+        result.type !== NATIVE_SOCIAL_LOGIN_RESULT ||
+        result.provider !== expectedProvider
+      ) {
+        return;
+      }
+
+      if (result.status === 'cancelled') {
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (result.status !== 'success' || !result.socialToken || !role) {
+        setError(result.message ?? '소셜 로그인에 실패했습니다.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
+          body: JSON.stringify({
+            authorizationCode: result.authorizationCode,
+            role,
+            socialProvider: result.provider,
+            socialToken: result.socialToken,
+          }),
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
+        const body = (await response.json()) as NativeLoginResponse;
+
+        if (!response.ok || !body.data) {
+          throw new Error(body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
+        }
+
+        window.location.replace(
+          getLoginDestination(
+            body.data.selectedRole,
+            forceOnboarding || body.data.needsOnboarding,
+            forceOnboarding,
+          ),
+        );
+      } catch (loginError) {
+        setError(loginError instanceof Error ? loginError.message : '로그인 서버 요청에 실패했습니다.');
+        setIsSubmitting(false);
+      }
+    };
+
+    window.addEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
+
+    return () => window.removeEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
+  }, [forceOnboarding, provider, role]);
 
   const submit = async () => {
     if (!role || isSubmitting) return;
 
     setIsSubmitting(true);
     setError(undefined);
+
+    if (provider) {
+      if (window.__DEARBLOOM_NATIVE_APP__?.platform) {
+        const bridge = window.ReactNativeWebView;
+
+        if (!bridge) {
+          setError('앱 로그인 브리지를 찾지 못했습니다.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        bridge.postMessage(
+          JSON.stringify({
+            type: provider === 'google' ? NATIVE_GOOGLE_LOGIN : NATIVE_APPLE_LOGIN,
+          }),
+        );
+        return;
+      }
+
+      const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+      window.location.assign(
+        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}`,
+      );
+      return;
+    }
+
+    if (forceOnboarding) {
+      window.location.replace(getLoginDestination(role, true, true));
+      return;
+    }
 
     try {
       const response = await fetch('/app/api/members/role', {
@@ -104,4 +238,17 @@ export function RoleSelectionForm() {
       </div>
     </main>
   );
+}
+
+function getLoginDestination(
+  role: AuthRole,
+  needsOnboarding: boolean,
+  forceOnboarding = false,
+) {
+  if (needsOnboarding) {
+    const destination = role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist';
+    return forceOnboarding ? `${destination}?forceOnboarding=1` : destination;
+  }
+
+  return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
 }

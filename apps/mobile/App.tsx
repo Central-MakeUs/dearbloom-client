@@ -29,6 +29,7 @@ const colors = {
 type NativeLoginRequest = typeof NATIVE_APPLE_LOGIN | typeof NATIVE_GOOGLE_LOGIN;
 type NativeSocialProvider = 'APPLE' | 'GOOGLE';
 type NativeLoginResult = {
+  authorizationCode?: string;
   errorCode?: string;
   message?: string;
   provider: NativeSocialProvider;
@@ -171,6 +172,7 @@ async function signInWithApple(): Promise<NativeLoginResult> {
     }
 
     return {
+      authorizationCode: credential.authorizationCode ?? undefined,
       provider: 'APPLE',
       socialToken: credential.identityToken,
       status: 'success',
