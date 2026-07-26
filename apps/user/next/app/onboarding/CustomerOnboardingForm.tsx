@@ -116,7 +116,7 @@ function SchoolSearchScreen({ initialKeyword, onBack, onSelect }: SchoolSearchSc
   );
 }
 
-export function CustomerOnboardingForm() {
+export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: boolean }) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [isNameTouched, setIsNameTouched] = useState(false);
@@ -145,6 +145,11 @@ export function CustomerOnboardingForm() {
 
     setIsSubmitting(true);
     setError(undefined);
+
+    if (forceOnboarding) {
+      window.location.replace('/snaps');
+      return;
+    }
 
     try {
       const response = await fetch('/app/api/members/customer', {

@@ -7,11 +7,16 @@ import {
   type OAuthProvider,
 } from '@dearbloom/features-auth';
 
+import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 
 export function GET(request: NextRequest) {
   const provider = getOAuthProvider(request.nextUrl.searchParams.get('provider'));
   const role = getAuthRole(request.nextUrl.searchParams.get('role'));
+  const forceOnboarding = shouldForceOnboarding(
+    request.nextUrl.searchParams.get('forceOnboarding'),
+  );
 
   if (!provider || !role) {
     const reason = provider ? 'invalid_role' : 'invalid_provider';
@@ -30,6 +35,7 @@ export function GET(request: NextRequest) {
             process.env.NEXT_PUBLIC_LOCAL_GOOGLE_CALLBACK_URL ??
               'http://localhost:3000/app/api/auth/callback',
             role,
+            forceOnboarding,
           ),
         })
       : createOAuthAuthorizationUrl({ baseUrl: apiBaseUrl, provider, role });
@@ -49,6 +55,13 @@ export function GET(request: NextRequest) {
     sameSite: 'lax',
     secure: request.nextUrl.protocol === 'https:',
   });
+  response.cookies.set('forceOnboarding', forceOnboarding ? '1' : '', {
+    httpOnly: true,
+    maxAge: forceOnboarding ? 60 * 10 : 0,
+    path: '/',
+    sameSite: 'lax',
+    secure: request.nextUrl.protocol === 'https:',
+  });
 
   return response;
 }
@@ -57,9 +70,14 @@ function getAuthRole(value: string | null): AuthRole | undefined {
   return value === 'ARTIST' || value === 'CUSTOMER' ? value : undefined;
 }
 
-function addRoleToCallbackUrl(callbackUrl: string, role: AuthRole) {
+function addRoleToCallbackUrl(
+  callbackUrl: string,
+  role: AuthRole,
+  forceOnboarding: boolean,
+) {
   const url = new URL(callbackUrl);
   url.searchParams.set('role', role);
+  if (forceOnboarding) url.searchParams.set('forceOnboarding', '1');
 
   return url.toString();
 }
