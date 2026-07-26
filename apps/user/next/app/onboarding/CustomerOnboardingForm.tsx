@@ -236,7 +236,7 @@ export function CustomerOnboardingForm() {
           {error}
         </p>
       ) : null}
-      <BottomButton disabled={!isNameValid || isSubmitting} onClick={submit}>
+      <BottomButton color="black" disabled={!isNameValid || isSubmitting} onClick={submit}>
         {isSubmitting ? '저장 중...' : '다음'}
       </BottomButton>
     </div>
