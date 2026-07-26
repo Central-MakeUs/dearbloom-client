@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { ARTIST_REGION_OPTIONS, nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
+import { FileField } from '@/src/components/common/FileField';
 
 const schema = z.object({
   nickname: nicknameSchema,
@@ -125,9 +126,9 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       </div>
 
       <div>
-        <label className={label} htmlFor="image">대표 이미지</label>
+        <span className={label}>대표 이미지</span>
         {initial.imageUrl && !imageFile && <img src={initial.imageUrl} alt="현재 대표 이미지" className="mb-2 h-20 w-20 rounded-full object-cover" />}
-        <input id="image" type="file" accept="image/*" className={field} onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
+        <FileField accept="image/*" buttonLabel="사진 선택" emptyText="선택된 파일 없음" onFiles={(files) => setImageFile(files[0] ?? null)} ariaLabel="대표 이미지" />
       </div>
 
       <button type="submit" disabled={isSubmitting} className="mt-2 flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0 disabled:opacity-50">
