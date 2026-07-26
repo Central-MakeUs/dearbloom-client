@@ -3,18 +3,22 @@ import { redirect } from 'next/navigation';
 
 import type { OAuthProvider } from '@dearbloom/features-auth';
 
+import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+
 import { RoleSelectionForm } from './RoleSelectionForm';
 
 type RoleSelectionPageProps = {
-  searchParams: Promise<{ provider?: string }>;
+  searchParams: Promise<{ forceOnboarding?: string; provider?: string }>;
 };
 
 export default async function RoleSelectionPage({ searchParams }: RoleSelectionPageProps) {
-  const provider = getOAuthProvider((await searchParams).provider);
+  const { forceOnboarding: forceOnboardingParam, provider: providerParam } = await searchParams;
+  const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
+  const provider = getOAuthProvider(providerParam);
 
   if (!provider && !(await cookies()).has('accessToken')) redirect('/app/login');
 
-  return <RoleSelectionForm provider={provider} />;
+  return <RoleSelectionForm forceOnboarding={forceOnboarding} provider={provider} />;
 }
 
 function getOAuthProvider(value?: string): OAuthProvider | undefined {

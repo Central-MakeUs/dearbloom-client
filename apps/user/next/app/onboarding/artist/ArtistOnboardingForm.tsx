@@ -9,8 +9,10 @@ import { BottomButton, TextField } from '@dearbloom/ui';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
 export function ArtistOnboardingForm({
+  forceOnboarding,
   hasServerError,
 }: {
+  forceOnboarding: boolean;
   hasServerError: boolean;
 }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -76,6 +78,11 @@ export function ArtistOnboardingForm({
 
     setError('');
     setIsSubmitting(true);
+
+    if (forceOnboarding) {
+      window.location.replace('/app/artist/dashboard');
+      return;
+    }
 
     try {
       const formData = new FormData(event.currentTarget);

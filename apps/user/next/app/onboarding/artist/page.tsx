@@ -1,16 +1,19 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+
 import { ArtistOnboardingForm } from './ArtistOnboardingForm';
 
 type ArtistOnboardingPageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; forceOnboarding?: string }>;
 };
 
 export default async function ArtistOnboardingPage({ searchParams }: ArtistOnboardingPageProps) {
   if (!(await cookies()).has('accessToken')) redirect('/dev/login');
 
-  const { error } = await searchParams;
+  const { error, forceOnboarding: forceOnboardingParam } = await searchParams;
+  const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
   const header = (
     <header className="flex h-[52px] items-center px-2">
       <a
@@ -45,7 +48,10 @@ export default async function ArtistOnboardingPage({ searchParams }: ArtistOnboa
           주로 활동하는 지역을 입력해 주세요.
         </p>
       </div>
-      <ArtistOnboardingForm hasServerError={Boolean(error)} />
+      <ArtistOnboardingForm
+        forceOnboarding={forceOnboarding}
+        hasServerError={Boolean(error)}
+      />
     </section>
   );
 

@@ -1,14 +1,17 @@
 import Image from 'next/image';
 
+import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+
 import dearBloomLogo from '../../../public/images/dearbloom-logo.png';
 import { SocialLoginButtons } from '../SocialLoginButtons';
 
 type LoginPageProps = {
-  searchParams: Promise<{ auth?: string }>;
+  searchParams: Promise<{ auth?: string; forceOnboarding?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { auth } = await searchParams;
+  const { auth, forceOnboarding: forceOnboardingParam } = await searchParams;
+  const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
 
   const brand = (
     <div className="flex flex-col items-center">
@@ -36,7 +39,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
         <div className="absolute inset-x-2 bottom-[88px]">
           {error}
-          <SocialLoginButtons />
+          <SocialLoginButtons forceOnboarding={forceOnboarding} />
         </div>
       </div>
     </main>

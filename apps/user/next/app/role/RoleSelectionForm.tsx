@@ -41,7 +41,13 @@ declare global {
   }
 }
 
-export function RoleSelectionForm({ provider }: { provider?: OAuthProvider }) {
+export function RoleSelectionForm({
+  forceOnboarding,
+  provider,
+}: {
+  forceOnboarding: boolean;
+  provider?: OAuthProvider;
+}) {
   const [role, setRole] = useState<MemberRole>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
@@ -90,7 +96,13 @@ export function RoleSelectionForm({ provider }: { provider?: OAuthProvider }) {
           throw new Error(body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
         }
 
-        window.location.replace(getLoginDestination(body.data.selectedRole, body.data.needsOnboarding));
+        window.location.replace(
+          getLoginDestination(
+            body.data.selectedRole,
+            forceOnboarding || body.data.needsOnboarding,
+            forceOnboarding,
+          ),
+        );
       } catch (loginError) {
         setError(loginError instanceof Error ? loginError.message : '로그인 서버 요청에 실패했습니다.');
         setIsSubmitting(false);
@@ -100,7 +112,7 @@ export function RoleSelectionForm({ provider }: { provider?: OAuthProvider }) {
     window.addEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
 
     return () => window.removeEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
-  }, [provider, role]);
+  }, [forceOnboarding, provider, role]);
 
   const submit = async () => {
     if (!role || isSubmitting) return;
@@ -126,7 +138,15 @@ export function RoleSelectionForm({ provider }: { provider?: OAuthProvider }) {
         return;
       }
 
-      window.location.assign(`/app/api/auth/login?provider=${provider}&role=${role}`);
+      const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+      window.location.assign(
+        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}`,
+      );
+      return;
+    }
+
+    if (forceOnboarding) {
+      window.location.replace(getLoginDestination(role, true, true));
       return;
     }
 
@@ -220,9 +240,14 @@ export function RoleSelectionForm({ provider }: { provider?: OAuthProvider }) {
   );
 }
 
-function getLoginDestination(role: AuthRole, needsOnboarding: boolean) {
+function getLoginDestination(
+  role: AuthRole,
+  needsOnboarding: boolean,
+  forceOnboarding = false,
+) {
   if (needsOnboarding) {
-    return role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist';
+    const destination = role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist';
+    return forceOnboarding ? `${destination}?forceOnboarding=1` : destination;
   }
 
   return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
