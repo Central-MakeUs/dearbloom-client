@@ -221,7 +221,8 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   const confirmDialog = confirmOpen ? (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-neutral-950/50 px-8">
       <div className="w-full max-w-xs rounded-xl bg-neutral-0 px-5 py-6 text-center">
-        <p className="text-body-2 text-neutral-950">선택하신 목록을 삭제하시겠어요?</p>
+        <h2 className="mb-1 text-head-3 text-neutral-950">삭제하기</h2>
+        <p className="text-body-4 text-neutral-700">선택하신 목록을 삭제하시겠어요?</p>
         <div className="mt-5 flex gap-2">
           <button type="button" onClick={() => setConfirmOpen(false)} className="flex-1 rounded-md bg-neutral-100 py-2.5 text-body-4 text-neutral-700">
             취소

@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
   isCancelledResponse,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
@@ -237,28 +242,30 @@ export default function App() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <WebView
-        ref={webViewRef}
-        source={{ uri: webViewUrl }}
-        injectedJavaScriptBeforeContentLoaded={nativeAppBootstrapScript}
-        startInLoadingState
-        renderLoading={() => loading}
-        renderError={() => error}
-        onLoadStart={() => setLoadError(null)}
-        onError={(event: WebViewLoadErrorEvent) => {
-          const { code, description, url } = event.nativeEvent;
-          setLoadError(`${description} (${code})\n${url}`);
-        }}
-        onHttpError={(event: WebViewHttpLoadErrorEvent) => {
-          const { statusCode, url } = event.nativeEvent;
-          setLoadError(`HTTP ${statusCode}\n${url}`);
-        }}
-        onMessage={handleWebViewMessage}
-        sharedCookiesEnabled
-        thirdPartyCookiesEnabled
-      />
-    </SafeAreaView>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.container}>
+        <WebView
+          ref={webViewRef}
+          source={{ uri: webViewUrl }}
+          injectedJavaScriptBeforeContentLoaded={nativeAppBootstrapScript}
+          startInLoadingState
+          renderLoading={() => loading}
+          renderError={() => error}
+          onLoadStart={() => setLoadError(null)}
+          onError={(event: WebViewLoadErrorEvent) => {
+            const { code, description, url } = event.nativeEvent;
+            setLoadError(`${description} (${code})\n${url}`);
+          }}
+          onHttpError={(event: WebViewHttpLoadErrorEvent) => {
+            const { statusCode, url } = event.nativeEvent;
+            setLoadError(`HTTP ${statusCode}\n${url}`);
+          }}
+          onMessage={handleWebViewMessage}
+          sharedCookiesEnabled
+          thirdPartyCookiesEnabled
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

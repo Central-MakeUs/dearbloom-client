@@ -27,10 +27,25 @@ export interface ArtworkPhotoInput {
   universityId: number;
 }
 
+/** 작품 등록 시 넘기는 촬영 패키지 1건 */
+export interface ArtworkPackageInput {
+  packageName: string;
+  price: number;
+  durationMinutes: number;
+  finalPhotoCount: number;
+  extraInfo?: string | null;
+}
+
 export interface CreateArtworkPayload {
   title: string;
-  price: number;
+  /** 작품 설명(선택) */
+  description?: string | null;
+  /** 촬영 인원(min~max). 백엔드 필수. */
+  minHeadCount: number;
+  maxHeadCount: number;
   photoList: ArtworkPhotoInput[];
+  /** 촬영 패키지 목록. 1개 이상 필수. */
+  packageList: ArtworkPackageInput[];
 }
 
 /** 작품 기본 정보 수정. title·description 모두 선택(미전송/null=미변경, description=''=설명 비움). */

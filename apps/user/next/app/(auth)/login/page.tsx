@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         width={252}
       />
       <p className="w-[252px] text-body-2 text-neutral-800">
-        졸업스냅 서비스 디어블룸 머시기 슬로건
+        졸업스냅 작가 탐색부터 예약까지 하나의 흐름으로
       </p>
     </div>
   );
