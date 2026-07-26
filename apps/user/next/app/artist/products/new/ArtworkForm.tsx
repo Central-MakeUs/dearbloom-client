@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import type { University } from '@dearbloom/shared';
+import { FileField } from '@/src/components/common/FileField';
 
 interface PackageDraft {
   packageName: string;
@@ -190,9 +191,8 @@ export function ArtworkForm() {
       </div>
 
       <div>
-        <label className={label} htmlFor="photos">사진</label>
-        <input id="photos" type="file" accept="image/*" multiple className={field} onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
-        {files.length > 0 && <p className="mt-1 text-caption-2 text-neutral-500">{files.length}장 선택됨</p>}
+        <span className={label}>사진</span>
+        <FileField accept="image/*" multiple buttonLabel="사진 선택" emptyText="선택된 사진 없음" onFiles={setFiles} ariaLabel="사진" />
       </div>
 
       {/* 촬영 구성(패키지) — 1개 이상 필수 */}

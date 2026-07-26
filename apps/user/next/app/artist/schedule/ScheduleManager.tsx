@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
 import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
+import { DateField } from './DateField';
 
 const DAYS: { key: DayOfWeek; label: string }[] = [
   { key: 'MONDAY', label: '월' },
@@ -219,7 +220,7 @@ export function ScheduleManager({
             </ul>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <input type="date" value={blkDate} onChange={(e) => setBlkDate(e.target.value)} className={dateInput} />
+            <DateField value={blkDate} onChange={setBlkDate} ariaLabel="개인 예약불가 날짜" />
             <TimeSelect value={blkStart} options={START_SLOTS} onChange={setBlkStartV} ariaLabel="개인 예약불가 시작 시간" />
             <span className="text-body-6 text-neutral-500">~</span>
             <TimeSelect value={blkEnd} options={endSlotsAfter(blkStart)} onChange={setBlkEnd} ariaLabel="개인 예약불가 종료 시간" />
