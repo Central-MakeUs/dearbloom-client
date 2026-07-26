@@ -13,14 +13,15 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();
+  const imageUrl = String(formData.get('imageUrl') ?? '').trim();
   const region = getRegion(String(formData.get('region') ?? ''));
 
-  if (!nickname || nickname.length > 20 || !region) {
+  if (!nickname || nickname.length > 20 || !imageUrl || !region) {
     return redirectRelative('/app/onboarding/artist?error=invalid');
   }
 
   try {
-    const result = await createArtist({ nickname, regionList: [region] }, { token });
+    const result = await createArtist({ nickname, imageUrl, regionList: [region] }, { token });
     return redirectRelative('/app/artist/dashboard', result.accessToken, request.nextUrl.protocol === 'https:');
   } catch (error) {
     const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';

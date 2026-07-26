@@ -42,6 +42,7 @@ export interface CreateCustomerResult {
 
 export interface CreateArtistPayload {
   nickname: string;
+  imageUrl?: string;
   regionList: ArtistRegionCode[];
 }
 
