@@ -1,17 +1,14 @@
 import Image from 'next/image';
 
-import type { AuthRole } from '@dearbloom/features-auth';
-
 import dearBloomLogo from '../../../public/images/dearbloom-logo.png';
 import { SocialLoginButtons } from '../SocialLoginButtons';
 
 type LoginPageProps = {
-  searchParams: Promise<{ auth?: string; role?: string }>;
+  searchParams: Promise<{ auth?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { auth, role: roleParam } = await searchParams;
-  const role: AuthRole = roleParam === 'ARTIST' ? roleParam : 'CUSTOMER';
+  const { auth } = await searchParams;
 
   const brand = (
     <div className="flex flex-col items-center">
@@ -39,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
         <div className="absolute inset-x-2 bottom-[88px]">
           {error}
-          <SocialLoginButtons role={role} />
+          <SocialLoginButtons />
         </div>
       </div>
     </main>

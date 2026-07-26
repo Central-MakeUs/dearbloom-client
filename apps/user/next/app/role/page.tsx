@@ -1,10 +1,22 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import type { OAuthProvider } from '@dearbloom/features-auth';
+
 import { RoleSelectionForm } from './RoleSelectionForm';
 
-export default async function RoleSelectionPage() {
-  if (!(await cookies()).has('accessToken')) redirect('/dev/login');
+type RoleSelectionPageProps = {
+  searchParams: Promise<{ provider?: string }>;
+};
 
-  return <RoleSelectionForm />;
+export default async function RoleSelectionPage({ searchParams }: RoleSelectionPageProps) {
+  const provider = getOAuthProvider((await searchParams).provider);
+
+  if (!provider && !(await cookies()).has('accessToken')) redirect('/app/login');
+
+  return <RoleSelectionForm provider={provider} />;
+}
+
+function getOAuthProvider(value?: string): OAuthProvider | undefined {
+  return value === 'apple' || value === 'google' ? value : undefined;
 }
