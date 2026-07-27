@@ -3,6 +3,10 @@ import tailwind from '@astrojs/tailwind';
 import react from '@astrojs/react';
 import vercel from '@astrojs/vercel';
 
+if (process.env.VERCEL && !process.env.NEXT_PUBLIC_API_URL && !process.env.PUBLIC_API_URL) {
+  throw new Error('Vercel 배포에는 NEXT_PUBLIC_API_URL 또는 PUBLIC_API_URL이 필요합니다.');
+}
+
 export default defineConfig({
   // 기본은 정적(SSG). 서버렌더가 필요한 페이지만 `export const prerender = false` 로 옵트인.
   // 어댑터가 있어야 on-demand(SSR) 페이지를 배포할 수 있음.
