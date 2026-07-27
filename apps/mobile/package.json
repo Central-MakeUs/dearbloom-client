@@ -10,6 +10,7 @@
     "ios": "open -a Simulator && expo run:ios --no-build-cache --device",
     "ios:16pro": "open -a Simulator && expo run:ios --device \"iPhone 16 Pro\"",
     "ios:naver": "open -a Simulator && EXPO_PUBLIC_WEBVIEW_URL=https://m.naver.com expo run:ios",
+    "test:safe-area": "node --test nativeSafeArea.test.mjs",
     "web": "expo start --web",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
