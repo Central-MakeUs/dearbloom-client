@@ -267,6 +267,7 @@ export default function App() {
 
   const topSafeAreaStyle = { backgroundColor: safeAreaColors.top };
   const bottomSafeAreaStyle = { backgroundColor: safeAreaColors.bottom };
+  const webViewStyle = [styles.webView, { backgroundColor: safeAreaColors.top }];
   const webView = (
     <WebView
       ref={webViewRef}
@@ -283,12 +284,13 @@ export default function App() {
       }}
       onLoadStart={() => setLoadError(null)}
       onMessage={handleWebViewMessage}
+      pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
       renderLoading={() => loading}
       sharedCookiesEnabled
       source={{ uri: webViewUrl }}
       startInLoadingState
-      style={styles.webView}
+      style={webViewStyle}
       thirdPartyCookiesEnabled
     />
   );
