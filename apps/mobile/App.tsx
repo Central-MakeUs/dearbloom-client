@@ -13,6 +13,12 @@ import {
 } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
+import {
+  defaultNativeSafeAreaColors,
+  nativeSafeAreaSyncScript,
+  parseNativeSafeAreaColors,
+} from './nativeSafeArea';
+
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
@@ -196,6 +202,7 @@ export default function App() {
   const webViewRef = useRef<WebView>(null);
   const isNativeLoginPending = useRef(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
 
   useEffect(() => {
     if (!googleWebClientId) {
@@ -211,11 +218,26 @@ export default function App() {
 
   const handleWebViewMessage = async (event: WebViewMessageEvent) => {
     const { data, url } = event.nativeEvent;
-    const request = parseNativeLoginRequest(data);
 
-    if (!request || !isTrustedMessageUrl(url, webViewUrl) || isNativeLoginPending.current) {
+    if (!isTrustedMessageUrl(url, webViewUrl)) {
       return;
     }
+
+    const nextSafeAreaColors = parseNativeSafeAreaColors(data);
+
+    if (nextSafeAreaColors) {
+      setSafeAreaColors((currentColors) =>
+        currentColors.top === nextSafeAreaColors.top &&
+        currentColors.bottom === nextSafeAreaColors.bottom
+          ? currentColors
+          : nextSafeAreaColors,
+      );
+      return;
+    }
+
+    const request = parseNativeLoginRequest(data);
+
+    if (!request || isNativeLoginPending.current) return;
 
     isNativeLoginPending.current = true;
 
@@ -243,30 +265,43 @@ export default function App() {
     </View>
   );
 
+  const topSafeAreaStyle = { backgroundColor: safeAreaColors.top };
+  const bottomSafeAreaStyle = { backgroundColor: safeAreaColors.bottom };
+  const webViewStyle = [styles.webView, { backgroundColor: safeAreaColors.top }];
+  const webView = (
+    <WebView
+      ref={webViewRef}
+      allowsBackForwardNavigationGestures={Platform.OS === 'ios'}
+      injectedJavaScript={nativeSafeAreaSyncScript}
+      injectedJavaScriptBeforeContentLoaded={nativeAppBootstrapScript}
+      onError={(event: WebViewLoadErrorEvent) => {
+        const { code, description, url } = event.nativeEvent;
+        setLoadError(`${description} (${code})\n${url}`);
+      }}
+      onHttpError={(event: WebViewHttpLoadErrorEvent) => {
+        const { statusCode, url } = event.nativeEvent;
+        setLoadError(`HTTP ${statusCode}\n${url}`);
+      }}
+      onLoadStart={() => setLoadError(null)}
+      onMessage={handleWebViewMessage}
+      pullToRefreshEnabled={Platform.OS === 'ios'}
+      renderError={() => error}
+      renderLoading={() => loading}
+      sharedCookiesEnabled
+      source={{ uri: webViewUrl }}
+      startInLoadingState
+      style={webViewStyle}
+      thirdPartyCookiesEnabled
+    />
+  );
+
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.container}>
-        <WebView
-          ref={webViewRef}
-          source={{ uri: webViewUrl }}
-          injectedJavaScriptBeforeContentLoaded={nativeAppBootstrapScript}
-          startInLoadingState
-          renderLoading={() => loading}
-          renderError={() => error}
-          onLoadStart={() => setLoadError(null)}
-          onError={(event: WebViewLoadErrorEvent) => {
-            const { code, description, url } = event.nativeEvent;
-            setLoadError(`${description} (${code})\n${url}`);
-          }}
-          onHttpError={(event: WebViewHttpLoadErrorEvent) => {
-            const { statusCode, url } = event.nativeEvent;
-            setLoadError(`HTTP ${statusCode}\n${url}`);
-          }}
-          onMessage={handleWebViewMessage}
-          sharedCookiesEnabled
-          thirdPartyCookiesEnabled
-        />
-      </SafeAreaView>
+      <View style={styles.container}>
+        <SafeAreaView edges={['top']} style={topSafeAreaStyle} />
+        {webView}
+        <SafeAreaView edges={['bottom']} style={bottomSafeAreaStyle} />
+      </View>
     </SafeAreaProvider>
   );
 }
@@ -304,5 +339,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
+  },
+  webView: {
+    flex: 1,
   },
 });

@@ -23,14 +23,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         src={dearBloomLogo}
         width={252}
       />
-      <p className="w-[252px] text-body-2 text-neutral-800">
-        졸업스냅 작가 탐색부터 예약까지 하나의 흐름으로
+      <p className="w-[252px] text-center text-body-2 text-neutral-800">
+        졸업스냅 작가 탐색부터 예약까지
+        <br />
+        하나의 흐름으로
       </p>
     </div>
   );
 
   const error = auth ? (
-    <p className="mb-3 text-center text-caption-1 text-danger">로그인에 실패했어요. 다시 시도해 주세요.</p>
+    <p className="mb-3 text-center text-caption-1 text-danger">
+      로그인에 실패했어요. 다시 시도해 주세요.
+    </p>
   ) : null;
 
   return (
