@@ -1,5 +1,9 @@
 /* global process */
 
+if (process.env.VERCEL && !process.env.NEXT_PUBLIC_API_URL) {
+  throw new Error('Vercel 배포에는 NEXT_PUBLIC_API_URL이 필요합니다.');
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
