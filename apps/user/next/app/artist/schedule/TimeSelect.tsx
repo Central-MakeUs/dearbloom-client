@@ -21,7 +21,7 @@ export function TimeSelect({
 }) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger aria-label={ariaLabel} className="h-auto w-[84px] py-2">
+      <SelectTrigger aria-label={ariaLabel} className="h-auto w-[96px] gap-1 px-2.5 py-2">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

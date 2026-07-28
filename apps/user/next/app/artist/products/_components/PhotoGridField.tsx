@@ -87,7 +87,7 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
   const clearUni = (id: string) => onChange(value.map((p) => (p.id === id ? { ...p, universityId: null, uniName: null } : p)));
 
   const grid = value.length > 0 && (
-    <div ref={gridRef} className="mt-2 grid select-none grid-cols-3 gap-2">
+    <div ref={gridRef} className="photo-grid mt-2 grid select-none grid-cols-3 gap-2">
       {value.map((p) => {
         const on = selected.has(p.id);
         return (
@@ -197,7 +197,8 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
       {mounted && value.length > 0 && (
         <Selecto
           ref={selectoRef}
-          dragContainer={gridRef.current ?? undefined}
+          container=".photo-grid"
+          dragContainer=".photo-grid"
           selectableTargets={['.photo-cell']}
           selectByClick
           selectFromInside
