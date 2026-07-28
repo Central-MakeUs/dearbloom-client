@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef } from 'react';
+import { Calendar } from 'lucide-react';
+import { Button, cn } from '@dearbloom/ui';
 
 /** 'YYYY-MM-DD' → 'YYYY년 M월 D일' */
 function formatKorean(iso: string): string {
@@ -36,18 +38,12 @@ export function DateField({
 
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={openPicker}
-        aria-label={ariaLabel ?? '날짜 선택'}
-        className="flex items-center gap-2 rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 text-body-5 text-neutral-950"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400" aria-hidden>
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <path d="M16 2v4M8 2v4M3 10h18" />
-        </svg>
-        <span className={value ? 'text-neutral-950' : 'text-neutral-400'}>{value ? formatKorean(value) : placeholder}</span>
-      </button>
+      <Button type="button" variant="outline" onClick={openPicker} aria-label={ariaLabel ?? '날짜 선택'}>
+        <Calendar className="text-neutral-400" aria-hidden />
+        <span className={cn(value ? 'text-neutral-950' : 'text-neutral-400')}>
+          {value ? formatKorean(value) : placeholder}
+        </span>
+      </Button>
       <input
         ref={inputRef}
         type="date"
