@@ -66,7 +66,7 @@ export function NumberField({
           const raw = e.target.value.replace(/[^0-9]/g, '');
           onValueChange(raw === '' ? '' : clamp(Number(raw)));
         }}
-        className="min-w-0 flex-1 bg-transparent text-center text-body-5 text-neutral-950 outline-none placeholder:text-neutral-400"
+        className="min-w-0 flex-1 bg-transparent text-center text-body-2 text-neutral-950 outline-none placeholder:text-neutral-400"
       />
       {suffix && <span className="shrink-0 pr-1 text-caption-1 text-neutral-500">{suffix}</span>}
       <button type="button" onClick={inc} disabled={disabled || atMax} aria-label="증가" className={stepBtn}>
