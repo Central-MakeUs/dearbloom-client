@@ -3,9 +3,11 @@ import {
   createArtwork,
   updateArtwork,
   deleteArtwork,
+  replaceArtworkPhotos,
   ApiError,
   type CreateArtworkPayload,
   type UpdateArtworkPayload,
+  type ArtworkPhotoInput,
 } from '@dearbloom/shared';
 
 function authToken(request: NextRequest) {
@@ -42,6 +44,23 @@ export async function PATCH(request: NextRequest) {
   const body = (await request.json()) as UpdateArtworkPayload;
   try {
     await updateArtwork(id, body, { token });
+    return new NextResponse(null, { status: 204 });
+  } catch (e) {
+    return errorResponse(e);
+  }
+}
+
+/** 작품 사진 전체 교체 프록시 (?id=, body: {photoList}) */
+export async function PUT(request: NextRequest) {
+  const token = authToken(request);
+  if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  const id = request.nextUrl.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+  const body = (await request.json()) as { photoList: ArtworkPhotoInput[] };
+  try {
+    await replaceArtworkPhotos(id, body.photoList, { token });
     return new NextResponse(null, { status: 204 });
   } catch (e) {
     return errorResponse(e);
