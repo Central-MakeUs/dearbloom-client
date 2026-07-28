@@ -1,5 +1,25 @@
 export * from './lib/cn';
-export * from './components/Button';
+
+// shadcn/radix primitives
+export * from './components/ui/button';
+export * from './components/ui/input';
+export * from './components/ui/textarea';
+export * from './components/ui/label';
+export * from './components/ui/badge';
+export * from './components/ui/card';
+export * from './components/ui/field';
+export * from './components/ui/number-field';
+export * from './components/ui/select';
+export * from './components/ui/checkbox';
+export * from './components/ui/radio-group';
+export * from './components/ui/popover';
+export * from './components/ui/tabs';
+export * from './components/ui/toggle-group';
+export * from './components/ui/dialog';
+export * from './components/ui/alert-dialog';
+export * from './components/ui/dropdown-menu';
+
+// 기존 공통 컴포넌트
 export * from './components/BottomButton';
 export * from './components/DeleteButton';
 export * from './components/TextField';
