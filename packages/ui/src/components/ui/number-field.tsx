@@ -48,7 +48,7 @@ export function NumberField({
   return (
     <div
       className={cn(
-        'flex h-11 items-center rounded-md border border-neutral-300 bg-neutral-0 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30',
+        'flex h-11 min-w-0 items-center rounded-md border border-neutral-300 bg-neutral-0 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30',
         disabled && 'opacity-50',
         className,
       )}
