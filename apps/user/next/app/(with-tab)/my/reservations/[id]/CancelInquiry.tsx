@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@dearbloom/ui';
 
 export function CancelInquiry({ id }: { id: number }) {
   const router = useRouter();
@@ -25,14 +26,9 @@ export function CancelInquiry({ id }: { id: number }) {
   return (
     <div className="fixed inset-x-0 bottom-[60px] z-20 border-t border-neutral-200 bg-neutral-0 p-4">
       <div className="mx-auto max-w-md">
-        <button
-          type="button"
-          onClick={cancel}
-          disabled={busy}
-          className="h-[52px] w-full rounded-md border border-neutral-300 text-body-1 text-neutral-700 disabled:opacity-40"
-        >
+        <Button type="button" variant="outline" size="lg" onClick={cancel} disabled={busy} className="w-full">
           문의 취소
-        </button>
+        </Button>
       </div>
     </div>
   );

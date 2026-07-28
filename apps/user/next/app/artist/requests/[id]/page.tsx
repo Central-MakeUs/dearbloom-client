@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { getReceivedInquiry } from '@dearbloom/shared';
+import { Card, CardContent } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
 import { InquiryActions } from './InquiryActions';
 
@@ -48,9 +49,9 @@ export default async function ArtistRequestDetailPage({
     <div className="mx-auto max-w-md">
       <Header />
       <div className="px-4 py-3">
-        <div className="overflow-hidden rounded-lg bg-neutral-0">
+        <Card className="overflow-hidden">
           <img src={d.artworkImageUrl} alt={d.artworkName} className="aspect-[4/3] w-full object-cover" />
-          <div className="p-4">
+          <CardContent>
             <h2 className="text-head-3 text-neutral-950">{d.artworkName}</h2>
             <dl className="mt-2 border-t border-neutral-200 pt-2">
               <Row label="패키지" value={d.packageName} />
@@ -60,8 +61,8 @@ export default async function ArtistRequestDetailPage({
               <Row label="촬영 일시" value={`${shootLabel(d.shootDate, d.dayOfWeek, d.startTime)}~${d.endTime.slice(0, 5)}`} />
               <Row label="요청사항" value={d.requestNote ?? '없음'} />
             </dl>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
       <InquiryActions id={d.inquiryId} status={status} />
     </div>

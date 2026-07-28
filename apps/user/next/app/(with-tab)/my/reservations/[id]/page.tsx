@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { getMyInquiry } from '@dearbloom/shared';
+import { Card } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
 import { CancelInquiry } from './CancelInquiry';
 
@@ -50,7 +51,7 @@ export default async function ReservationDetailPage({
     <div className="mx-auto max-w-md">
       <Header />
       <div className="px-4 py-3">
-        <div className="overflow-hidden rounded-lg bg-neutral-0">
+        <Card className="overflow-hidden">
           <img src={d.artworkImageUrl} alt={d.artworkName} className="aspect-[4/3] w-full object-cover" />
           <div className="p-4">
             <h2 className="text-head-3 text-neutral-950">{d.artworkName}</h2>
@@ -64,7 +65,7 @@ export default async function ReservationDetailPage({
               <Row label="요청사항" value={d.requestNote ?? '없음'} />
             </dl>
           </div>
-        </div>
+        </Card>
       </div>
       {canCancel && <CancelInquiry id={d.inquiryId} />}
     </div>

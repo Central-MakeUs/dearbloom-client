@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { ARTIST_REGION_OPTIONS, nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
+import { Button, Field, Input, Textarea, ToggleGroup, ToggleGroupItem } from '@dearbloom/ui';
 import { FileField } from '@/src/components/common/FileField';
 
 const schema = z.object({
@@ -33,10 +34,6 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
   const [regions, setRegions] = useState<ArtistRegionCode[]>(initial.regionList ?? []);
   const [imageFile, setImageFile] = useState<File | null>(null);
-
-  function toggleRegion(code: ArtistRegionCode) {
-    setRegions((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]));
-  }
 
   async function uploadImage(file: File): Promise<string> {
     const p = await fetch('/app/api/artist/presigned', {
@@ -82,48 +79,36 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     }
   };
 
-  const field = 'w-full rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5 text-body-5 text-neutral-950 outline-none focus:border-primary';
   const label = 'mb-1 block text-body-4 text-neutral-800';
-  const errText = 'mt-1 text-caption-1 text-danger';
 
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
-      <div>
-        <label className={label} htmlFor="nickname">닉네임</label>
-        <input id="nickname" className={field} aria-invalid={!!errors.nickname} {...register('nickname')} />
-        {errors.nickname && <p className={errText}>{errors.nickname.message}</p>}
-      </div>
+      <Field label="닉네임" htmlFor="nickname" error={errors.nickname?.message}>
+        <Input id="nickname" aria-invalid={!!errors.nickname} {...register('nickname')} />
+      </Field>
 
-      <div>
-        <label className={label} htmlFor="intro">작가 소개</label>
-        <textarea id="intro" rows={4} className={field} placeholder="작가님을 소개해주세요" {...register('intro')} />
-      </div>
+      <Field label="작가 소개" htmlFor="intro">
+        <Textarea id="intro" rows={4} placeholder="작가님을 소개해주세요" {...register('intro')} />
+      </Field>
 
       <div>
         <span className={label}>활동 지역</span>
-        <div className="flex flex-wrap gap-1.5">
-          {ARTIST_REGION_OPTIONS.map((r) => {
-            const on = regions.includes(r.value);
-            return (
-              <button
-                key={r.value}
-                type="button"
-                onClick={() => toggleRegion(r.value)}
-                className={`rounded-full border px-3 py-1.5 text-caption-1 transition-colors ${
-                  on ? 'border-primary bg-primary text-neutral-0' : 'border-neutral-300 bg-neutral-0 text-neutral-700'
-                }`}
-              >
-                {r.label}
-              </button>
-            );
-          })}
-        </div>
+        <ToggleGroup
+          type="multiple"
+          value={regions}
+          onValueChange={(v) => setRegions(v as ArtistRegionCode[])}
+        >
+          {ARTIST_REGION_OPTIONS.map((r) => (
+            <ToggleGroupItem key={r.value} value={r.value}>
+              {r.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </div>
 
-      <div>
-        <label className={label} htmlFor="etc">기타 안내</label>
-        <textarea id="etc" rows={4} className={field} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />
-      </div>
+      <Field label="기타 안내" htmlFor="etc">
+        <Textarea id="etc" rows={4} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />
+      </Field>
 
       <div>
         <span className={label}>대표 이미지</span>
@@ -131,9 +116,9 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         <FileField accept="image/*" buttonLabel="사진 선택" emptyText="선택된 파일 없음" onFiles={(files) => setImageFile(files[0] ?? null)} ariaLabel="대표 이미지" />
       </div>
 
-      <button type="submit" disabled={isSubmitting} className="mt-2 flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0 disabled:opacity-50">
+      <Button type="submit" size="lg" disabled={isSubmitting} className="mt-2 w-full">
         {isSubmitting ? '저장 중…' : '저장'}
-      </button>
+      </Button>
     </form>
   );
 }
