@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Plus, Trash2 } from 'lucide-react';
 import {
   Button,
@@ -18,15 +21,6 @@ import {
 } from '@dearbloom/ui';
 import { PhotoGridField, type PhotoItem } from '../_components/PhotoGridField';
 
-interface PackageDraft {
-  packageName: string;
-  price: number | '';
-  durationMinutes: number | '';
-  finalPhotoCount: number | '';
-}
-
-const emptyPackage = (): PackageDraft => ({ packageName: '', price: '', durationMinutes: '', finalPhotoCount: '' });
-
 // 촬영 시간: 30분 단위(30분 ~ 6시간) — 백엔드는 임의 정수(분)를 받으나 UX상 30분 단위로 고정
 const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) => (i + 1) * 30);
 function fmtDuration(min: number): string {
@@ -36,6 +30,44 @@ function fmtDuration(min: number): string {
   if (h) return `${h}시간`;
   return `${m}분`;
 }
+
+const PKG_MSG = '각 패키지의 이름·가격·촬영 시간·보정본 수를 입력하세요.';
+const HEAD_MSG = '촬영 인원(최소·최대)을 입력하세요.';
+
+/** NumberField/Select 는 값이 number | '' 이므로, '' 이거나 임계값 이하이면 실패 처리. */
+const requiredNumber = (message: string, gt = 0) =>
+  z
+    .union([z.literal(''), z.number()])
+    .refine((v) => typeof v === 'number' && v > gt, { message });
+
+const packageSchema = z.object({
+  packageName: z.string().trim().min(1, PKG_MSG),
+  price: requiredNumber(PKG_MSG),
+  durationMinutes: requiredNumber(PKG_MSG),
+  finalPhotoCount: requiredNumber(PKG_MSG),
+});
+
+const schema = z
+  .object({
+    title: z.string().trim().min(1, '작품 제목을 입력하세요.'),
+    description: z.string().optional(),
+    minHeadCount: requiredNumber(HEAD_MSG),
+    maxHeadCount: requiredNumber(HEAD_MSG),
+    photos: z.array(z.custom<PhotoItem>()).min(1, '사진을 1장 이상 추가하세요.'),
+    packageList: z.array(packageSchema).min(1, PKG_MSG),
+  })
+  .refine(
+    (v) => {
+      if (typeof v.minHeadCount !== 'number' || typeof v.maxHeadCount !== 'number') return true;
+      return v.maxHeadCount >= v.minHeadCount;
+    },
+    { message: '최대 인원은 최소 인원보다 크거나 같아야 해요.', path: ['maxHeadCount'] },
+  );
+
+type FormValues = z.infer<typeof schema>;
+type PackageForm = FormValues['packageList'][number];
+
+const emptyPackage = (): PackageForm => ({ packageName: '', price: '', durationMinutes: '', finalPhotoCount: '' });
 
 async function uploadOne(file: File): Promise<string> {
   const p = await fetch('/app/api/artist/presigned', {
@@ -53,51 +85,36 @@ async function uploadOne(file: File): Promise<string> {
 
 export function ArtworkForm() {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [minHead, setMinHead] = useState<number | ''>(1);
-  const [maxHead, setMaxHead] = useState<number | ''>('');
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [packages, setPackages] = useState<PackageDraft[]>([emptyPackage()]);
-  const [busy, setBusy] = useState(false);
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: '',
+      description: '',
+      minHeadCount: 1,
+      maxHeadCount: '',
+      photos: [],
+      packageList: [emptyPackage()],
+    },
+  });
+  const { fields, append, remove } = useFieldArray({ control, name: 'packageList' });
+
   const [progress, setProgress] = useState('');
-  const [error, setError] = useState('');
+  const [submitError, setSubmitError] = useState('');
 
-  function updatePackage(idx: number, patch: Partial<PackageDraft>) {
-    setPackages((prev) => prev.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
-  }
-  const addPackage = () => setPackages((prev) => [...prev, emptyPackage()]);
-  const removePackage = (idx: number) => setPackages((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
-
-  function validate(): string | null {
-    if (!title.trim()) return '작품 제목을 입력하세요.';
-    if (photos.length === 0) return '사진을 1장 이상 추가하세요.';
-    if (!minHead || !maxHead) return '촬영 인원(최소·최대)을 입력하세요.';
-    if (maxHead < minHead) return '최대 인원은 최소 인원보다 크거나 같아야 해요.';
-    for (const p of packages) {
-      if (!p.packageName.trim() || !p.price || !p.durationMinutes || !p.finalPhotoCount) {
-        return '각 패키지의 이름·가격·촬영 시간·보정본 수를 입력하세요.';
-      }
-    }
-    return null;
-  }
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError('');
-    const invalid = validate();
-    if (invalid) {
-      setError(invalid);
-      return;
-    }
-    setBusy(true);
+  const onValid = async (values: FormValues) => {
+    setSubmitError('');
     try {
       const photoList = [];
-      for (let i = 0; i < photos.length; i += 1) {
-        const item = photos[i]!;
+      for (let i = 0; i < values.photos.length; i += 1) {
+        const item = values.photos[i]!;
         let { fileUrl } = item;
         if (item.file) {
-          setProgress(`사진 업로드 중 ${i + 1}/${photos.length}`);
+          setProgress(`사진 업로드 중 ${i + 1}/${values.photos.length}`);
           fileUrl = await uploadOne(item.file);
         }
         photoList.push({ fileUrl: fileUrl!, fileType: 'IMAGE' as const, universityId: item.universityId });
@@ -107,12 +124,12 @@ export function ArtworkForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim() || undefined,
-          minHeadCount: Number(minHead),
-          maxHeadCount: Number(maxHead),
+          title: values.title.trim(),
+          description: values.description?.trim() || undefined,
+          minHeadCount: Number(values.minHeadCount),
+          maxHeadCount: Number(values.maxHeadCount),
           photoList,
-          packageList: packages.map((p) => ({
+          packageList: values.packageList.map((p) => ({
             packageName: p.packageName.trim(),
             price: Number(p.price),
             durationMinutes: Number(p.durationMinutes),
@@ -130,116 +147,149 @@ export function ArtworkForm() {
       }
       router.push('/artist/products');
     } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했어요');
+      setSubmitError(err instanceof Error ? err.message : '오류가 발생했어요');
     } finally {
-      setBusy(false);
       setProgress('');
     }
-  }
+  };
 
   const packageSection = (
     <div>
       <div className="mb-1 flex items-center justify-between">
         <span className="text-body-4 text-neutral-800">촬영 구성 (패키지)</span>
-        <Button type="button" variant="link" size="sm" className="h-auto px-0" onClick={addPackage}>
+        <Button type="button" variant="link" size="sm" className="h-auto px-0" onClick={() => append(emptyPackage())}>
           <Plus className="size-4" /> 패키지 추가
         </Button>
       </div>
       <div className="flex flex-col gap-3">
-        {packages.map((p, idx) => (
-          <Card key={idx} className="p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-body-6 text-neutral-600">패키지 {idx + 1}</span>
-              {packages.length > 1 && (
-                <button type="button" onClick={() => removePackage(idx)} className="text-neutral-400 hover:text-danger" aria-label="패키지 삭제">
-                  <Trash2 className="size-4" />
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Input
-                value={p.packageName}
-                onChange={(e) => updatePackage(idx, { packageName: e.target.value })}
-                placeholder="패키지명 (예: 기본)"
-                aria-label="패키지명"
-              />
-              <div className="flex gap-2">
-                <NumberField
-                  value={p.price}
-                  onValueChange={(v) => updatePackage(idx, { price: v })}
-                  min={0}
-                  step={10000}
-                  placeholder="가격"
-                  suffix="원"
-                  aria-label="가격"
-                />
-                <Select
-                  value={p.durationMinutes === '' ? undefined : String(p.durationMinutes)}
-                  onValueChange={(v) => updatePackage(idx, { durationMinutes: Number(v) })}
-                >
-                  <SelectTrigger aria-label="촬영 시간">
-                    <SelectValue placeholder="촬영 시간" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DURATION_OPTIONS.map((m) => (
-                      <SelectItem key={m} value={String(m)}>
-                        {fmtDuration(m)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {fields.map((f, idx) => {
+          const pkgErr = errors.packageList?.[idx];
+          const pkgMsg =
+            pkgErr?.packageName?.message ||
+            pkgErr?.price?.message ||
+            pkgErr?.durationMinutes?.message ||
+            pkgErr?.finalPhotoCount?.message;
+          return (
+            <Card key={f.id} className="p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-body-6 text-neutral-600">패키지 {idx + 1}</span>
+                {fields.length > 1 && (
+                  <button type="button" onClick={() => remove(idx)} className="text-neutral-400 hover:text-danger" aria-label="패키지 삭제">
+                    <Trash2 className="size-4" />
+                  </button>
+                )}
               </div>
-              <NumberField
-                value={p.finalPhotoCount}
-                onValueChange={(v) => updatePackage(idx, { finalPhotoCount: v })}
-                min={1}
-                placeholder="보정본 수"
-                suffix="장"
-                aria-label="보정본 수"
-              />
-            </div>
-          </Card>
-        ))}
+              <div className="flex flex-col gap-2">
+                <Input
+                  {...register(`packageList.${idx}.packageName` as const)}
+                  placeholder="패키지명 (예: 기본)"
+                  aria-label="패키지명"
+                />
+                <div className="flex gap-2">
+                  <Controller
+                    control={control}
+                    name={`packageList.${idx}.price` as const}
+                    render={({ field }) => (
+                      <NumberField
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        min={0}
+                        step={10000}
+                        placeholder="가격"
+                        suffix="원"
+                        aria-label="가격"
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name={`packageList.${idx}.durationMinutes` as const}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value === '' ? undefined : String(field.value)}
+                        onValueChange={(v) => field.onChange(Number(v))}
+                      >
+                        <SelectTrigger aria-label="촬영 시간">
+                          <SelectValue placeholder="촬영 시간" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DURATION_OPTIONS.map((m) => (
+                            <SelectItem key={m} value={String(m)}>
+                              {fmtDuration(m)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <Controller
+                  control={control}
+                  name={`packageList.${idx}.finalPhotoCount` as const}
+                  render={({ field }) => (
+                    <NumberField
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      min={1}
+                      placeholder="보정본 수"
+                      suffix="장"
+                      aria-label="보정본 수"
+                    />
+                  )}
+                />
+              </div>
+              {pkgMsg && <p className="mt-2 text-caption-1 text-danger">{pkgMsg}</p>}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5 px-4 py-5">
-      <Field label="제목" htmlFor="title">
-        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="작품 제목" />
+    <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
+      <Field label="제목" htmlFor="title" error={errors.title?.message}>
+        <Input id="title" aria-invalid={!!errors.title} placeholder="작품 제목" {...register('title')} />
       </Field>
 
       <Field label="작품 설명" htmlFor="description" optional>
-        <Textarea
-          id="description"
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="작품에 대한 설명을 적어주세요."
-        />
+        <Textarea id="description" rows={3} placeholder="작품에 대한 설명을 적어주세요." {...register('description')} />
       </Field>
 
-      <Field label="촬영 인원">
+      <Field label="촬영 인원" error={errors.minHeadCount?.message ?? errors.maxHeadCount?.message}>
         <div className="flex items-center gap-2">
-          <NumberField value={minHead} onValueChange={setMinHead} min={1} aria-label="최소 인원" />
+          <Controller
+            control={control}
+            name="minHeadCount"
+            render={({ field }) => <NumberField value={field.value} onValueChange={field.onChange} min={1} aria-label="최소 인원" />}
+          />
           <span className="shrink-0 text-body-5 text-neutral-500">~</span>
-          <NumberField value={maxHead} onValueChange={setMaxHead} min={1} placeholder="최대" aria-label="최대 인원" />
+          <Controller
+            control={control}
+            name="maxHeadCount"
+            render={({ field }) => (
+              <NumberField value={field.value} onValueChange={field.onChange} min={1} placeholder="최대" aria-label="최대 인원" />
+            )}
+          />
           <span className="shrink-0 text-body-5 text-neutral-600">명</span>
         </div>
       </Field>
 
-      <Field label="사진" helper="사진마다 촬영 학교를 지정할 수 있어요 (선택)">
-        <PhotoGridField value={photos} onChange={setPhotos} />
+      <Field label="사진" helper="사진마다 촬영 학교를 지정할 수 있어요 (선택)" error={errors.photos?.message}>
+        <Controller
+          control={control}
+          name="photos"
+          render={({ field }) => <PhotoGridField value={field.value} onChange={field.onChange} />}
+        />
       </Field>
 
       {packageSection}
 
-      {error && <p className="text-caption-1 text-danger">{error}</p>}
+      {submitError && <p className="text-caption-1 text-danger">{submitError}</p>}
       {progress && <p className="text-caption-1 text-neutral-500">{progress}</p>}
 
-      <Button type="submit" size="lg" disabled={busy}>
-        {busy ? '등록 중…' : '작품 등록'}
+      <Button type="submit" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? '등록 중…' : '작품 등록'}
       </Button>
     </form>
   );

@@ -1,6 +1,8 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { cn } from '../lib/cn';
+import { Badge } from './ui/badge';
 import { SaveHeart } from './SaveHeart';
 
 export interface ArtworkCardProps {
@@ -69,9 +71,9 @@ export function ArtworkCard({
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
         {regions?.map((r) => (
-          <span key={r} className="rounded-sm bg-neutral-200 px-1.5 py-0.5 text-caption-2 text-neutral-700">
+          <Badge key={r} variant="muted" className="text-neutral-700">
             {r}
-          </span>
+          </Badge>
         ))}
       </div>
     </div>
@@ -87,11 +89,7 @@ export function ArtworkCard({
           selected ? 'border-neutral-950 bg-neutral-950 text-neutral-0' : 'border-neutral-0 bg-neutral-950/15',
         )}
       >
-        {selected && (
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        )}
+        {selected && <Check size={14} strokeWidth={3} aria-hidden />}
       </span>
     );
 
