@@ -191,6 +191,7 @@ export function ArtworkForm() {
                     name={`packageList.${idx}.price` as const}
                     render={({ field }) => (
                       <NumberField
+                        className="flex-1"
                         value={field.value}
                         onValueChange={field.onChange}
                         min={0}
@@ -209,7 +210,7 @@ export function ArtworkForm() {
                         value={field.value === '' ? undefined : String(field.value)}
                         onValueChange={(v) => field.onChange(Number(v))}
                       >
-                        <SelectTrigger aria-label="촬영 시간">
+                        <SelectTrigger aria-label="촬영 시간" className="flex-1">
                           <SelectValue placeholder="촬영 시간" />
                         </SelectTrigger>
                         <SelectContent>
@@ -261,14 +262,14 @@ export function ArtworkForm() {
           <Controller
             control={control}
             name="minHeadCount"
-            render={({ field }) => <NumberField value={field.value} onValueChange={field.onChange} min={1} aria-label="최소 인원" />}
+            render={({ field }) => <NumberField className="flex-1" value={field.value} onValueChange={field.onChange} min={1} aria-label="최소 인원" />}
           />
           <span className="shrink-0 text-body-5 text-neutral-500">~</span>
           <Controller
             control={control}
             name="maxHeadCount"
             render={({ field }) => (
-              <NumberField value={field.value} onValueChange={field.onChange} min={1} placeholder="최대" aria-label="최대 인원" />
+              <NumberField className="flex-1" value={field.value} onValueChange={field.onChange} min={1} placeholder="최대" aria-label="최대 인원" />
             )}
           />
           <span className="shrink-0 text-body-5 text-neutral-600">명</span>

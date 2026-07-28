@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
 import { getMyArtworks, type MyArtworkListItem } from '@dearbloom/shared';
+import { Plus } from 'lucide-react';
+import { Button } from '@dearbloom/ui';
 import { MyArtworkList } from './MyArtworkList';
 
 export const dynamic = 'force-dynamic';
@@ -16,8 +18,15 @@ export default async function ArtistProductsPage() {
   }
 
   const header = (
-    <header className="flex items-center px-4 pt-6">
+    <header className="flex items-center justify-between px-4 pt-6">
       <h1 className="text-head-2 text-neutral-950">내 작품</h1>
+      {!needLogin && items.length > 0 && (
+        <Button asChild size="sm">
+          <a href="/app/artist/products/new">
+            <Plus className="size-4" /> 작품 등록
+          </a>
+        </Button>
+      )}
     </header>
   );
 
