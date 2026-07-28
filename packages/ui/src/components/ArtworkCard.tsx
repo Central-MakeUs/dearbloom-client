@@ -2,7 +2,6 @@
 
 import { Check } from 'lucide-react';
 import { cn } from '../lib/cn';
-import { Badge } from './ui/badge';
 import { SaveHeart } from './SaveHeart';
 
 export interface ArtworkCardProps {
@@ -71,9 +70,9 @@ export function ArtworkCard({
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
         {regions?.map((r) => (
-          <Badge key={r} variant="muted" className="text-neutral-700">
+          <span key={r} className="rounded-full bg-neutral-200 px-2 py-0.5 text-body-5 text-neutral-800">
             {r}
-          </Badge>
+          </span>
         ))}
       </div>
     </div>
