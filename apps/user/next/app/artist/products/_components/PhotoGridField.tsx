@@ -197,8 +197,8 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
       {mounted && value.length > 0 && (
         <Selecto
           ref={selectoRef}
-          container=".photo-grid"
-          dragContainer=".photo-grid"
+          container={gridRef.current ?? undefined}
+          dragContainer={gridRef.current ?? undefined}
           selectableTargets={['.photo-cell']}
           selectByClick
           selectFromInside
