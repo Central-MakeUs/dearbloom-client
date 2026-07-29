@@ -5,7 +5,7 @@ import { SaveHeart, RegionTag } from '@dearbloom/ui';
 import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { DetailMoreCollapsible } from '@/components/DetailMoreCollapsible';
 import { SnapShareButton } from '@/components/SnapShareButton';
-import { getArtwork, fetchPublicWithAuthFallback, regionLabel, type ArtworkDetail } from '@dearbloom/shared';
+import { getArtwork, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkDetail } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -95,7 +95,7 @@ const packages = artwork?.packageList ?? [];
               <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <h2 class="text-head-3 text-neutral-950">{artwork.title}</h2>
                 {artwork.artist.regionList?.map((code) => (
-                  <RegionTag>{regionLabel(code)}</RegionTag>
+                  <RegionTag>{artistRegionLabel(code)}</RegionTag>
                 ))}
               </div>
               <p class="mt-1 text-body-6 text-neutral-800">{artwork.artist.nickname}</p>

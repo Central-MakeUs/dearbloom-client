@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArtworkCard, Header, Button } from '@dearbloom/ui';
-import { regionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
 import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
 
 const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
@@ -12,7 +12,7 @@ const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
   artistNickname: a.artistNickname,
   price: a.lowestPrice,
   thumbnailUrl: a.thumbnailUrl,
-  regions: a.artistRegionList?.map(regionLabel) ?? [],
+  regions: a.artistRegionList?.map(artistRegionLabel) ?? [],
 });
 
 export function AddClient({ boardId, items }: { boardId: string; items: ArtworkListItem[] }) {
@@ -52,7 +52,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
             artistNickname={a.artistNickname}
             price={a.lowestPrice}
             thumbnailUrl={a.thumbnailUrl}
-            regions={a.artistRegionList?.map(regionLabel)}
+            regions={a.artistRegionList?.map(artistRegionLabel)}
             selectable
             selected={selected.has(a.artworkId)}
             onSelect={() => toggle(a.artworkId)}
