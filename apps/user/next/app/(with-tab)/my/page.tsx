@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { getMemberMe } from '@dearbloom/shared';
+import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +23,11 @@ export default async function MyPage() {
 
   if (!token) return login('로그인이 필요해요.');
 
-  const me = await getMemberMe({ token }).catch(() => null);
-  if (!me) return login('계정 정보를 불러오지 못했어요. 다시 로그인해주세요.');
+  const [customer, member] = await Promise.all([
+    getCustomerMe({ token }).catch(() => null),
+    getMemberMe({ token }).catch(() => null),
+  ]);
+  if (!customer || !member) return login('계정 정보를 불러오지 못했어요. 다시 로그인해주세요.');
 
   return (
     <div className="mx-auto max-w-md">
@@ -37,8 +40,8 @@ export default async function MyPage() {
         <div className="flex min-w-0 items-center gap-3">
           <div className="h-12 w-12 shrink-0 rounded-full bg-neutral-300" />
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-head-2 text-neutral-950">{me.name}</span>
-            <span className="truncate text-caption-1 text-neutral-600">{me.email}</span>
+            <span className="truncate text-head-2 text-neutral-950">{customer.name}</span>
+            <span className="truncate text-caption-1 text-neutral-600">{member.email}</span>
           </div>
         </div>
         <a
