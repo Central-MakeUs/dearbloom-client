@@ -3,6 +3,7 @@
 import { Check } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { SaveHeart } from './SaveHeart';
+import { RegionTag } from './ui/region-tag';
 
 export interface ArtworkCardProps {
   artworkId: number;
@@ -70,9 +71,7 @@ export function ArtworkCard({
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
         {regions?.map((r) => (
-          <span key={r} className="rounded-full bg-neutral-200 px-2 py-0.5 text-body-5 text-neutral-800">
-            {r}
-          </span>
+          <RegionTag key={r}>{r}</RegionTag>
         ))}
       </div>
     </div>
