@@ -3,6 +3,9 @@ import { ChevronRight } from 'lucide-react';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
 import { Badge, Button } from '@dearbloom/ui';
 
+import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
+import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
+
 export const dynamic = 'force-dynamic';
 
 /** href 없는 항목은 아직 백엔드가 없어 노출만(준비중). */
@@ -10,8 +13,6 @@ const menu: { label: string; href?: string }[] = [
   { label: '포인트' },
   { label: '채팅 템플릿 관리' },
   { label: '공지사항' },
-  { label: '로그아웃', href: '/app/api/auth/logout' },
-  { label: '탈퇴하기' },
 ];
 
 export default async function ArtistMyPage() {
@@ -80,6 +81,8 @@ export default async function ArtistMyPage() {
             </div>
           ),
         )}
+        <MemberLogoutButton />
+        <MemberWithdrawalButton />
       </nav>
     </div>
   );
