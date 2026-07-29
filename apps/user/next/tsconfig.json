@@ -4,6 +4,7 @@
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./*"] },
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "incremental": true,
     "noEmit": true
   },

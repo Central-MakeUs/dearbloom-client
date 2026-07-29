@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { ApiError, createCustomer, type CreateCustomerPayload } from '@dearbloom/shared';
 
+import { setAuthCookie } from '@/src/lib/authCookies';
+
 const namePattern = /^[A-Za-z가-힣]{2,5}$/;
 
 export async function POST(request: NextRequest) {
@@ -14,12 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const result = await createCustomer(payload, { token });
     const response = NextResponse.json({ customer: result.customer });
-    response.cookies.set('accessToken', result.accessToken, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
-      secure: request.nextUrl.protocol === 'https:',
-    });
+    setAuthCookie(request, response, 'accessToken', result.accessToken);
 
     return response;
   } catch (error) {
