@@ -4,12 +4,13 @@ import {
   ApiError,
   ARTIST_REGION_OPTIONS,
   createArtist,
-  type ArtistRegionCode,
   updateArtistImage,
 } from '@dearbloom/shared';
 
 import { LOGIN_HREF } from '@/src/lib/env';
 import { setAuthCookie } from '@/src/lib/authCookies';
+
+import { parseArtistRegions } from './artistRegions';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
@@ -18,15 +19,15 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();
   const imageUrl = String(formData.get('imageUrl') ?? '').trim();
-  const region = getRegion(String(formData.get('region') ?? ''));
+  const regions = parseArtistRegions(formData.getAll('region'), ARTIST_REGION_OPTIONS);
 
-  if (!nickname || nickname.length > 20 || !imageUrl || !region) {
+  if (!nickname || nickname.length > 20 || !imageUrl || !regions) {
     return redirectRelative(request, '/app/onboarding/artist?error=invalid');
   }
 
   let result;
   try {
-    result = await createArtist({ nickname, regionList: [region] }, { token });
+    result = await createArtist({ nickname, regionList: regions }, { token });
   } catch (error) {
     const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
     return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
@@ -39,13 +40,6 @@ export async function POST(request: NextRequest) {
   }
 
   return redirectRelative(request, '/app/artist/dashboard', result.accessToken);
-}
-
-function getRegion(input: string): ArtistRegionCode | undefined {
-  const normalized = input.trim();
-  return ARTIST_REGION_OPTIONS.find(
-    (region) => region.label === normalized || region.value === normalized.toUpperCase(),
-  )?.value;
 }
 
 function redirectRelative(request: NextRequest, location: string, accessToken?: string) {
