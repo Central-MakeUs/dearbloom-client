@@ -9,7 +9,7 @@ export function RegionTag({ className, ...props }: React.HTMLAttributes<HTMLSpan
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full bg-neutral-200 px-2.5 py-0.5 text-body-5 text-neutral-800',
+        'inline-flex items-center rounded-md bg-neutral-100 px-2 py-0.5 text-body-6 text-neutral-600',
         className,
       )}
       {...props}
