@@ -25,11 +25,13 @@ function ConfirmModal({
   message,
   onCancel,
   onConfirm,
+  isConfirming = false,
 }: {
   title: string;
   message: string;
   onCancel: () => void;
   onConfirm: () => void;
+  isConfirming?: boolean;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal>
@@ -43,16 +45,18 @@ function ConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            className="h-12 flex-1 rounded-[6px] bg-neutral-200 text-body-1 text-neutral-800"
+            disabled={isConfirming}
+            className="h-12 flex-1 rounded-[6px] bg-neutral-200 text-body-1 text-neutral-800 disabled:opacity-40"
           >
             취소
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="h-12 flex-1 rounded-[6px] bg-primary text-body-1 text-neutral-0"
+            disabled={isConfirming}
+            className="h-12 flex-1 rounded-[6px] bg-primary text-body-1 text-neutral-0 disabled:opacity-40"
           >
-            확인
+            {isConfirming ? '처리 중…' : '확인'}
           </button>
         </div>
       </div>
@@ -64,10 +68,34 @@ type Modal = 'logout' | 'withdraw' | null;
 
 export function MyMenu() {
   const [modal, setModal] = useState<Modal>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState('');
 
   const logout = () => {
     // 로그아웃 라우트가 세션 무효화 + 쿠키 만료 후 /snaps 로 리다이렉트.
     window.location.href = '/app/api/auth/logout';
+  };
+
+  const withdraw = async () => {
+    if (isWithdrawing) return;
+
+    setIsWithdrawing(true);
+    setWithdrawError('');
+
+    try {
+      const response = await fetch('/app/api/auth/withdraw', { method: 'DELETE' });
+      if (response.redirected) {
+        window.location.assign(response.url);
+        return;
+      }
+
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      setWithdrawError(body?.error ?? '회원 탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } catch {
+      setWithdrawError('네트워크 연결을 확인하고 다시 시도해 주세요.');
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   return (
@@ -87,7 +115,10 @@ export function MyMenu() {
         </button>
         <button
           type="button"
-          onClick={() => setModal('withdraw')}
+          onClick={() => {
+            setWithdrawError('');
+            setModal('withdraw');
+          }}
           className="flex h-11 items-center justify-between transition-colors hover:opacity-70"
         >
           <span className="text-body-1 text-neutral-950">탈퇴하기</span>
@@ -106,10 +137,10 @@ export function MyMenu() {
       {modal === 'withdraw' && (
         <ConfirmModal
           title="탈퇴하기"
-          message="정말 탈퇴 하시겠습니까?"
+          message={withdrawError || '탈퇴하면 모든 계정 정보가 삭제되며 복구할 수 없어요. 정말 탈퇴하시겠습니까?'}
           onCancel={() => setModal(null)}
-          // TODO: 회원 탈퇴 API 나오면 연결. 현재는 백엔드 부재로 닫기만.
-          onConfirm={() => setModal(null)}
+          onConfirm={withdraw}
+          isConfirming={isWithdrawing}
         />
       )}
     </>

@@ -92,3 +92,8 @@ export function switchMemberRole(
 export function logoutMember(opts: RequestOptions): Promise<void> {
   return apiDelete<void>('/api/members/logout', undefined, opts);
 }
+
+/** 회원 전체 탈퇴. 성공 후 호출한 프론트가 accessToken/refreshToken 쿠키를 만료해야 합니다. */
+export function withdrawMember(opts: RequestOptions): Promise<void> {
+  return apiDelete<void>('/api/members', undefined, opts);
+}
