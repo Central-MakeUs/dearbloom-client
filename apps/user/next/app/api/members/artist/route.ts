@@ -5,13 +5,15 @@ import {
   ARTIST_REGION_OPTIONS,
   createArtist,
   type ArtistRegionCode,
+  updateArtistImage,
 } from '@dearbloom/shared';
 
 import { LOGIN_HREF } from '@/src/lib/env';
+import { setAuthCookie } from '@/src/lib/authCookies';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
-  if (!token) return redirectRelative(LOGIN_HREF);
+  if (!token) return redirectRelative(request, LOGIN_HREF);
 
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();
@@ -19,16 +21,24 @@ export async function POST(request: NextRequest) {
   const region = getRegion(String(formData.get('region') ?? ''));
 
   if (!nickname || nickname.length > 20 || !imageUrl || !region) {
-    return redirectRelative('/app/onboarding/artist?error=invalid');
+    return redirectRelative(request, '/app/onboarding/artist?error=invalid');
+  }
+
+  let result;
+  try {
+    result = await createArtist({ nickname, regionList: [region] }, { token });
+  } catch (error) {
+    const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
+    return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
   }
 
   try {
-    const result = await createArtist({ nickname, imageUrl, regionList: [region] }, { token });
-    return redirectRelative('/app/artist/dashboard', result.accessToken, request.nextUrl.protocol === 'https:');
-  } catch (error) {
-    const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
-    return redirectRelative(`/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
+    await updateArtistImage(imageUrl, { token: result.accessToken });
+  } catch {
+    return redirectRelative(request, '/app/artist/dashboard?error=profile-image', result.accessToken);
   }
+
+  return redirectRelative(request, '/app/artist/dashboard', result.accessToken);
 }
 
 function getRegion(input: string): ArtistRegionCode | undefined {
@@ -38,15 +48,10 @@ function getRegion(input: string): ArtistRegionCode | undefined {
   )?.value;
 }
 
-function redirectRelative(location: string, accessToken?: string, secure = true) {
+function redirectRelative(request: NextRequest, location: string, accessToken?: string) {
   const response = new NextResponse(null, { status: 303, headers: { Location: location } });
   if (accessToken) {
-    response.cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
-      secure,
-    });
+    setAuthCookie(request, response, 'accessToken', accessToken);
   }
 
   return response;
