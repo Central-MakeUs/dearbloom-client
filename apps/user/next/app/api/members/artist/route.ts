@@ -7,9 +7,11 @@ import {
   type ArtistRegionCode,
 } from '@dearbloom/shared';
 
+import { setAuthCookie } from '@/src/lib/authCookies';
+
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
-  if (!token) return redirectRelative('/app/dev/login');
+  if (!token) return redirectRelative(request, '/app/dev/login');
 
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();
@@ -17,15 +19,15 @@ export async function POST(request: NextRequest) {
   const region = getRegion(String(formData.get('region') ?? ''));
 
   if (!nickname || nickname.length > 20 || !imageUrl || !region) {
-    return redirectRelative('/app/onboarding/artist?error=invalid');
+    return redirectRelative(request, '/app/onboarding/artist?error=invalid');
   }
 
   try {
     const result = await createArtist({ nickname, imageUrl, regionList: [region] }, { token });
-    return redirectRelative('/app/artist/dashboard', result.accessToken, request.nextUrl.protocol === 'https:');
+    return redirectRelative(request, '/app/artist/dashboard', result.accessToken);
   } catch (error) {
     const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
-    return redirectRelative(`/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
+    return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
   }
 }
 
@@ -36,15 +38,10 @@ function getRegion(input: string): ArtistRegionCode | undefined {
   )?.value;
 }
 
-function redirectRelative(location: string, accessToken?: string, secure = true) {
+function redirectRelative(request: NextRequest, location: string, accessToken?: string) {
   const response = new NextResponse(null, { status: 303, headers: { Location: location } });
   if (accessToken) {
-    response.cookies.set('accessToken', accessToken, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
-      secure,
-    });
+    setAuthCookie(request, response, 'accessToken', accessToken);
   }
 
   return response;

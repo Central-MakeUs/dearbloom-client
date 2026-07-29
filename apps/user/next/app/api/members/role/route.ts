@@ -7,6 +7,8 @@ import {
   type MemberRole,
 } from '@dearbloom/shared';
 
+import { setAuthCookie } from '@/src/lib/authCookies';
+
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   if (!token) return errorResponse(401, '로그인이 필요합니다.');
@@ -26,12 +28,7 @@ export async function POST(request: NextRequest) {
 
     const result = await switchMemberRole(role, { token });
     const response = NextResponse.json({ destination: getHome(role) });
-    response.cookies.set('accessToken', result.accessToken, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
-      secure: request.nextUrl.protocol === 'https:',
-    });
+    setAuthCookie(request, response, 'accessToken', result.accessToken);
 
     return response;
   } catch (error) {
