@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getReceivedInquiries, type ArtistInquiryListItem } from '@dearbloom/shared';
 import { Badge, type BadgeProps } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function ArtistRequestsPage() {
         {header}
         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <p className="text-body-5 text-neutral-500">작가 계정으로 로그인해주세요.</p>
-          <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
+          <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
         </div>
       </div>
     );

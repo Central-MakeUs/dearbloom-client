@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { devLogin } from '@dearbloom/shared';
 
+import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
+
 /**
  * 개발용 로그인 — 소셜 로그인 없이 테스트 계정(memberId, 음수)으로 로그인.
  * dev 토큰을 받아 실제 로그인과 동일하게 httpOnly 쿠키로 심는다.
@@ -34,10 +36,12 @@ async function handleLogin(request: NextRequest, memberId: number) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
   const formData = await request.formData();
   return handleLogin(request, Number(formData.get('memberId')));
 }
 
 export async function GET(request: NextRequest) {
+  if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
   return handleLogin(request, Number(request.nextUrl.searchParams.get('memberId')));
 }

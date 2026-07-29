@@ -35,8 +35,10 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
   }
 
   return (
-    <div className="flex flex-col gap-2 px-4">
-      {items.map((a) => (
+    <>
+      <p className="mb-3 px-4 pt-1 text-caption-1 text-neutral-600">{items.length}개</p>
+      <div className="flex flex-col gap-2 px-4">
+        {items.map((a) => (
         <Card key={a.artworkId} className="flex items-center gap-3 p-2">
           <a href={`/snaps/${a.artworkId}`} className="flex min-w-0 flex-1 items-center gap-3">
             <img src={a.thumbnailUrl} alt={a.title} className="size-16 shrink-0 rounded-md object-cover" />
@@ -75,7 +77,8 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
             </AlertDialog>
           </div>
         </Card>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }

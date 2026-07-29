@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { ChevronRight } from 'lucide-react';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
 import { Badge, Button } from '@dearbloom/ui';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export default async function ArtistMyPage() {
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
         <Button asChild>
-          <a href="/app/dev/login">로그인</a>
+          <a href={LOGIN_HREF}>로그인</a>
         </Button>
       </div>
     </div>

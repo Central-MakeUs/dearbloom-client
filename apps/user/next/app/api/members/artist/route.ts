@@ -7,9 +7,11 @@ import {
   type ArtistRegionCode,
 } from '@dearbloom/shared';
 
+import { LOGIN_HREF } from '@/src/lib/env';
+
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
-  if (!token) return redirectRelative('/app/dev/login');
+  if (!token) return redirectRelative(LOGIN_HREF);
 
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();
