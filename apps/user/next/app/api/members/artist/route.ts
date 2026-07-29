@@ -5,6 +5,7 @@ import {
   ARTIST_REGION_OPTIONS,
   createArtist,
   type ArtistRegionCode,
+  updateArtistImage,
 } from '@dearbloom/shared';
 
 export async function POST(request: NextRequest) {
@@ -20,13 +21,22 @@ export async function POST(request: NextRequest) {
     return redirectRelative('/app/onboarding/artist?error=invalid');
   }
 
+  let result;
   try {
-    const result = await createArtist({ nickname, imageUrl, regionList: [region] }, { token });
-    return redirectRelative('/app/artist/dashboard', result.accessToken, request.nextUrl.protocol === 'https:');
+    result = await createArtist({ nickname, regionList: [region] }, { token });
   } catch (error) {
     const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
     return redirectRelative(`/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
   }
+
+  const secure = request.nextUrl.protocol === 'https:';
+  try {
+    await updateArtistImage(imageUrl, { token: result.accessToken });
+  } catch {
+    return redirectRelative('/app/artist/dashboard?error=profile-image', result.accessToken, secure);
+  }
+
+  return redirectRelative('/app/artist/dashboard', result.accessToken, secure);
 }
 
 function getRegion(input: string): ArtistRegionCode | undefined {
