@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LOGIN_HREF } from '@/src/lib/env';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -138,7 +139,7 @@ export function ArtworkForm() {
         }),
       });
       if (res.status === 401) {
-        window.location.href = '/app/dev/login';
+        window.location.href = LOGIN_HREF;
         return;
       }
       if (!res.ok) {

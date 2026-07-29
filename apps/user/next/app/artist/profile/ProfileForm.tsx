@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { ARTIST_REGION_OPTIONS, nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
 import { Button, Field, Input, Textarea, ToggleGroup, ToggleGroupItem } from '@dearbloom/ui';
 import { FileField } from '@/src/components/common/FileField';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 const schema = z.object({
   nickname: nicknameSchema,
@@ -17,12 +18,22 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+/** 활동 지역 비교(순서 무관). */
+function sameRegions(a: ArtistRegionCode[], b: ArtistRegionCode[]): boolean {
+  if (a.length !== b.length) return false;
+  const sa = [...a].sort();
+  const sb = [...b].sort();
+  return sa.every((v, i) => v === sb[i]);
+}
+
+const REGION_REQUIRED_MSG = '활동 지역을 1개 이상 선택해주세요';
+
 export function ProfileForm({ initial }: { initial: ArtistMe }) {
   const router = useRouter();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -32,7 +43,9 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     },
   });
 
-  const [regions, setRegions] = useState<ArtistRegionCode[]>(initial.regionList ?? []);
+  const initialRegions = initial.regionList ?? [];
+  const [regions, setRegions] = useState<ArtistRegionCode[]>(initialRegions);
+  const [regionError, setRegionError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   async function uploadImage(file: File): Promise<string> {
@@ -49,15 +62,33 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
   }
 
   const onValid = async (values: FormValues) => {
+    // FIX #1: 활동 지역 클라이언트 선검증 — 미선택이면 API 호출 없이 인라인 에러.
+    if (regions.length === 0) {
+      setRegionError(REGION_REQUIRED_MSG);
+      return;
+    }
+    setRegionError(null);
+
     try {
+      // FIX #4: 실제로 변경된 필드만 전송.
       const patch: {
-        nickname: string;
-        intro: string;
-        regionList: ArtistRegionCode[];
-        etcInfo: string;
+        nickname?: string;
+        intro?: string;
+        regionList?: ArtistRegionCode[];
+        etcInfo?: string;
         artistImageUrl?: string;
-      } = { ...values, regionList: regions };
+      } = {};
+      if (dirtyFields.nickname) patch.nickname = values.nickname;
+      if (dirtyFields.intro) patch.intro = values.intro;
+      if (dirtyFields.etcInfo) patch.etcInfo = values.etcInfo;
+      if (!sameRegions(regions, initialRegions)) patch.regionList = regions;
       if (imageFile) patch.artistImageUrl = await uploadImage(imageFile);
+
+      // 변경 사항이 없으면 네트워크 호출 생략.
+      if (Object.keys(patch).length === 0) {
+        toast.success('저장되었습니다.');
+        return;
+      }
 
       const res = await fetch('/app/api/artist/profile', {
         method: 'PATCH',
@@ -65,7 +96,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         body: JSON.stringify(patch),
       });
       if (res.status === 401) {
-        window.location.href = '/app/dev/login';
+        window.location.href = LOGIN_HREF;
         return;
       }
       if (!res.ok) {
@@ -96,7 +127,11 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         <ToggleGroup
           type="multiple"
           value={regions}
-          onValueChange={(v) => setRegions(v as ArtistRegionCode[])}
+          onValueChange={(v) => {
+            const next = v as ArtistRegionCode[];
+            setRegions(next);
+            if (next.length > 0) setRegionError(null);
+          }}
         >
           {ARTIST_REGION_OPTIONS.map((r) => (
             <ToggleGroupItem key={r.value} value={r.value}>
@@ -104,6 +139,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        {regionError && <p className="mt-1 text-caption-1 text-danger">{regionError}</p>}
       </div>
 
       <Field label="기타 안내" htmlFor="etc">

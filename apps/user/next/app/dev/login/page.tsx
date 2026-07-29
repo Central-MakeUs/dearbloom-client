@@ -1,5 +1,8 @@
 import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { getDevAccounts, type DevAccount } from '@dearbloom/shared';
+
+import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +24,8 @@ export default async function DevLoginPage({
 }: {
   searchParams?: Promise<{ ok?: string; error?: string }>;
 }) {
+  if (!DEV_LOGIN_ENABLED) notFound();
+
   const params = await searchParams;
   const [accounts, cookieStore] = await Promise.all([
     getDevAccounts().catch(() => [] as DevAccount[]),

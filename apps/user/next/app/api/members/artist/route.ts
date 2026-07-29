@@ -8,11 +8,12 @@ import {
   updateArtistImage,
 } from '@dearbloom/shared';
 
+import { LOGIN_HREF } from '@/src/lib/env';
 import { setAuthCookie } from '@/src/lib/authCookies';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
-  if (!token) return redirectRelative(request, '/app/dev/login');
+  if (!token) return redirectRelative(request, LOGIN_HREF);
 
   const formData = await request.formData();
   const nickname = String(formData.get('nickname') ?? '').trim();

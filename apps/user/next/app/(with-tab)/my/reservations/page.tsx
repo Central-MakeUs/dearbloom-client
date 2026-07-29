@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getMyInquiries, type CustomerInquiryListItem } from '@dearbloom/shared';
 import { Badge, type BadgeProps, Button, Card } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export default async function ReservationsPage() {
         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
           <Button asChild size="sm">
-            <a href="/app/dev/login">로그인</a>
+            <a href={LOGIN_HREF}>로그인</a>
           </Button>
         </div>
       </div>

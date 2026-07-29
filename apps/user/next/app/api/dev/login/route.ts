@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { devLogin } from '@dearbloom/shared';
 
+import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 import { setAuthCookie } from '@/src/lib/authCookies';
 
 /**
@@ -39,10 +40,12 @@ async function handleLogin(request: NextRequest, memberId: number) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
   const formData = await request.formData();
   return handleLogin(request, Number(formData.get('memberId')));
 }
 
 export async function GET(request: NextRequest) {
+  if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
   return handleLogin(request, Number(request.nextUrl.searchParams.get('memberId')));
 }

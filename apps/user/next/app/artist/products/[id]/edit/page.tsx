@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getMyArtwork } from '@dearbloom/shared';
 import { EditForm } from './EditForm';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
         {header}
         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <p className="text-body-6 text-neutral-500">작가 계정으로 로그인해주세요.</p>
-          <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-6 text-neutral-0">로그인</a>
+          <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-6 text-neutral-0">로그인</a>
         </div>
       </div>
     );
