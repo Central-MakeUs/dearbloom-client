@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@dearbloom/ui';
 
 type Action = 'reserve' | 'reserve-cancel' | 'cancel';
 
@@ -28,19 +29,16 @@ export function InquiryActions({ id, status }: { id: number; status?: string }) 
     }
   };
 
-  const primary = 'h-[52px] flex-1 rounded-md bg-primary text-body-1 text-neutral-0 disabled:opacity-40';
-  const ghost = 'h-[52px] flex-1 rounded-md border border-neutral-300 text-body-1 text-neutral-700 disabled:opacity-40';
-
   let buttons: ReactNode = null;
   if (status === 'RESERVED') {
     buttons = (
-      <button type="button" disabled={busy} onClick={() => run('reserve-cancel', '예약을 취소했어요.')} className={ghost}>예약 취소</button>
+      <Button type="button" variant="outline" size="lg" className="flex-1" disabled={busy} onClick={() => run('reserve-cancel', '예약을 취소했어요.')}>예약 취소</Button>
     );
   } else if (!status || status === 'IN_PROGRESS') {
     buttons = (
       <>
-        <button type="button" disabled={busy} onClick={() => run('cancel', '문의를 취소했어요.')} className={ghost}>문의 취소</button>
-        <button type="button" disabled={busy} onClick={() => run('reserve', '예약을 완료했어요.')} className={primary}>예약 완료</button>
+        <Button type="button" variant="outline" size="lg" className="flex-1" disabled={busy} onClick={() => run('cancel', '문의를 취소했어요.')}>문의 취소</Button>
+        <Button type="button" variant="primary" size="lg" className="flex-1" disabled={busy} onClick={() => run('reserve', '예약을 완료했어요.')}>예약 완료</Button>
       </>
     );
   }

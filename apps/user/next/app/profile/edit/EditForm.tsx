@@ -1,10 +1,21 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { customerNameSchema, REGION_OPTIONS } from '@dearbloom/shared';
+import { X } from 'lucide-react';
+import {
+  Field,
+  Input,
+  Button,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@dearbloom/ui';
+import { customerNameSchema, ARTIST_REGION_OPTIONS, type ArtistRegionCode } from '@dearbloom/shared';
 
 const schema = z.object({ name: customerNameSchema, region: z.string() });
 type FormValues = z.infer<typeof schema>;
@@ -12,6 +23,7 @@ type FormValues = z.infer<typeof schema>;
 export function EditForm({ initialName, initialRegion }: { initialName: string; initialRegion: string }) {
   const {
     register,
+    control,
     handleSubmit,
     watch,
     setValue,
@@ -24,8 +36,12 @@ export function EditForm({ initialName, initialRegion }: { initialName: string; 
   const name = watch('name');
 
   const onValid = async (values: FormValues) => {
-    const body: { name: string; region?: string } = { name: values.name };
-    if (values.region) body.region = values.region;
+    // region은 항상 명시적으로 전송한다. 값이 없으면 null을 보내 서버에서 "미설정"으로 초기화.
+    // (백엔드 규약상 필드를 생략하면 미변경이므로, 지역 해제를 반영하려면 null이 필요하다.)
+    const body: { name: string; region: ArtistRegionCode | null } = {
+      name: values.name,
+      region: values.region ? (values.region as ArtistRegionCode) : null,
+    };
     const res = await fetch('/app/api/customer/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -42,64 +58,74 @@ export function EditForm({ initialName, initialRegion }: { initialName: string; 
 
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-1 flex-col" noValidate>
-      <div className="flex flex-col gap-1.5 px-4 pt-4">
-        <label htmlFor="username" className="text-body-4 text-neutral-950">
-          사용자 이름
-        </label>
-        <div className="flex h-14 items-center gap-2 rounded-md bg-neutral-0 px-4">
-          <input
-            id="username"
-            {...register('name')}
-            aria-invalid={!!errors.name}
-            className="min-w-0 flex-1 bg-transparent text-body-2 text-neutral-950 outline-none placeholder:text-neutral-400"
-            placeholder="사용자 이름을 입력해주세요"
-          />
-          {name && (
-            <button
-              type="button"
-              aria-label="지우기"
-              onClick={() => setValue('name', '', { shouldValidate: true })}
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neutral-300 text-neutral-0"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden>
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-        {errors.name ? (
-          <p className="text-caption-1 text-danger">{errors.name.message}</p>
-        ) : (
-          <p className="text-caption-2 text-neutral-500">2-5자의 한글 또는 영문만 가능합니다</p>
-        )}
+      <div className="px-4 pt-4">
+        <Field
+          label="사용자 이름"
+          htmlFor="username"
+          error={errors.name?.message}
+          helper="2-5자의 한글 또는 영문만 가능합니다"
+        >
+          <div className="relative">
+            <Input
+              id="username"
+              {...register('name')}
+              aria-invalid={!!errors.name}
+              placeholder="사용자 이름을 입력해주세요"
+              className="pr-10"
+            />
+            {name && (
+              <button
+                type="button"
+                aria-label="지우기"
+                onClick={() => setValue('name', '', { shouldValidate: true })}
+                className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-300 text-neutral-0"
+              >
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
+        </Field>
       </div>
 
-      <div className="flex flex-col gap-1.5 px-4 pt-5">
-        <label htmlFor="region" className="text-body-4 text-neutral-950">
-          지역 <span className="text-caption-1 text-neutral-400">(선택)</span>
-        </label>
-        <select
-          id="region"
-          {...register('region')}
-          className="h-14 rounded-md bg-neutral-0 px-4 text-body-2 text-neutral-950 outline-none"
-        >
-          <option value="">지역 선택</option>
-          {REGION_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+      <div className="px-4 pt-5">
+        <Field label="지역" optional htmlFor="region">
+          <Controller
+            control={control}
+            name="region"
+            render={({ field }) => (
+              <div className="relative">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="region" className={field.value ? 'pr-16' : undefined}>
+                    <SelectValue placeholder="지역 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ARTIST_REGION_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {field.value && (
+                  <button
+                    type="button"
+                    aria-label="지역 선택 안 함"
+                    onClick={() => field.onChange('')}
+                    className="absolute right-8 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-300 text-neutral-0"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
+            )}
+          />
+        </Field>
       </div>
 
       <div className="mt-auto px-4 py-2">
-        <button
-          type="submit"
-          disabled={!isValid || isSubmitting}
-          className="h-[52px] w-full rounded-md bg-neutral-800 text-body-1 text-neutral-0 disabled:opacity-40"
-        >
+        <Button type="submit" size="lg" disabled={!isValid || isSubmitting} className="w-full">
           완료
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -4,6 +4,7 @@ import type { AuthRole } from '@dearbloom/features-auth';
 import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+import { setAuthCookie } from '@/src/lib/authCookies';
 
 type LocalTokenExchangeResponse = {
   accessToken?: string;
@@ -58,15 +59,8 @@ export async function GET(request: NextRequest) {
     forceOnboarding || localNeedsOnboarding,
     forceOnboarding,
   );
-  const cookieOptions = {
-    httpOnly: true,
-    path: '/',
-    sameSite: 'lax' as const,
-    secure: request.nextUrl.protocol === 'https:',
-  };
-
-  response.cookies.set('accessToken', tokenExchangeResult.tokens.accessToken, cookieOptions);
-  response.cookies.set('refreshToken', tokenExchangeResult.tokens.refreshToken, cookieOptions);
+  setAuthCookie(request, response, 'accessToken', tokenExchangeResult.tokens.accessToken);
+  setAuthCookie(request, response, 'refreshToken', tokenExchangeResult.tokens.refreshToken);
 
   return response;
 }

@@ -24,7 +24,8 @@ export interface ArtistMe {
 export interface ArtworkPhotoInput {
   fileUrl: string;
   fileType: FileType;
-  universityId: number;
+  /** 사진별 촬영 학교(선택). 미지정 시 null. */
+  universityId: number | null;
 }
 
 /** 작품 등록 시 넘기는 촬영 패키지 1건 */
@@ -33,7 +34,6 @@ export interface ArtworkPackageInput {
   price: number;
   durationMinutes: number;
   finalPhotoCount: number;
-  extraInfo?: string | null;
 }
 
 export interface CreateArtworkPayload {

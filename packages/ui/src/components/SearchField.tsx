@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { Search } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { TextField } from './TextField';
 import { DeleteButton } from './DeleteButton';
@@ -44,21 +45,5 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
 });
 
 function SearchIcon({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      className={cn('shrink-0', className)}
-    >
-      <circle cx={11} cy={11} r={7} />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
+  return <Search size={size} strokeWidth={1.8} aria-hidden className={cn('shrink-0', className)} />;
 }

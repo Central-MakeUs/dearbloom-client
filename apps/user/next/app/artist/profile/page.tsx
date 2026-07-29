@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getArtistMe } from '@dearbloom/shared';
 import { ProfileForm } from './ProfileForm';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export default async function ArtistProfilePage() {
       {header}
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
-        <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
+        <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
       </div>
     </div>
   );

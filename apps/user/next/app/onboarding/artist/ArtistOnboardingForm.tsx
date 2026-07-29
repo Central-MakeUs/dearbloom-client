@@ -71,6 +71,8 @@ export function ArtistOnboardingForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
     if (!imageFile) {
       setError('프로필 사진을 선택해 주세요.');
       return;
@@ -85,9 +87,9 @@ export function ArtistOnboardingForm({
     }
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       formData.set('imageUrl', await uploadImage(imageFile));
-      const response = await fetch(event.currentTarget.action, { method: 'POST', body: formData });
+      const response = await fetch(form.action, { method: 'POST', body: formData });
 
       if (response.redirected) {
         window.location.assign(response.url);

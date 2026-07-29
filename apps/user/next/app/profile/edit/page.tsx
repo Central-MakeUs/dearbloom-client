@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getCustomerMe } from '@dearbloom/shared';
 import { EditForm } from './EditForm';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function ProfileEditPage() {
         <Header />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
           <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-          <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
+          <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
             로그인
           </a>
         </div>

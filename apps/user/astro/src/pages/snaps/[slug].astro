@@ -1,8 +1,11 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import { SaveHeart } from '@dearbloom/ui';
-import { getArtwork, fetchPublicWithAuthFallback, regionLabel, type ArtworkDetail } from '@dearbloom/shared';
+import { SaveHeart, RegionTag } from '@dearbloom/ui';
+import { SnapDetailTabs } from '@/components/SnapDetailTabs';
+import { DetailMoreCollapsible } from '@/components/DetailMoreCollapsible';
+import { SnapShareButton } from '@/components/SnapShareButton';
+import { getArtwork, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkDetail } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -69,13 +72,7 @@ const packages = artwork?.packageList ?? [];
               <div class="flex h-11 w-11 items-center justify-center">
                 <SaveHeart artworkId={artwork.artworkId} initialSaved={!!artwork.isSaved} size={24} client:load />
               </div>
-              <button id="share-btn" type="button" aria-label="공유" class="flex h-11 w-11 items-center justify-center text-neutral-950">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
-                  <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
-                  <path d="M16 6l-4-4-4 4" />
-                  <path d="M12 2v13" />
-                </svg>
-              </button>
+              <SnapShareButton client:load />
             </div>
           </header>
 
@@ -98,17 +95,14 @@ const packages = artwork?.packageList ?? [];
               <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <h2 class="text-head-3 text-neutral-950">{artwork.title}</h2>
                 {artwork.artist.regionList?.map((code) => (
-                  <span class="rounded-sm bg-neutral-200 px-2 py-1 text-body-6 text-neutral-700">{regionLabel(code)}</span>
+                  <RegionTag>{artistRegionLabel(code)}</RegionTag>
                 ))}
               </div>
               <p class="mt-1 text-body-6 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
 
             {/* 인페이지 탭 (리뷰는 준비중) */}
-            <div class="mt-3 flex border-b border-neutral-200">
-              <span class="flex-1 border-b-2 border-primary py-3 text-center text-head-3 text-primary">작품정보</span>
-              <span class="flex-1 cursor-not-allowed py-3 text-center text-body-1 text-neutral-400" title="준비 중">리뷰 <span class="text-caption-2">(준비중)</span></span>
-            </div>
+            <SnapDetailTabs client:load />
           </div>
 
           <div class="pb-28 pt-4">
@@ -191,40 +185,12 @@ const packages = artwork?.packageList ?? [];
 
             {/* 상세 정보 — 기본 접힘, '상세 정보 더보기' 토글로 기타 안내 + 작가 소개 노출 (Figma) */}
             {(artwork.artist.etcInfo || artwork.artist.intro) && (
-              <div class="mb-3">
-                <div id="detail-more" class="hidden flex-col gap-3">
-                  {/* 기타 안내 */}
-                  {artwork.artist.etcInfo && (
-                    <section>
-                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">기타 안내</h3>
-                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
-                      </div>
-                    </section>
-                  )}
-                  {/* 작가 소개 */}
-                  {artwork.artist.intro && (
-                    <section>
-                      <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작가 소개</h3>
-                      <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                        <p class="mb-1 text-body-4 text-neutral-950">{artwork.artist.nickname}</p>
-                        <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
-                      </div>
-                    </section>
-                  )}
-                </div>
-                <button
-                  id="detail-more-btn"
-                  type="button"
-                  aria-expanded="false"
-                  class="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-lg border border-neutral-300 bg-neutral-0 py-3 text-body-5 text-neutral-700"
-                >
-                  <span id="detail-more-label">상세 정보 더보기</span>
-                  <svg id="detail-more-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden class="transition-transform">
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </button>
-              </div>
+              <DetailMoreCollapsible
+                etcInfo={artwork.artist.etcInfo}
+                intro={artwork.artist.intro}
+                nickname={artwork.artist.nickname}
+                client:load
+              />
             )}
 
             {/* 다른 작업 보기 */}
@@ -253,34 +219,6 @@ const packages = artwork?.packageList ?? [];
             </div>
           </div>
 
-          <script is:inline>
-            document.getElementById('share-btn')?.addEventListener('click', async () => {
-              const data = { title: document.title, url: location.href };
-              try {
-                if (navigator.share) await navigator.share(data);
-                else if (navigator.clipboard) await navigator.clipboard.writeText(location.href);
-              } catch {
-                /* 사용자 취소 무시 */
-              }
-            });
-
-            // 상세 정보 더보기/접기 토글 (기타 안내 + 작가 소개 섹션 단위 show/hide)
-            (function () {
-              const btn = document.getElementById('detail-more-btn');
-              const content = document.getElementById('detail-more');
-              const label = document.getElementById('detail-more-label');
-              const chevron = document.getElementById('detail-more-chevron');
-              if (!btn || !content) return;
-              btn.addEventListener('click', () => {
-                const open = content.classList.contains('hidden');
-                content.classList.toggle('hidden', !open);
-                content.classList.toggle('flex', open);
-                btn.setAttribute('aria-expanded', String(open));
-                if (label) label.textContent = open ? '상세 정보 접기' : '상세 정보 더보기';
-                if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
-              });
-            })();
-          </script>
         </>
       )
     }

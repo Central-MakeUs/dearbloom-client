@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@dearbloom/ui';
 
 /**
  * 30분 단위 시간 슬롯 드롭다운. 네이티브 time input 대신 정해진 슬롯만 선택 가능.
@@ -19,58 +19,19 @@ export function TimeSelect({
   disabled?: boolean;
   ariaLabel?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
-
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen((o) => !o)}
-        aria-label={ariaLabel}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className="flex w-[84px] items-center justify-between rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 text-body-5 text-neutral-950 disabled:opacity-40"
-      >
-        {value}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400" aria-hidden>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute left-0 z-30 mt-1 max-h-56 w-[84px] overflow-y-auto rounded-md border border-neutral-200 bg-neutral-0 py-1 shadow-elevation"
-        >
-          {options.map((o) => (
-            <li key={o} role="option" aria-selected={o === value}>
-              <button
-                type="button"
-                onClick={() => {
-                  onChange(o);
-                  setOpen(false);
-                }}
-                className={`block w-full px-3 py-1.5 text-left text-body-5 ${
-                  o === value ? 'bg-primary-50 font-semibold text-primary' : 'text-neutral-800 hover:bg-neutral-100'
-                }`}
-              >
-                {o}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger aria-label={ariaLabel} className="h-auto w-[96px] gap-1 px-2.5 py-2">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o} value={o}>
+            {o}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

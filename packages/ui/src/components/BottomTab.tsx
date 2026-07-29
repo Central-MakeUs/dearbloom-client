@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { Compass, Heart, MessageCircle, User } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { TabButton } from './TabButton';
 
@@ -96,75 +97,17 @@ export function BottomTab({ currentPath, variant = 'light', className }: BottomT
 }
 
 function CompassIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? 2.2 : 1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx={12} cy={12} r={9} />
-      <path d="m15.5 8.5-2 5-5 2 2-5z" fill={active ? 'currentColor' : 'none'} />
-    </svg>
-  );
+  return <Compass size={24} strokeWidth={active ? 2.2 : 1.8} aria-hidden />;
 }
 
 function HeartIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill={active ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
+  return <Heart size={24} strokeWidth={1.8} fill={active ? 'currentColor' : 'none'} aria-hidden />;
 }
 
 function ChatIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill={active ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L3 21l1.7-5.1A8.5 8.5 0 1 1 21 11.5z" />
-    </svg>
-  );
+  return <MessageCircle size={24} strokeWidth={1.8} fill={active ? 'currentColor' : 'none'} aria-hidden />;
 }
 
 function UserIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill={active ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx={12} cy={8} r={4} />
-      <path d="M4 21a8 8 0 0 1 16 0" />
-    </svg>
-  );
+  return <User size={24} strokeWidth={1.8} fill={active ? 'currentColor' : 'none'} aria-hidden />;
 }

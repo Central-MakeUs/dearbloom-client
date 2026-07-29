@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtworkCard, Header } from '@dearbloom/ui';
-import { regionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { ArtworkCard, Header, Button } from '@dearbloom/ui';
+import { artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
 import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
 
 const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
@@ -12,7 +12,7 @@ const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
   artistNickname: a.artistNickname,
   price: a.lowestPrice,
   thumbnailUrl: a.thumbnailUrl,
-  regions: a.artistRegionList?.map(regionLabel) ?? [],
+  regions: a.artistRegionList?.map(artistRegionLabel) ?? [],
 });
 
 export function AddClient({ boardId, items }: { boardId: string; items: ArtworkListItem[] }) {
@@ -52,7 +52,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
             artistNickname={a.artistNickname}
             price={a.lowestPrice}
             thumbnailUrl={a.thumbnailUrl}
-            regions={a.artistRegionList?.map(regionLabel)}
+            regions={a.artistRegionList?.map(artistRegionLabel)}
             selectable
             selected={selected.has(a.artworkId)}
             onSelect={() => toggle(a.artworkId)}
@@ -66,14 +66,9 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
       <Header showBack onBack={() => router.back()} title="작품 추가" />
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-neutral-200 bg-neutral-0 px-4 py-3">
-        <button
-          type="button"
-          onClick={submit}
-          disabled={selected.size === 0}
-          className="w-full rounded-md bg-primary py-3 text-body-2 text-neutral-0 disabled:bg-neutral-300 disabled:text-neutral-500"
-        >
+        <Button type="button" size="lg" onClick={submit} disabled={selected.size === 0} className="w-full">
           {selected.size > 0 ? `${selected.size}개 추가` : '작품 선택'}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,8 +1,5 @@
-const ChevronRight = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="text-neutral-400">
-    <path d="m9 18 6-6-6-6" />
-  </svg>
-);
+import { ChevronRight } from 'lucide-react';
+import { Badge, Card } from '@dearbloom/ui';
 
 const items: { label: string; desc: string; href?: string }[] = [
   { label: '일정 관리', desc: '촬영 가능 일정 · 예약 불가 관리', href: '/app/artist/schedule' },
@@ -13,12 +10,25 @@ const items: { label: string; desc: string; href?: string }[] = [
   { label: '포인트 현황', desc: '준비중', href: '/app/artist/points' },
 ];
 
-export default function ArtistDashboardPage() {
+export default async function ArtistDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const imageError = error === 'profile-image' ? (
+    <p className="mx-4 mt-2 rounded-lg bg-danger/10 px-4 py-3 text-caption-1 text-danger" role="alert">
+      프로필 사진을 저장하지 못했어요. 작가 프로필에서 다시 등록해 주세요.
+    </p>
+  ) : null;
+
   return (
     <div className="mx-auto max-w-md">
       <header className="flex h-[52px] items-center justify-center">
         <h1 className="text-head-3 text-neutral-950">대시보드</h1>
       </header>
+
+      {imageError}
 
       <div className="mt-2 flex flex-col gap-2 px-4">
         {items.map((it) =>
@@ -26,22 +36,28 @@ export default function ArtistDashboardPage() {
             <a
               key={it.label}
               href={it.href}
-              className="flex items-center justify-between rounded-lg bg-neutral-0 px-4 py-4 transition-colors hover:bg-neutral-50"
+              className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-0 px-4 py-4 transition-colors hover:bg-neutral-50"
             >
               <div className="min-w-0">
                 <div className="text-body-4 text-neutral-950">{it.label}</div>
-                <div className="mt-0.5 truncate text-caption-1 text-neutral-500">{it.desc}</div>
+                {it.desc === '준비중' ? (
+                  <Badge variant="muted" className="mt-0.5">
+                    준비중
+                  </Badge>
+                ) : (
+                  <div className="mt-0.5 truncate text-caption-1 text-neutral-500">{it.desc}</div>
+                )}
               </div>
-              <ChevronRight />
+              <ChevronRight className="size-6 shrink-0 text-neutral-400" aria-hidden />
             </a>
           ) : (
-            <div key={it.label} className="flex items-center justify-between rounded-lg bg-neutral-0 px-4 py-4" aria-disabled>
+            <Card key={it.label} className="flex items-center justify-between px-4 py-4" aria-disabled>
               <div className="min-w-0">
                 <div className="text-body-4 text-neutral-400">{it.label}</div>
                 <div className="mt-0.5 truncate text-caption-1 text-neutral-400">{it.desc}</div>
               </div>
-              <span className="text-caption-2 text-neutral-400">준비중</span>
-            </div>
+              <Badge variant="muted">준비중</Badge>
+            </Card>
           ),
         )}
       </div>

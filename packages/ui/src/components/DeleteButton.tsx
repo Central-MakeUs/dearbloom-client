@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { X } from 'lucide-react';
 import { cn } from '../lib/cn';
 
 interface DeleteButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,22 +18,7 @@ export const DeleteButton = forwardRef<HTMLButtonElement, DeleteButtonProps>(fun
   { size = 20, className, 'aria-label': ariaLabel = '지우기', ...rest },
   ref,
 ) {
-  const glyph = (
-    <svg
-      width={size * 0.55}
-      height={size * 0.55}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M6 6l12 12" />
-      <path d="M18 6 6 18" />
-    </svg>
-  );
+  const glyph = <X size={size * 0.55} strokeWidth={2.5} aria-hidden />;
 
   return (
     <button

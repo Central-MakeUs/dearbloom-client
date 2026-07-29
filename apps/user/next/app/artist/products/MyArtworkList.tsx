@@ -1,9 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { type MyArtworkListItem } from '@dearbloom/shared';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Button,
+  Card,
+} from '@dearbloom/ui';
 
-const formatPrice = (won: number) => `${won.toLocaleString()}원`;
+const formatPrice = (won: number) => `${won.toLocaleString('ko-KR')}원`;
 
 export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }) {
   const [items, setItems] = useState(initial);
@@ -11,7 +25,6 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
 
   async function remove(id: number) {
     if (deleting) return;
-    if (!window.confirm('이 작품을 삭제할까요?')) return;
     setDeleting(id);
     try {
       const res = await fetch(`/app/api/artist/artworks?id=${id}`, { method: 'DELETE' });
@@ -22,35 +35,50 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
   }
 
   return (
-    <ul className="flex flex-col gap-2 px-4">
-      {items.map((a) => (
-        <li key={a.artworkId} className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-0 p-2">
+    <>
+      <p className="mb-3 px-4 pt-1 text-caption-1 text-neutral-600">{items.length}개</p>
+      <div className="flex flex-col gap-2 px-4">
+        {items.map((a) => (
+        <Card key={a.artworkId} className="flex items-center gap-3 p-2">
           <a href={`/snaps/${a.artworkId}`} className="flex min-w-0 flex-1 items-center gap-3">
-            <img src={a.thumbnailUrl} alt={a.title} className="h-16 w-16 shrink-0 rounded-md object-cover" />
+            <img src={a.thumbnailUrl} alt={a.title} className="size-16 shrink-0 rounded-md object-cover" />
             <div className="min-w-0">
               <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
               <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>
-              <div className="mt-0.5 text-caption-2 text-neutral-500">저장 {a.savedCount} · 조회 {a.viewCount}</div>
+              <div className="mt-0.5 text-caption-2 text-neutral-500">
+                저장 {a.savedCount} · 조회 {a.viewCount}
+              </div>
             </div>
           </a>
           <div className="flex shrink-0 flex-col gap-1">
-            <a
-              href={`/app/artist/products/${a.artworkId}/edit`}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-center text-caption-1 text-neutral-700"
-            >
-              수정
-            </a>
-            <button
-              type="button"
-              onClick={() => remove(a.artworkId)}
-              disabled={deleting === a.artworkId}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-caption-1 text-neutral-600 disabled:opacity-50"
-            >
-              {deleting === a.artworkId ? '삭제 중' : '삭제'}
-            </button>
+            <Button asChild variant="outline" size="sm">
+              <a href={`/app/artist/products/${a.artworkId}/edit`}>
+                <Pencil className="size-3.5" /> 수정
+              </a>
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={deleting === a.artworkId}>
+                  <Trash2 className="size-3.5" /> {deleting === a.artworkId ? '삭제 중' : '삭제'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>작품을 삭제할까요?</AlertDialogTitle>
+                  <AlertDialogDescription>삭제하면 되돌릴 수 없어요.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction className="bg-danger hover:opacity-90" onClick={() => remove(a.artworkId)}>
+                    삭제
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
-        </li>
-      ))}
-    </ul>
+        </Card>
+        ))}
+      </div>
+    </>
   );
 }

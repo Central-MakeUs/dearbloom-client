@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, cn, Header } from '@dearbloom/ui';
+import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -172,19 +172,23 @@ export function RoleSelectionForm({
   const roleCard = (value: MemberRole, title: string, description: ReactNode) => (
     <button
       aria-pressed={role === value}
-      className={cn(
-        'relative h-[145px] w-full overflow-hidden rounded-lg bg-primary-100 px-7 py-6 text-left shadow-elevation',
-        role === value && 'ring-2 ring-primary',
-      )}
+      className="w-full text-left"
       onClick={() => setRole(value)}
       type="button"
     >
-      <span className="block text-head-2 text-neutral-950">{title}</span>
-      <span className="mt-2 block w-[175px] text-body-2 text-neutral-950">{description}</span>
-      <span
-        aria-hidden
-        className="absolute right-[23px] top-[30px] h-[84px] w-[84px] rounded-full bg-neutral-0"
-      />
+      <Card
+        className={cn(
+          'relative h-[145px] w-full overflow-hidden border-0 bg-primary-100 px-7 py-6 shadow-elevation',
+          role === value && 'ring-2 ring-primary',
+        )}
+      >
+        <span className="block text-head-2 text-neutral-950">{title}</span>
+        <span className="mt-2 block w-[175px] text-body-2 text-neutral-950">{description}</span>
+        <span
+          aria-hidden
+          className="absolute right-[23px] top-[30px] h-[84px] w-[84px] rounded-full bg-neutral-0"
+        />
+      </Card>
     </button>
   );
 

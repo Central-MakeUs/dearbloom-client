@@ -4,6 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
+import {
+  Button,
+  Card,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@dearbloom/ui';
 import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
 import { DateField } from './DateField';
 
@@ -137,8 +146,6 @@ export function ScheduleManager({
     } else toast.error('삭제에 실패했어요.');
   };
 
-  const dateInput = 'rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 text-body-5 text-neutral-950';
-
   return (
     <div className="flex flex-col gap-3 pb-6">
       <p className="px-4 text-caption-1 text-neutral-500">촬영 시간은 09:00~21:00, 30분 단위로 선택할 수 있어요.</p>
@@ -147,27 +154,23 @@ export function ScheduleManager({
       <section>
         <div className="flex items-center justify-between px-4">
           <h2 className="text-head-3 text-neutral-950">기본 촬영 가능 일정</h2>
-          <button
-            type="button"
-            onClick={saveWeekly}
-            disabled={busy}
-            className="rounded-md bg-primary px-3 py-1.5 text-body-5 text-neutral-0 disabled:opacity-40"
-          >
+          <Button type="button" variant="primary" size="sm" onClick={saveWeekly} disabled={busy}>
             저장
-          </button>
+          </Button>
         </div>
-        <div className="mx-4 mt-2 flex flex-col divide-y divide-neutral-200 rounded-lg bg-neutral-0">
+        <Card className="mx-4 mt-2 flex flex-col divide-y divide-neutral-200">
           {DAYS.map((d) => {
             const s = days[d.key];
             return (
               <div key={d.key} className="flex items-center gap-3 px-4 py-2.5">
-                <button
+                <Button
                   type="button"
+                  variant={s.enabled ? 'primary' : 'secondary'}
                   onClick={() => toggleDay(d.key)}
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-body-4 ${s.enabled ? 'bg-primary text-neutral-0' : 'bg-neutral-200 text-neutral-500'}`}
+                  className="h-7 w-7 shrink-0 px-0 text-body-4"
                 >
                   {d.label}
-                </button>
+                </Button>
                 <div className={`flex flex-1 items-center gap-2 ${s.enabled ? '' : 'pointer-events-none opacity-40'}`}>
                   <TimeSelect value={s.start} options={START_SLOTS} disabled={!s.enabled} onChange={(v) => setDayStart(d.key, v)} ariaLabel={`${d.label} 시작 시간`} />
                   <span className="text-body-6 text-neutral-500">~</span>
@@ -176,45 +179,52 @@ export function ScheduleManager({
               </div>
             );
           })}
-        </div>
+        </Card>
       </section>
 
       {/* 반복 예약 불가 */}
       <section>
         <h2 className="px-4 text-head-3 text-neutral-950">반복 예약 불가</h2>
-        <div className="mx-4 mt-2 rounded-lg bg-neutral-0 p-4">
+        <Card className="mx-4 mt-2 p-4">
           {recurring.length > 0 && (
             <ul className="mb-3 flex flex-col gap-2">
               {recurring.map((r) => (
                 <li key={r.scheduleRuleId} className="flex items-center justify-between">
                   <span className="text-body-5 text-neutral-950">매주 {dayLabel(r.dayOfWeek)} · {hhmm(r.startTime)}~{hhmm(r.endTime)}</span>
-                  <button type="button" onClick={() => remove('recurring-blocks', r.scheduleRuleId)} disabled={busy} className="text-caption-1 text-danger">삭제</button>
+                  <Button type="button" variant="link" size="sm" onClick={() => remove('recurring-blocks', r.scheduleRuleId)} disabled={busy} className="h-auto px-0 text-caption-1 text-danger">삭제</Button>
                 </li>
               ))}
             </ul>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <select value={recDay} onChange={(e) => setRecDay(e.target.value as DayOfWeek)} className={dateInput}>
-              {DAYS.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}
-            </select>
+            <Select value={recDay} onValueChange={(v) => setRecDay(v as DayOfWeek)}>
+              <SelectTrigger aria-label="반복 요일" className="h-auto w-auto py-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DAYS.map((d) => (
+                  <SelectItem key={d.key} value={d.key}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <TimeSelect value={recStart} options={START_SLOTS} onChange={setRecStartV} ariaLabel="반복 시작 시간" />
             <span className="text-body-6 text-neutral-500">~</span>
             <TimeSelect value={recEnd} options={endSlotsAfter(recStart)} onChange={setRecEnd} ariaLabel="반복 종료 시간" />
-            <button type="button" onClick={addRecurring} disabled={busy} className="ml-auto rounded-md bg-neutral-800 px-3 py-1.5 text-body-5 text-neutral-0 disabled:opacity-40">추가</button>
+            <Button type="button" variant="primary" size="sm" onClick={addRecurring} disabled={busy} className="ml-auto">추가</Button>
           </div>
-        </div>
+        </Card>
       </section>
 
       {/* 개인 예약 불가 */}
       <section>
         <h2 className="px-4 text-head-3 text-neutral-950">개인 예약 불가</h2>
-        <div className="mx-4 mt-2 rounded-lg bg-neutral-0 p-4">
+        <Card className="mx-4 mt-2 p-4">
           {dates.length > 0 && (
             <ul className="mb-3 flex flex-col gap-2">
               {dates.map((r) => (
                 <li key={r.scheduleRuleId} className="flex items-center justify-between">
                   <span className="text-body-5 text-neutral-950">{r.blockDate} · {hhmm(r.startTime)}~{hhmm(r.endTime)}</span>
-                  <button type="button" onClick={() => remove('date-blocks', r.scheduleRuleId)} disabled={busy} className="text-caption-1 text-danger">삭제</button>
+                  <Button type="button" variant="link" size="sm" onClick={() => remove('date-blocks', r.scheduleRuleId)} disabled={busy} className="h-auto px-0 text-caption-1 text-danger">삭제</Button>
                 </li>
               ))}
             </ul>
@@ -224,9 +234,9 @@ export function ScheduleManager({
             <TimeSelect value={blkStart} options={START_SLOTS} onChange={setBlkStartV} ariaLabel="개인 예약불가 시작 시간" />
             <span className="text-body-6 text-neutral-500">~</span>
             <TimeSelect value={blkEnd} options={endSlotsAfter(blkStart)} onChange={setBlkEnd} ariaLabel="개인 예약불가 종료 시간" />
-            <button type="button" onClick={addDate} disabled={busy} className="ml-auto rounded-md bg-neutral-800 px-3 py-1.5 text-body-5 text-neutral-0 disabled:opacity-40">추가</button>
+            <Button type="button" variant="primary" size="sm" onClick={addDate} disabled={busy} className="ml-auto">추가</Button>
           </div>
-        </div>
+        </Card>
       </section>
     </div>
   );

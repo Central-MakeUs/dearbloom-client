@@ -1,21 +1,19 @@
 import { cookies } from 'next/headers';
+import { ChevronRight } from 'lucide-react';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
+import { Badge, Button } from '@dearbloom/ui';
+import { LOGIN_HREF } from '@/src/lib/env';
+
+import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
+import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
 
 export const dynamic = 'force-dynamic';
-
-const ChevronRight = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="text-neutral-400">
-    <path d="m9 18 6-6-6-6" />
-  </svg>
-);
 
 /** href 없는 항목은 아직 백엔드가 없어 노출만(준비중). */
 const menu: { label: string; href?: string }[] = [
   { label: '포인트' },
   { label: '채팅 템플릿 관리' },
   { label: '공지사항' },
-  { label: '로그아웃', href: '/app/api/auth/logout' },
-  { label: '탈퇴하기' },
 ];
 
 export default async function ArtistMyPage() {
@@ -28,9 +26,9 @@ export default async function ArtistMyPage() {
       </header>
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
-        <a href="/app/dev/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
-          로그인
-        </a>
+        <Button asChild>
+          <a href={LOGIN_HREF}>로그인</a>
+        </Button>
       </div>
     </div>
   );
@@ -64,12 +62,9 @@ export default async function ArtistMyPage() {
             <span className="truncate text-caption-1 text-neutral-600">{me.email}</span>
           </div>
         </div>
-        <a
-          href="/app/artist/profile"
-          className="shrink-0 rounded-md border border-neutral-300 px-3 py-1 text-body-1 text-neutral-950"
-        >
-          수정
-        </a>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <a href="/app/artist/profile">수정</a>
+        </Button>
       </section>
 
       {/* 메뉴 */}
@@ -78,15 +73,17 @@ export default async function ArtistMyPage() {
           m.href ? (
             <a key={m.label} href={m.href} className="flex h-11 items-center justify-between transition-colors hover:opacity-70">
               <span className="text-body-1 text-neutral-950">{m.label}</span>
-              <ChevronRight />
+              <ChevronRight className="size-6 text-neutral-400" aria-hidden />
             </a>
           ) : (
             <div key={m.label} className="flex h-11 items-center justify-between" aria-disabled>
               <span className="text-body-1 text-neutral-400">{m.label}</span>
-              <span className="text-caption-2 text-neutral-400">준비중</span>
+              <Badge variant="muted">준비중</Badge>
             </div>
           ),
         )}
+        <MemberLogoutButton />
+        <MemberWithdrawalButton />
       </nav>
     </div>
   );
