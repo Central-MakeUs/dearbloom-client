@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
 
+import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
+
 export const dynamic = 'force-dynamic';
 
 const ChevronRight = () => (
@@ -15,7 +17,6 @@ const menu: { label: string; href?: string }[] = [
   { label: '채팅 템플릿 관리' },
   { label: '공지사항' },
   { label: '로그아웃', href: '/app/api/auth/logout' },
-  { label: '탈퇴하기' },
 ];
 
 export default async function ArtistMyPage() {
@@ -87,6 +88,7 @@ export default async function ArtistMyPage() {
             </div>
           ),
         )}
+        <MemberWithdrawalButton />
       </nav>
     </div>
   );
