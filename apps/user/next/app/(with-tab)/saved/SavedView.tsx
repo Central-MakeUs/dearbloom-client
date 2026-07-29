@@ -23,7 +23,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@dearbloom/ui';
-import { regionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
 import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
 
@@ -38,7 +38,7 @@ const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
   artistNickname: a.artistNickname,
   price: a.lowestPrice,
   thumbnailUrl: a.thumbnailUrl,
-  regions: a.artistRegionList?.map(regionLabel) ?? [],
+  regions: a.artistRegionList?.map(artistRegionLabel) ?? [],
 });
 
 /**
@@ -138,7 +138,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
           artistNickname={a.artistNickname}
           price={a.lowestPrice}
           thumbnailUrl={a.thumbnailUrl}
-          regions={a.artistRegionList?.map(regionLabel)}
+          regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved
           saveEndpoint={SAVED_ENDPOINT}
           onSavedChange={(saved) => {
