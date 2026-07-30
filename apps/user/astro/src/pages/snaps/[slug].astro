@@ -67,7 +67,7 @@ const packages = artwork?.packageList ?? [];
             <a href="/snaps" aria-label="뒤로가기" class="flex h-11 w-11 items-center justify-center text-neutral-950">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
             </a>
-            <h1 class="truncate text-head-3 text-neutral-950">작품 상세</h1>
+            <h1 class="truncate text-head-3 text-neutral-950">상세 정보</h1>
             <div class="flex items-center">
               <div class="flex h-11 w-11 items-center justify-center">
                 <SaveHeart artworkId={artwork.artworkId} initialSaved={!!artwork.isSaved} size={24} client:load />
@@ -196,7 +196,7 @@ const packages = artwork?.packageList ?? [];
             {/* 다른 작업 보기 */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-3">
-                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">다른 작업 보기</h3>
+                <h3 class="mb-3 px-4 text-head-3 text-neutral-800">이 작가의 다른 작품</h3>
                 <div class="grid grid-cols-3 gap-2 px-4">
                   {artwork.otherArtworkList.map((o) => (
                     <a href={`/snaps/${o.artworkId}`} class="block">
