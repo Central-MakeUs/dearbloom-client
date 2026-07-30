@@ -47,6 +47,8 @@ pnpm --filter admin dev
 pnpm mobile
 ```
 
+EAS 명령은 Expo 설정이 있는 `apps/mobile` 디렉터리에서 실행합니다.
+
 ---
 
 ## Conventions
