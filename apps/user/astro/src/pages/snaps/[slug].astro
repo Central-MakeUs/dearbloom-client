@@ -4,7 +4,14 @@ export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 AP
 import { SaveHeart, RegionTag } from '@dearbloom/ui';
 import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
-import { getArtwork, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkDetail } from '@dearbloom/shared';
+import { SnapReportButton } from '@/components/SnapReportButton';
+import {
+  getArtwork,
+  getArtworkReported,
+  fetchPublicWithAuthFallback,
+  artistRegionLabel,
+  type ArtworkDetail,
+} from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -43,6 +50,14 @@ const headCount =
       : `${artwork.minHeadCount}명 이상`;
 
 const packages = artwork?.packageList ?? [];
+
+// 신고 여부 — 로그인 상태에서만 조회(실패해도 상세 노출을 막지 않는다).
+let reported = false;
+if (artwork && token) {
+  reported = await getArtworkReported(artwork.artworkId, { token })
+    .then((r) => r.reported)
+    .catch(() => false);
+}
 ---
 
 <!doctype html>
@@ -225,6 +240,9 @@ const packages = artwork?.packageList ?? [];
                 </div>
               </section>
             )}
+
+            {/* 작품 신고 — 피그마 헤더(♡/공유)를 건드리지 않도록 상세 하단 텍스트 링크로 배치 */}
+            <SnapReportButton artworkId={artwork.artworkId} initialReported={reported} client:load />
           </div>
 
           {/*
