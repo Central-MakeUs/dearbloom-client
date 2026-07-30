@@ -6,8 +6,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { ARTIST_REGION_OPTIONS, nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
-import { Button, Field, Input, Textarea, ToggleGroup, ToggleGroupItem } from '@dearbloom/ui';
+import { nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
+import { Button, Field, Input, Textarea } from '@dearbloom/ui';
+import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
 import { LOGIN_HREF } from '@/src/lib/env';
 
@@ -122,25 +123,14 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         <Textarea id="intro" rows={4} placeholder="작가님을 소개해주세요" {...register('intro')} />
       </Field>
 
-      <div>
-        <span className={label}>활동 지역</span>
-        <ToggleGroup
-          type="multiple"
-          value={regions}
-          onValueChange={(v) => {
-            const next = v as ArtistRegionCode[];
-            setRegions(next);
-            if (next.length > 0) setRegionError(null);
-          }}
-        >
-          {ARTIST_REGION_OPTIONS.map((r) => (
-            <ToggleGroupItem key={r.value} value={r.value}>
-              {r.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        {regionError && <p className="mt-1 text-caption-1 text-danger">{regionError}</p>}
-      </div>
+      <ArtistRegionField
+        error={regionError}
+        onValueChange={(next) => {
+          setRegions(next);
+          if (next.length > 0) setRegionError(null);
+        }}
+        value={regions}
+      />
 
       <Field label="기타 안내" htmlFor="etc">
         <Textarea id="etc" rows={4} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />

@@ -3,8 +3,10 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
 
-import { ARTIST_REGION_OPTIONS } from '@dearbloom/shared';
+import type { ArtistRegionCode } from '@dearbloom/shared';
 import { BottomButton, TextField } from '@dearbloom/ui';
+
+import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
@@ -17,6 +19,8 @@ export function ArtistOnboardingForm({
 }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [regions, setRegions] = useState<ArtistRegionCode[]>([]);
+  const [regionError, setRegionError] = useState<string | null>(null);
   const [error, setError] = useState(
     hasServerError ? '작가 정보를 저장하지 못했습니다. 입력값을 확인해 주세요.' : '',
   );
@@ -77,8 +81,13 @@ export function ArtistOnboardingForm({
       setError('프로필 사진을 선택해 주세요.');
       return;
     }
+    if (regions.length === 0) {
+      setRegionError('활동 지역을 1개 이상 선택해주세요');
+      return;
+    }
 
     setError('');
+    setRegionError(null);
     setIsSubmitting(true);
 
     if (forceOnboarding) {
@@ -88,6 +97,8 @@ export function ArtistOnboardingForm({
 
     try {
       const formData = new FormData(form);
+      formData.delete('region');
+      regions.forEach((region) => formData.append('region', region));
       formData.set('imageUrl', await uploadImage(imageFile));
       const response = await fetch(form.action, { method: 'POST', body: formData });
 
@@ -157,20 +168,14 @@ export function ArtistOnboardingForm({
         placeholder="이름을 입력하세요"
         required
       />
-      <TextField
-        autoComplete="address-level1"
-        id="artist-region"
-        label="활동 지역"
-        list="artist-region-options"
-        name="region"
-        placeholder="활동 지역을 입력하세요"
-        required
+      <ArtistRegionField
+        error={regionError}
+        onValueChange={(next) => {
+          setRegions(next);
+          if (next.length > 0) setRegionError(null);
+        }}
+        value={regions}
       />
-      <datalist id="artist-region-options">
-        {ARTIST_REGION_OPTIONS.map((region) => (
-          <option key={region.value} value={region.label} />
-        ))}
-      </datalist>
     </div>
   );
 
