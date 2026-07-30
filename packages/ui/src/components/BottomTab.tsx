@@ -28,13 +28,14 @@ const TABS: Tab[] = [
     match: (p) => p.startsWith('/app/saved') || p.startsWith('/app/boards'),
     Icon: HeartIcon,
   },
-  {
-    key: 'chats',
-    label: '채팅',
-    href: '/app/chats',
-    match: (p) => p.startsWith('/app/chats'),
-    Icon: ChatIcon,
-  },
+  // 준비중(채팅) — 출시 전 숨김. 백엔드 준비 후 아래 탭 주석 해제로 복구.
+  // {
+  //   key: 'chats',
+  //   label: '채팅',
+  //   href: '/app/chats',
+  //   match: (p) => p.startsWith('/app/chats'),
+  //   Icon: ChatIcon,
+  // },
   {
     key: 'my',
     label: '마이',

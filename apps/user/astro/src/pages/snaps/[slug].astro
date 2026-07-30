@@ -212,12 +212,17 @@ const packages = artwork?.packageList ?? [];
             )}
           </div>
 
-          {/* 하단 액션바 — 스마트 문의 기능(백엔드 문의/채팅 API)은 준비 중이라 비활성 */}
+          {/*
+            하단 액션바 — 스마트 문의 기능(백엔드 문의/채팅 API)은 준비 중이라 출시 전 숨김.
+            백엔드 준비 후 아래 블록 주석 해제로 복구.
+          */}
+          {/*
           <div class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4">
             <div class="mx-auto max-w-md">
               <button type="button" disabled aria-disabled="true" title="준비 중" class="flex h-[52px] w-full items-center justify-center rounded-md bg-neutral-300 text-body-1 text-neutral-500">스마트 문의하기 (준비 중)</button>
             </div>
           </div>
+          */}
 
         </>
       )

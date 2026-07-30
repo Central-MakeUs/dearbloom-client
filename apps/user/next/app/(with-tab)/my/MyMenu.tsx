@@ -14,6 +14,10 @@ export function MyMenu() {
           <span className="text-body-1 text-neutral-950">예약 내역</span>
           <ChevronRight className="size-6 text-neutral-400" aria-hidden />
         </a>
+        <a href="/privacy-policy" className={rowClass}>
+          <span className="text-body-1 text-neutral-950">개인정보 처리방침</span>
+          <ChevronRight className="size-6 text-neutral-400" aria-hidden />
+        </a>
         <MemberLogoutButton />
         <MemberWithdrawalButton />
       </nav>
