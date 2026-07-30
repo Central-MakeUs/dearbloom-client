@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test:auth-cookies": "node --experimental-strip-types --test src/lib/authCookies.test.ts",
+    "test:customer-onboarding": "node --experimental-strip-types --test app/api/members/customer/customerPayload.test.ts",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
