@@ -5,7 +5,14 @@ import { SaveHeart, RegionTag } from '@dearbloom/ui';
 import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
-import { getArtwork, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkDetail } from '@dearbloom/shared';
+import { SnapReportButton } from '@/components/SnapReportButton';
+import {
+  getArtwork,
+  getArtworkReported,
+  fetchPublicWithAuthFallback,
+  artistRegionLabel,
+  type ArtworkDetail,
+} from '@dearbloom/shared';
 
 const { slug } = Astro.params;
 const token = Astro.cookies.get('accessToken')?.value;
@@ -37,6 +44,14 @@ const shootPlaces = artwork
 
 const packages = artwork?.packageList ?? [];
 const lowestPrice = packages.length > 0 ? Math.min(...packages.map((p) => p.price)) : null;
+
+// 신고 여부 — 로그인 상태에서만 조회(실패해도 상세 노출을 막지 않는다).
+let reported = false;
+if (artwork && token) {
+  reported = await getArtworkReported(artwork.artworkId, { token })
+    .then((r) => r.reported)
+    .catch(() => false);
+}
 ---
 
 <!doctype html>
@@ -189,6 +204,9 @@ const lowestPrice = packages.length > 0 ? Math.min(...packages.map((p) => p.pric
 
             {/* 패키지 리스트 (Figma: 처음 2개 노출 + '패키지 N개 더보기' 토글) */}
             {packages.length > 0 && <PackageList packages={packages} client:load />}
+
+            {/* 작품 신고 — 피그마 헤더(♡/공유)를 건드리지 않도록 상세 하단 텍스트 링크로 배치 */}
+            <SnapReportButton artworkId={artwork.artworkId} initialReported={reported} client:load />
           </div>
 
           {/* 하단 sticky CTA — 스마트 문의하기 (백엔드 문의 API 미준비: 클릭 무효) */}
