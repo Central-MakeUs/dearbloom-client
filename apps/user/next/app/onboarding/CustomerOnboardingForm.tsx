@@ -441,7 +441,7 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
   const goToSnaps = () => window.location.replace('/snaps');
   const completeActions = (
     <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-      <BottomButton onClick={goToSnaps}>기능 둘러보기</BottomButton>
+      {/* 기능이 준비되면 복원: <BottomButton onClick={goToSnaps}>기능 둘러보기</BottomButton> */}
       <button
         className="mt-3 h-10 w-full text-body-5 text-neutral-700"
         onClick={goToSnaps}
