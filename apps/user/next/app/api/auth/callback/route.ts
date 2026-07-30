@@ -4,6 +4,7 @@ import type { AuthRole } from '@dearbloom/features-auth';
 import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { setAuthCookie } from '@/src/lib/authCookies';
 
 type LocalTokenExchangeResponse = {
@@ -132,13 +133,19 @@ function redirectAfterLogin(
     return redirectLoginError(request, 'missing_onboarding_state', role);
   }
 
-  const destination = needsOnboarding
-    ? role === 'CUSTOMER'
-      ? '/app/onboarding'
-      : '/app/onboarding/artist'
-    : role === 'CUSTOMER'
-      ? '/snaps'
-      : '/app/artist/dashboard';
+  // 온보딩이 필요하면 온보딩이 우선(returnUrl 무시). 아니면 returnUrl(찜 등에서 보던 곳)로 복귀.
+  const returnUrl = needsOnboarding
+    ? undefined
+    : safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
+  const destination =
+    returnUrl ??
+    (needsOnboarding
+      ? role === 'CUSTOMER'
+        ? '/app/onboarding'
+        : '/app/onboarding/artist'
+      : role === 'CUSTOMER'
+        ? '/snaps'
+        : '/app/artist/dashboard');
   const url = new URL(destination, getPublicOrigin(request));
   if (forceOnboarding) url.searchParams.set('forceOnboarding', '1');
 
@@ -165,6 +172,11 @@ function clearOAuthCookies(response: NextResponse) {
     path: '/',
   });
   response.cookies.set('forceOnboarding', '', {
+    expires: new Date(0),
+    maxAge: 0,
+    path: '/',
+  });
+  response.cookies.set('oauthReturnUrl', '', {
     expires: new Date(0),
     maxAge: 0,
     path: '/',
