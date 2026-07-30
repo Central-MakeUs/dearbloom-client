@@ -292,6 +292,7 @@ export default function App() {
       startInLoadingState
       style={webViewStyle}
       thirdPartyCookiesEnabled
+      webviewDebuggingEnabled={__DEV__}
     />
   );
 
