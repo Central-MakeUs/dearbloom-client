@@ -44,9 +44,11 @@ declare global {
 export function RoleSelectionForm({
   forceOnboarding,
   provider,
+  returnUrl,
 }: {
   forceOnboarding: boolean;
   provider?: OAuthProvider;
+  returnUrl?: string;
 }) {
   const [role, setRole] = useState<MemberRole>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,8 +141,9 @@ export function RoleSelectionForm({
       }
 
       const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+      const returnUrlQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
       window.location.assign(
-        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}`,
+        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}${returnUrlQuery}`,
       );
       return;
     }

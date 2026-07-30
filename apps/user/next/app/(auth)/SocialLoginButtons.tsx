@@ -22,9 +22,16 @@ function getNativeAppPlatform(): NativeAppPlatform | null {
 const socialButtonClassName =
   'inline-flex h-[52px] w-full items-center justify-center rounded-md px-[14px] text-body-5 disabled:pointer-events-none disabled:opacity-40';
 
-export function SocialLoginButtons({ forceOnboarding }: { forceOnboarding: boolean }) {
+export function SocialLoginButtons({
+  forceOnboarding,
+  returnUrl,
+}: {
+  forceOnboarding: boolean;
+  returnUrl?: string;
+}) {
   const [nativePlatform, setNativePlatform] = useState<NativeAppPlatform | null>(null);
   const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+  const returnUrlQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
 
   useEffect(() => {
     setNativePlatform(getNativeAppPlatform());
@@ -33,7 +40,7 @@ export function SocialLoginButtons({ forceOnboarding }: { forceOnboarding: boole
   const googleButton = (
     <a
       className={cn(socialButtonClassName, 'bg-neutral-0 text-neutral-950')}
-      href={`/app/role?provider=google${forceOnboardingQuery}`}
+      href={`/app/role?provider=google${forceOnboardingQuery}${returnUrlQuery}`}
     >
       Google로 시작하기
     </a>
@@ -42,7 +49,7 @@ export function SocialLoginButtons({ forceOnboarding }: { forceOnboarding: boole
   const appleButton = nativePlatform === 'android' ? null : (
     <a
       className={cn(socialButtonClassName, 'bg-neutral-950 text-neutral-0')}
-      href={`/app/role?provider=apple${forceOnboardingQuery}`}
+      href={`/app/role?provider=apple${forceOnboardingQuery}${returnUrlQuery}`}
     >
       Apple로 시작하기
     </a>
