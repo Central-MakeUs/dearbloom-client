@@ -10,7 +10,7 @@ export function SnapDetailTabs() {
     <Tabs defaultValue="info" className="mt-3">
       <TabsList>
         <TabsTrigger value="info" className="text-head-3">
-          작품정보
+          촬영정보
         </TabsTrigger>
         {/*
         <TabsTrigger value="review" disabled title="준비 중" className="cursor-not-allowed">
