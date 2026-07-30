@@ -299,8 +299,9 @@ export default function App() {
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View style={styles.container}>
         <SafeAreaView edges={['top']} style={topSafeAreaStyle} />
-        {webView}
-        <SafeAreaView edges={['bottom']} style={bottomSafeAreaStyle} />
+        <SafeAreaView edges={['bottom']} style={[styles.webViewContainer, bottomSafeAreaStyle]}>
+          {webView}
+        </SafeAreaView>
       </View>
     </SafeAreaProvider>
   );
@@ -341,6 +342,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   webView: {
+    flex: 1,
+  },
+  webViewContainer: {
     flex: 1,
   },
 });
