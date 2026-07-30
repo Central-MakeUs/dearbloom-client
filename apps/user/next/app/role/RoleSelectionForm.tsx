@@ -187,10 +187,6 @@ export function RoleSelectionForm({
       >
         <span className="block text-head-2 text-neutral-950">{title}</span>
         <span className="mt-2 block w-[175px] text-body-2 text-neutral-950">{description}</span>
-        <span
-          aria-hidden
-          className="absolute right-[23px] top-[30px] h-[84px] w-[84px] rounded-full bg-neutral-0"
-        />
       </Card>
     </button>
   );
