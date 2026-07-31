@@ -200,7 +200,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         <Button type="button" variant="outline" onClick={() => setConfirmOpen(true)} disabled={selected.size === 0} className="flex-1 py-3">
           삭제하기
         </Button>
-        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)} disabled={selected.size === 0} className="flex-1 py-3">
+        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)} disabled={selected.size === 0} className="hidden flex-1 py-3">
           보드에 추가하기
         </Button>
       </div>
@@ -276,7 +276,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
         {!editing && (
           <TabsList className="px-4">
             <TabsTrigger value="saved">내 저장</TabsTrigger>
-            <TabsTrigger value="board">공동보드</TabsTrigger>
+            <TabsTrigger className="hidden" value="board">공동보드</TabsTrigger>
           </TabsList>
         )}
         <TabsContent value="saved">{savedBody}</TabsContent>
