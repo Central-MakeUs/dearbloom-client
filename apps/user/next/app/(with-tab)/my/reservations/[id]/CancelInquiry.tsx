@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Button } from '@dearbloom/ui';
 
+/** 문의 취소 — 카드 안쪽 연한 그린 버튼(Figma). 진행중 문의에서만 노출된다. */
 export function CancelInquiry({ id }: { id: number }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -24,12 +24,13 @@ export function CancelInquiry({ id }: { id: number }) {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-[60px] z-20 border-t border-neutral-200 bg-neutral-0 p-4">
-      <div className="mx-auto max-w-md">
-        <Button type="button" variant="outline" size="lg" onClick={cancel} disabled={busy} className="w-full">
-          문의 취소
-        </Button>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={cancel}
+      disabled={busy}
+      className="h-[52px] w-full rounded-md bg-primary-50 text-body-3 text-primary transition-colors hover:bg-primary-100 disabled:opacity-50"
+    >
+      {busy ? '취소하는 중…' : '문의 취소하기'}
+    </button>
   );
 }
