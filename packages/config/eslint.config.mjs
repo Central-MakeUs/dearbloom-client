@@ -35,7 +35,8 @@ const noHexColor = {
 };
 
 export default [
-  { ignores: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/.astro/**'] },
+  // .vercel 은 astro 의 Vercel 어댑터 빌드 산출물 — 한 번이라도 빌드하면 lint 가 그 번들을 훑는다.
+  { ignores: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/.astro/**', '**/.vercel/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   noHexColor,
