@@ -31,7 +31,8 @@ export interface InquiryDetail {
   artistNickname?: string;
   /** 작가 상세에만 있음 */
   customerName?: string;
-  artworkId: number;
+  /** 작품이 삭제되면 null — 문의는 스냅샷으로 남는다. */
+  artworkId: number | null;
   artworkName: string;
   packageName: string;
   price: number;
@@ -90,6 +91,8 @@ export interface InquiryCreatePayload {
 /** 전송 완료 화면에 그대로 보여줄 수 있는 문의 스냅샷. */
 export interface InquiryCreateResult {
   inquiryId: number;
+  /** 문의 전송으로 새로 만들어졌거나 재사용된 채팅방. 전송 완료 후 바로 이동할 수 있다. */
+  chatRoomId: number;
   artistNickname: string;
   artworkName: string;
   packageName: string;

@@ -13,7 +13,8 @@ export type ChatMessageType = 'TEXT' | 'IMAGE' | 'INQUIRY';
 /** 문의 카드(messageType=INQUIRY) 렌더용 스냅샷. '작품상세 보기'는 artworkId 로 이동. */
 export interface InquiryCard {
   inquiryId: number;
-  artworkId: number;
+  /** 작품이 삭제되면 null — 카드는 스냅샷으로 남고 '작품상세 보기'만 막는다. */
+  artworkId: number | null;
   artworkName: string;
   packageName: string;
   artistNickname: string;
