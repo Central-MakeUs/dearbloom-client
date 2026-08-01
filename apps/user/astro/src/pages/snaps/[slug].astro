@@ -6,6 +6,7 @@ import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
 import { SnapReportButton } from '@/components/SnapReportButton';
+import { SmartInquiryCta } from '@/components/SmartInquiryCta';
 import {
   getArtwork,
   getArtworkReported,
@@ -210,17 +211,8 @@ if (artwork && token) {
             <SnapReportButton artworkId={artwork.artworkId} initialReported={reported} client:load />
           </div>
 
-          {/* 하단 sticky CTA — 스마트 문의하기 (백엔드 문의 API 미준비: 클릭 무효) */}
-          <div class="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4">
-            <button
-              type="button"
-              aria-disabled="true"
-              title="스마트 문의 기능은 준비 중입니다"
-              class="flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0"
-            >
-              스마트 문의하기
-            </button>
-          </div>
+          {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입 */}
+          <SmartInquiryCta packages={packages} client:load />
         </>
       )
     }
