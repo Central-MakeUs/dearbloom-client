@@ -3,6 +3,7 @@ import { getReceivedInquiry } from '@dearbloom/shared';
 import { Card, CardContent } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
 import { InquiryActions } from './InquiryActions';
+import { InquiryTimeline } from './InquiryTimeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +65,7 @@ export default async function ArtistRequestDetailPage({
           </CardContent>
         </Card>
       </div>
+      {token && <InquiryTimeline id={id} token={token} />}
       <InquiryActions id={d.inquiryId} status={status} />
     </div>
   );
