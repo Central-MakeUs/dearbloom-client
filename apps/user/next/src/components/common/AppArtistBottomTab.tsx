@@ -12,8 +12,8 @@ const TABS = [
   { key: 'home', label: '홈', href: '/app/artist/dashboard', match: (p: string) => p.startsWith('/artist/dashboard') || p.startsWith('/artist/schedule'), Icon: HomeIcon },
   { key: 'requests', label: '신청', href: '/app/artist/requests', match: (p: string) => p.startsWith('/artist/requests'), Icon: InboxIcon },
   { key: 'products', label: '작품', href: '/app/artist/products', match: (p: string) => p.startsWith('/artist/products'), Icon: GridIcon },
-  // 준비중(채팅·포인트) — 출시 전 숨김. 백엔드 준비 후 아래 두 탭 주석 해제로 복구.
-  // { key: 'chats', label: '채팅', href: '/app/artist/chats', match: (p: string) => p.startsWith('/artist/chats'), Icon: ChatIcon },
+  { key: 'chats', label: '채팅', href: '/app/artist/chats', match: (p: string) => p.startsWith('/artist/chats'), Icon: ChatIcon },
+  // 준비중(포인트) — 출시 전 숨김. 백엔드 준비 후 아래 탭 주석 해제로 복구.
   // { key: 'points', label: '포인트', href: '/app/artist/points', match: (p: string) => p.startsWith('/artist/points'), Icon: PointIcon },
   { key: 'my', label: '마이', href: '/app/artist/my', match: (p: string) => p.startsWith('/artist/my') || p.startsWith('/artist/profile'), Icon: UserIcon },
 ];
@@ -100,6 +100,8 @@ function ChatIcon({ active }: { active: boolean }) {
   );
 }
 
+// 위의 '포인트' 탭이 주석 해제될 때까지만 미사용 — 아이콘은 그대로 둔다.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PointIcon({ active }: { active: boolean }) {
   return (
     <svg {...svgProps(active)}>

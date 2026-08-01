@@ -281,7 +281,30 @@ importers:
 
   packages/features/auth: {}
 
-  packages/features/chat: {}
+  packages/features/chat:
+    dependencies:
+      '@dearbloom/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      '@dearbloom/ui':
+        specifier: workspace:*
+        version: link:../../ui
+      '@stomp/stompjs':
+        specifier: ^7.1.1
+        version: 7.3.0
+      lucide-react:
+        specifier: ^1.27.0
+        version: 1.27.0(react@19.2.3)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.3
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.17
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
 
   packages/mobile: {}
 
@@ -2360,6 +2383,9 @@ packages:
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+
+  '@stomp/stompjs@7.3.0':
+    resolution: {integrity: sha512-nKMLoFfJhrQAqkvvKd1vLq/cVBGCMwPRCD0LqW7UT1fecRx9C3GoKEIR2CYwVuErGeZu8w0kFkl2rlhPlqHVgQ==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -7666,6 +7692,8 @@ snapshots:
   '@sinclair/typebox@0.27.10': {}
 
   '@standard-schema/utils@0.3.0': {}
+
+  '@stomp/stompjs@7.3.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:
