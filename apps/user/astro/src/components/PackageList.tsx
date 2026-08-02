@@ -13,9 +13,18 @@ interface Package {
 
 const INITIAL_VISIBLE = 2;
 const won = (n: number) => `${n.toLocaleString()}원`;
+const minutes = (m: number | null) => {
+  if (m == null) return '';
+  const h = Math.floor(m / 60);
+  const rest = m % 60;
+  if (h && rest) return `${h}시간 ${rest}분`;
+  if (h) return `${h}시간`;
+  return `${rest}분`;
+};
 
 /**
- * 패키지 리스트 (island) — Figma: 처음 2개만 노출, 나머지는 '패키지 N개 더보기' 토글로 노출.
+ * 패키지 카드 리스트 (island) — Figma: 각 카드는 4행 표(항목/촬영 시간/가격/보정본 수).
+ * 처음 2개만 노출, 나머지는 '패키지 N개 더보기' 토글로 노출.
  */
 export function PackageList({ packages }: { packages: Package[] }) {
   const [open, setOpen] = useState(false);
@@ -23,34 +32,24 @@ export function PackageList({ packages }: { packages: Package[] }) {
   const shown = open || !hasToggle ? packages : packages.slice(0, INITIAL_VISIBLE);
   const hiddenCount = packages.length - INITIAL_VISIBLE;
 
+  const row = (label: string, value: string) => (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-body-5 text-neutral-800">{label}</span>
+      <span className="text-right text-body-4 text-neutral-900">{value}</span>
+    </div>
+  );
+
   return (
     <div>
       <div className="mx-4 flex flex-col gap-3">
         {shown.map((pkg) => (
-          <div key={pkg.artworkPackageId} className="rounded-lg bg-neutral-0 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-body-5 text-neutral-950">{pkg.packageName}</span>
-              <span className="shrink-0 text-body-3 font-semibold text-neutral-900">{won(pkg.price)}</span>
-            </div>
-            <dl className="mt-3 flex flex-col gap-2 border-t border-neutral-200 pt-3">
-              {pkg.durationMinutes != null && (
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-body-6 text-neutral-600">촬영 시간</dt>
-                  <dd className="text-body-5 text-neutral-950">{pkg.durationMinutes}분</dd>
-                </div>
-              )}
-              {pkg.finalPhotoCount != null && (
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-body-6 text-neutral-600">보정본 수</dt>
-                  <dd className="text-body-5 text-neutral-950">{pkg.finalPhotoCount}장</dd>
-                </div>
-              )}
-              {pkg.extraInfo && (
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="shrink-0 text-body-6 text-neutral-600">추가</dt>
-                  <dd className="text-right text-body-5 text-neutral-950">{pkg.extraInfo}</dd>
-                </div>
-              )}
+          <div key={pkg.artworkPackageId} className="rounded-md bg-neutral-0 p-5">
+            <dl className="flex flex-col gap-3">
+              {row('항목', pkg.packageName)}
+              {pkg.durationMinutes != null && row('촬영 시간', minutes(pkg.durationMinutes))}
+              {row('가격', won(pkg.price))}
+              {pkg.finalPhotoCount != null && row('보정본 수', `${pkg.finalPhotoCount}장`)}
+              {pkg.extraInfo && row('추가', pkg.extraInfo)}
             </dl>
           </div>
         ))}
@@ -59,7 +58,7 @@ export function PackageList({ packages }: { packages: Package[] }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-lg border border-neutral-200 bg-neutral-0 py-3 text-body-5 text-neutral-700"
+          className="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-md bg-neutral-200 py-3 text-body-4 text-neutral-800"
         >
           {open ? '패키지 접기' : `패키지 ${hiddenCount}개 더보기`}
           <ChevronDown
