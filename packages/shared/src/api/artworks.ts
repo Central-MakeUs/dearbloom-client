@@ -75,6 +75,8 @@ export interface ArtworkDetail {
   /** 촬영 패키지 목록 (가격/촬영시간/보정본수 등) */
   packageList: ArtworkPackage[];
   artist: ArtworkArtist;
+  /** 작가 연락 이메일 */
+  artistEmail: string | null;
   otherArtworkList: OtherArtwork[];
   isSaved: boolean | null;
 }

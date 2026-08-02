@@ -109,6 +109,11 @@ if (artwork && token) {
                 ))}
               </div>
               <p class="mt-1 text-body-6 text-neutral-800">{artwork.artist.nickname}</p>
+              {artwork.artistEmail && (
+                <a href={`mailto:${artwork.artistEmail}`} class="mt-1 inline-block text-body-6 text-primary underline">
+                  {artwork.artistEmail}
+                </a>
+              )}
             </div>
 
             {/* 인페이지 탭 — 상세정보 / 리뷰 (리뷰는 백엔드 미준비) */}

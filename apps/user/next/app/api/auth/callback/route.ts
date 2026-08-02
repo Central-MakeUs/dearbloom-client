@@ -6,6 +6,7 @@ import { getMemberMe } from '@dearbloom/shared';
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { setAuthCookie } from '@/src/lib/authCookies';
+import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 type LocalTokenExchangeResponse = {
   accessToken?: string;
@@ -53,7 +54,9 @@ export async function GET(request: NextRequest) {
 
   const localNeedsOnboarding =
     needsOnboarding ??
-    (role ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role) : undefined);
+    (role
+      ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role)
+      : undefined);
   const response = redirectAfterLogin(
     request,
     role,
@@ -68,9 +71,7 @@ export async function GET(request: NextRequest) {
 
 async function exchangeOneTimeCode(oneTimeCode: string) {
   const apiBaseUrl = normalizeBaseUrl(
-    process.env.NEXT_PUBLIC_OAUTH_API_URL ??
-      process.env.NEXT_PUBLIC_API_URL ??
-      fallbackApiBaseUrl,
+    process.env.NEXT_PUBLIC_OAUTH_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl,
   );
 
   try {
@@ -140,14 +141,11 @@ function redirectAfterLogin(
   const destination =
     returnUrl ??
     (needsOnboarding
-      ? role === 'CUSTOMER'
-        ? '/app/onboarding'
-        : '/app/onboarding/artist'
+      ? getOnboardingTermsPath(role, forceOnboarding)
       : role === 'CUSTOMER'
         ? '/snaps'
         : '/app/artist/dashboard');
   const url = new URL(destination, getPublicOrigin(request));
-  if (forceOnboarding) url.searchParams.set('forceOnboarding', '1');
 
   return clearOAuthCookies(NextResponse.redirect(url));
 }
@@ -202,7 +200,8 @@ function getPublicOrigin(request: NextRequest) {
 }
 
 function isLocalRequest(request: NextRequest) {
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const host =
+    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
 
   return host.startsWith('localhost') || host.startsWith('127.0.0.1');
 }

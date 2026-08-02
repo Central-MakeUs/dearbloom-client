@@ -25,6 +25,7 @@ export interface MemberMe {
 
 export interface CreateCustomerPayload {
   name: string;
+  region?: ArtistRegionCode;
   universityId?: number;
 }
 
