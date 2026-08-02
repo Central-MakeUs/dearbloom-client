@@ -1,14 +1,6 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
-import {
-  BottomButton,
-  BottomSheet,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@dearbloom/ui';
+import { Check, ChevronDown, X } from 'lucide-react';
+import { BottomButton, BottomSheet, cn } from '@dearbloom/ui';
 
 interface PackageOption {
   artworkPackageId: number;
@@ -27,9 +19,11 @@ interface SmartInquiryCtaProps {
  */
 export function SmartInquiryCta({ packages, inquiryHref = '/app/inquiries/new' }: SmartInquiryCtaProps) {
   const [open, setOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
   const [packageId, setPackageId] = useState('');
 
   const hasPackages = packages.length > 0;
+  const selected = packages.find((p) => String(p.artworkPackageId) === packageId);
 
   function start() {
     if (!packageId) return;
@@ -60,26 +54,67 @@ export function SmartInquiryCta({ packages, inquiryHref = '/app/inquiries/new' }
     </div>
   );
 
+  /**
+   * 시트 안에서 목록을 인라인으로 펼친다.
+   * Radix Select 는 포털로 body 에 붙어서 바텀시트(z-70) 뒤로 가려지고, 시트가 화면 최하단이라
+   * 아래로 펼쳐지며 뷰포트를 벗어난다. 접힌 모습만 드롭다운처럼 두고 목록은 시트 흐름 안에 둔다.
+   */
   const packageField = (
     <div className="flex flex-col gap-2 px-4">
       <span className="text-body-4 text-neutral-950">패키지 옵션</span>
-      <Select value={packageId} onValueChange={setPackageId}>
-        <SelectTrigger className="h-[56px] rounded-md border-0 bg-neutral-100 px-4 text-body-3 text-neutral-950">
-          <SelectValue placeholder="선택 안 함" />
-        </SelectTrigger>
-        <SelectContent>
-          {packages.map((pkg) => (
-            <SelectItem key={pkg.artworkPackageId} value={String(pkg.artworkPackageId)}>
-              {pkg.packageName}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+
+      <button
+        type="button"
+        aria-expanded={listOpen}
+        onClick={() => setListOpen((v) => !v)}
+        className="flex h-[56px] items-center justify-between rounded-md bg-neutral-100 px-4 text-body-3 text-neutral-950"
+      >
+        <span className={cn(!selected && 'text-neutral-500')}>{selected?.packageName ?? '선택 안 함'}</span>
+        <ChevronDown
+          size={20}
+          strokeWidth={2}
+          aria-hidden
+          className={cn('shrink-0 text-neutral-500 transition-transform', listOpen && 'rotate-180')}
+        />
+      </button>
+
+      {listOpen && (
+        <ul className="max-h-56 overflow-y-auto rounded-md bg-neutral-100">
+          {packages.map((pkg) => {
+            const isSelected = String(pkg.artworkPackageId) === packageId;
+            return (
+              <li key={pkg.artworkPackageId}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPackageId(String(pkg.artworkPackageId));
+                    setListOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center justify-between px-4 py-3 text-left text-body-3',
+                    isSelected ? 'font-semibold text-primary' : 'text-neutral-800',
+                  )}
+                >
+                  {pkg.packageName}
+                  {isSelected && <Check size={18} strokeWidth={2.5} aria-hidden />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 
   const sheet = (
-    <BottomSheet open={open} onOpenChange={setOpen} title="패키지 선택">
+    <BottomSheet
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setListOpen(false);
+      }}
+      title="패키지 선택"
+    >
       {sheetHeader}
       {packageField}
       <div className="mt-6 px-4">
