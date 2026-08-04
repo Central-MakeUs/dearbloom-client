@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { saveArtwork, unsaveArtwork, unsaveArtworks, ApiError } from '@dearbloom/shared';
+import {
+  saveArtwork,
+  unsaveArtwork,
+  unsaveArtworks,
+  ApiError,
+  getMemberMe,
+} from '@dearbloom/shared';
 
 /**
  * 저장 프록시 — 클라이언트 island 는 httpOnly accessToken 쿠키를 못 읽으므로,
@@ -8,12 +14,19 @@ import { saveArtwork, unsaveArtwork, unsaveArtworks, ApiError } from '@dearbloom
  */
 
 function authToken(request: NextRequest) {
+  if (request.cookies.has('onboardingPending')) return undefined;
   return request.cookies.get('accessToken')?.value;
 }
 
 function errorResponse(e: unknown) {
   const status = e instanceof ApiError ? e.status : 500;
   return NextResponse.json({ error: e instanceof Error ? e.message : 'failed' }, { status });
+}
+
+async function isIncompleteCustomer(token: string, error: unknown) {
+  if (error instanceof ApiError && error.status === 401) return true;
+  const member = await getMemberMe({ token }).catch(() => undefined);
+  return member ? !member.hasCustomer : false;
 }
 
 /** 작품 저장 */
@@ -31,6 +44,9 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     // 이미 저장됨(409)은 원하는 상태이므로 성공으로 처리(멱등).
     if (e instanceof ApiError && e.status === 409) return new NextResponse(null, { status: 204 });
+    if (await isIncompleteCustomer(token, e)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
     return errorResponse(e);
   }
 }
@@ -53,6 +69,9 @@ export async function DELETE(request: NextRequest) {
       await unsaveArtworks(ids, { token });
       return new NextResponse(null, { status: 204 });
     } catch (e) {
+      if (await isIncompleteCustomer(token, e)) {
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      }
       return errorResponse(e);
     }
   }
@@ -64,6 +83,9 @@ export async function DELETE(request: NextRequest) {
     await unsaveArtwork(id, { token });
     return new NextResponse(null, { status: 204 });
   } catch (e) {
+    if (await isIncompleteCustomer(token, e)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
     return errorResponse(e);
   }
 }

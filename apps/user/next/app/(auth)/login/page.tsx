@@ -2,6 +2,8 @@ import Image from 'next/image';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { getMemberMe } from '@dearbloom/shared';
+
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
@@ -18,11 +20,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
   const returnUrl = safeReturnUrl(returnUrlParam);
 
-  // 이미 로그인된 사용자가 (예: 복귀한 작품에서 뒤로가기로) 로그인 페이지에 오면
+  // 온보딩까지 끝난 사용자가 (예: 복귀한 작품에서 뒤로가기로) 로그인 페이지에 오면
   // 빈 로그인 화면 대신 홈(astro 탐색)으로 보낸다 → 뒤로가기 흐름이 자연스러워진다.
   // 주의: next redirect('/snaps')는 basePath('/app')가 붙어 '/app/snaps'(404)가 되므로,
   //       basePath 밖의 astro 경로로 보내려면 절대 URL을 써야 한다.
-  if (!auth && (await cookies()).has('accessToken')) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('accessToken')?.value;
+  const member =
+    !auth && token && !cookieStore.has('onboardingPending')
+      ? await getMemberMe({ token }).catch(() => undefined)
+      : undefined;
+  if (member?.hasCustomer || member?.hasArtist) {
     const h = await headers();
     const host = h.get('x-forwarded-host') ?? h.get('host') ?? '';
     const proto = h.get('x-forwarded-proto') ?? 'https';

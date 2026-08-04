@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { saveArtwork, unsaveArtwork, ApiError } from '@dearbloom/shared';
+import { saveArtwork, unsaveArtwork, ApiError, getMemberMe } from '@dearbloom/shared';
 
 /**
  * 저장 프록시 — 클라이언트 island 는 httpOnly accessToken 쿠키를 못 읽으므로,
@@ -25,7 +25,14 @@ function fail(status: number, message: string) {
   });
 }
 
+async function isIncompleteCustomer(token: string, error: unknown) {
+  if (error instanceof ApiError && error.status === 401) return true;
+  const member = await getMemberMe({ token }).catch(() => undefined);
+  return member ? !member.hasCustomer : false;
+}
+
 export const POST: APIRoute = async ({ request, cookies }) => {
+  if (cookies.has('onboardingPending')) return fail(401, 'unauthorized');
   const token = cookies.get('accessToken')?.value;
   if (!token) return fail(401, 'unauthorized');
 
@@ -38,12 +45,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   } catch (e) {
     // 이미 저장됨(409)은 원하는 상태이므로 성공으로 처리(멱등).
     if (e instanceof ApiError && e.status === 409) return new Response(null, { status: 204 });
+    if (await isIncompleteCustomer(token, e)) return fail(401, 'unauthorized');
     const status = e instanceof ApiError ? e.status : 500;
     return fail(status, e instanceof Error ? e.message : 'save failed');
   }
 };
 
 export const DELETE: APIRoute = async ({ request, cookies }) => {
+  if (cookies.has('onboardingPending')) return fail(401, 'unauthorized');
   const token = cookies.get('accessToken')?.value;
   if (!token) return fail(401, 'unauthorized');
 
@@ -54,6 +63,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     await unsaveArtwork(artworkId, { token });
     return new Response(null, { status: 204 });
   } catch (e) {
+    if (await isIncompleteCustomer(token, e)) return fail(401, 'unauthorized');
     const status = e instanceof ApiError ? e.status : 500;
     return fail(status, e instanceof Error ? e.message : 'unsave failed');
   }

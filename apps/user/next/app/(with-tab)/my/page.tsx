@@ -5,7 +5,10 @@ import { MyMenu } from './MyMenu';
 export const dynamic = 'force-dynamic';
 
 export default async function MyPage() {
-  const token = (await cookies()).get('accessToken')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.has('onboardingPending')
+    ? undefined
+    : cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -27,7 +30,7 @@ export default async function MyPage() {
     getCustomerMe({ token }).catch(() => null),
     getMemberMe({ token }).catch(() => null),
   ]);
-  if (!customer || !member) return login('계정 정보를 불러오지 못했어요. 다시 로그인해주세요.');
+  if (!customer || !member) return login('로그인이 필요해요.');
 
   return (
     <div className="mx-auto max-w-md">
