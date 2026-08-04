@@ -21,7 +21,10 @@ const menu: { label: string; href?: string }[] = [
 ];
 
 export default async function ArtistMyPage() {
-  const token = (await cookies()).get('accessToken')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.has('onboardingPending')
+    ? undefined
+    : cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -43,9 +46,9 @@ export default async function ArtistMyPage() {
     getMemberMe({ token }).catch(() => null),
     getArtistMe({ token }).catch(() => null),
   ]);
-  if (!me) return login('계정 정보를 불러오지 못했어요. 다시 로그인해주세요.');
+  if (!me || !artist) return login('작가 계정으로 로그인해주세요.');
 
-  const displayName = artist?.nickname ?? me.name;
+  const displayName = artist.nickname;
 
   return (
     <div className="mx-auto max-w-md">
@@ -56,7 +59,7 @@ export default async function ArtistMyPage() {
       {/* 프로필 */}
       <section className="flex items-center justify-between px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          {artist?.imageUrl ? (
+          {artist.imageUrl ? (
             <img src={artist.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
           ) : (
             <div className="h-12 w-12 shrink-0 rounded-full bg-neutral-300" />
