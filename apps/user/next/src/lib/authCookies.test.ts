@@ -4,7 +4,12 @@ import test from 'node:test';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server.js';
 
-import { getAuthCookieOptions, getTokenMaxAge, setAuthCookie } from './authCookies.ts';
+import {
+  getAuthCookieOptions,
+  getTokenMaxAge,
+  setAuthCookie,
+  setOnboardingPendingCookie,
+} from './authCookies.ts';
 
 function token(exp: number) {
   return `header.${Buffer.from(JSON.stringify({ exp })).toString('base64url')}.signature`;
@@ -60,4 +65,23 @@ test('cookie lifetime follows JWT exp across environments', () => {
   assert.equal(getTokenMaxAge(token(20_800), 10_000), 10_800);
   assert.equal(getTokenMaxAge(token(2_602_000), 10_000), 2_592_000);
   assert.equal(getTokenMaxAge('not-a-jwt', 10_000), undefined);
+});
+
+test('onboarding pending marker is set and cleared for both cookie scopes', () => {
+  const dearBloomRequest = request(
+    'user-next.vercel.app',
+    'https:',
+    'https',
+    'dev.dearbloom.co.kr',
+  );
+  const pendingResponse = NextResponse.json({});
+  const completeResponse = NextResponse.json({});
+
+  setOnboardingPendingCookie(dearBloomRequest, pendingResponse, true);
+  setOnboardingPendingCookie(dearBloomRequest, completeResponse, false);
+
+  assert.match(pendingResponse.headers.getSetCookie()[0] ?? '', /onboardingPending=1/);
+  assert.equal(pendingResponse.headers.getSetCookie().length, 2);
+  assert.equal(completeResponse.headers.getSetCookie().length, 2);
+  assert.ok(completeResponse.headers.getSetCookie().every((cookie) => /Max-Age=0/.test(cookie)));
 });

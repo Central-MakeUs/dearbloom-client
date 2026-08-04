@@ -1,6 +1,8 @@
 import type { NextRequest, NextResponse } from 'next/server';
 
 type AuthCookieName = 'accessToken' | 'refreshToken';
+type SessionCookieName = AuthCookieName | 'onboardingPending';
+const PENDING_ONBOARDING_MAX_AGE = 60 * 60 * 24 * 30;
 
 export function setAuthCookie(
   request: NextRequest,
@@ -16,6 +18,44 @@ export function setAuthCookie(
       'Set-Cookie',
       `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure`,
     );
+  }
+}
+
+export function setOnboardingPendingCookie(
+  request: NextRequest,
+  response: NextResponse,
+  pending: boolean,
+) {
+  if (!pending) {
+    expireAuthCookie(request, response, 'onboardingPending');
+    return;
+  }
+
+  const options = getAuthCookieOptions(request, PENDING_ONBOARDING_MAX_AGE);
+  response.cookies.set('onboardingPending', '1', options);
+
+  if (options.domain) {
+    response.headers.append(
+      'Set-Cookie',
+      'onboardingPending=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure',
+    );
+  }
+}
+
+export function expireAuthCookie(
+  request: NextRequest,
+  response: NextResponse,
+  name: SessionCookieName,
+) {
+  const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
+  const host =
+    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const hostname = host.split(':')[0] ?? request.nextUrl.hostname;
+
+  response.headers.append('Set-Cookie', expiredCookie);
+
+  if (hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr')) {
+    response.headers.append('Set-Cookie', `${expiredCookie}; Domain=.dearbloom.co.kr; Secure`);
   }
 }
 
