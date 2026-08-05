@@ -31,7 +31,7 @@ function request(
   } as NextRequest;
 }
 
-test('dearbloom hosts replace backend domain cookies', () => {
+test('dearbloom subdomains replace host-only cookies', () => {
   const dearBloomRequest = request(
     'user-next.vercel.app',
     'https:',
@@ -49,6 +49,17 @@ test('dearbloom hosts replace backend domain cookies', () => {
   assert.equal(response.headers.getSetCookie().length, 2);
   assert.match(response.headers.getSetCookie()[0] ?? '', /Domain=.dearbloom.co.kr/);
   assert.doesNotMatch(response.headers.getSetCookie()[1] ?? '', /Domain=/);
+});
+
+test('dearbloom root keeps the new domain cookie', () => {
+  const dearBloomRequest = request('dearbloom.co.kr', 'https:');
+  const response = NextResponse.json({});
+
+  setAuthCookie(dearBloomRequest, response, 'accessToken', token(Math.floor(Date.now() / 1000) + 3600));
+
+  assert.equal(response.headers.getSetCookie().length, 1);
+  assert.match(response.headers.getSetCookie()[0] ?? '', /Domain=.dearbloom.co.kr/);
+  assert.doesNotMatch(response.headers.getSetCookie()[0] ?? '', /Max-Age=0/);
 });
 
 test('local and tunnel hosts keep host-only cookies', () => {
