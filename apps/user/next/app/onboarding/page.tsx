@@ -6,13 +6,19 @@ import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { CustomerOnboardingForm } from './CustomerOnboardingForm';
 
 type OnboardingPageProps = {
-  searchParams: Promise<{ forceOnboarding?: string }>;
+  searchParams: Promise<{ completed?: string; forceOnboarding?: string }>;
 };
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
   if (!(await cookies()).has('accessToken')) redirect('/');
 
-  const forceOnboarding = shouldForceOnboarding((await searchParams).forceOnboarding);
+  const params = await searchParams;
+  const forceOnboarding = shouldForceOnboarding(params.forceOnboarding);
 
-  return <CustomerOnboardingForm forceOnboarding={forceOnboarding} />;
+  return (
+    <CustomerOnboardingForm
+      forceOnboarding={forceOnboarding}
+      initialComplete={params.completed === '1'}
+    />
+  );
 }
