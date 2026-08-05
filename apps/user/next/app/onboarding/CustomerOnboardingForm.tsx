@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
 import { BottomButton, cn, DeleteButton, Header, TextField } from '@dearbloom/ui';
 
-import { isNativeApp, submitFormNavigation } from '@/src/lib/submitFormNavigation';
-
 type OnboardingStep = 'complete' | 'name' | 'region' | 'school';
 
 const getUniversityLabel = (university: University) =>
@@ -191,15 +189,9 @@ function SchoolSearchScreen({
   );
 }
 
-export function CustomerOnboardingForm({
-  forceOnboarding,
-  initialComplete = false,
-}: {
-  forceOnboarding: boolean;
-  initialComplete?: boolean;
-}) {
+export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: boolean }) {
   const router = useRouter();
-  const [step, setStep] = useState<OnboardingStep>(initialComplete ? 'complete' : 'name');
+  const [step, setStep] = useState<OnboardingStep>('name');
   const [name, setName] = useState('');
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
@@ -238,24 +230,13 @@ export function CustomerOnboardingForm({
     }
 
     try {
-      const payload = {
-        name: trimmedName,
-        region,
-        universityId: selectedUniversity?.universityId,
-        // ponytail: API는 universityId만 지원한다. 자율입력 필드는 backend 지원 시 전송한다.
-      };
-
-      if (isNativeApp()) {
-        const formData = new FormData();
-        Object.entries(payload).forEach(([key, value]) => {
-          if (value !== undefined) formData.set(key, String(value));
-        });
-        submitFormNavigation('/app/api/members/customer', formData);
-        return;
-      }
-
       const response = await fetch('/app/api/members/customer', {
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: trimmedName,
+          region,
+          universityId: selectedUniversity?.universityId,
+          // ponytail: API는 universityId만 지원한다. 자율입력 필드는 backend 지원 시 전송한다.
+        }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
       });
