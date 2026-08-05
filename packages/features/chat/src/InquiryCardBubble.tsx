@@ -18,7 +18,7 @@ export function InquiryCardBubble({ card, artworkHref }: InquiryCardBubbleProps)
   const detailLink = href ? (
     <a
       href={href}
-      className="mt-4 block rounded-md bg-neutral-200 py-3 text-center text-body-4 text-primary"
+      className="mt-4 block rounded-md bg-primary-50 py-3 text-center text-body-4 text-primary"
     >
       작품상세 보기
     </a>
