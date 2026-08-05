@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@dearbloom/ui';
-import { ampmTimeLabel, shortDateLabel, type CustomerInquiryListItem, type InquiryStatus } from '@dearbloom/shared';
+import {
+  ampmTimeLabel,
+  compactDateLabel,
+  shortDateLabel,
+  type CustomerInquiryListItem,
+  type InquiryStatus,
+} from '@dearbloom/shared';
 
 type TabKey = 'inquiry' | 'canceled';
 
@@ -118,6 +124,7 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
             >
               <div className="flex items-center gap-2">
                 <span className="text-body-3 font-semibold text-neutral-950">{it.statusLabel}</span>
+                <span className="text-body-5 text-neutral-500">{compactDateLabel(it.requestedAt)} 문의</span>
                 <ChevronRight size={20} strokeWidth={2} className="ml-auto text-neutral-400" aria-hidden />
               </div>
               <div className="mt-3 flex gap-3">

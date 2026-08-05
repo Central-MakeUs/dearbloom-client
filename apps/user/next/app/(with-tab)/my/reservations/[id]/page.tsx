@@ -1,5 +1,11 @@
 import { cookies } from 'next/headers';
-import { ampmTimeLabel, getMyInquiry, shortDateLabel, type InquiryStatus } from '@dearbloom/shared';
+import {
+  ampmTimeLabel,
+  compactDateLabel,
+  getMyInquiry,
+  shortDateLabel,
+  type InquiryStatus,
+} from '@dearbloom/shared';
 import { CancelInquiry } from './CancelInquiry';
 
 export const dynamic = 'force-dynamic';
@@ -61,9 +67,12 @@ export default async function ReservationDetailPage({ params }: { params: Promis
     <div className="flex gap-3">
       <img src={d.artworkImageUrl} alt="" className="h-[100px] w-[76px] shrink-0 rounded-md object-cover" />
       <div className="min-w-0 flex-1">
-        <span className={`inline-block rounded-md px-2 py-1 text-caption-1 ${statusBadgeClass(d.status)}`}>
-          {STATUS_LABEL[d.status]}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`inline-block rounded-md px-2 py-1 text-caption-1 ${statusBadgeClass(d.status)}`}>
+            {STATUS_LABEL[d.status]}
+          </span>
+          <span className="text-body-5 text-neutral-500">{compactDateLabel(d.requestedAt)} 문의</span>
+        </div>
         <p className="mt-2 truncate text-body-3 font-semibold text-neutral-950">{d.artworkName}</p>
         {d.artistNickname && (
           <p className="mt-0.5 truncate text-body-5 text-neutral-500">{d.artistNickname}</p>

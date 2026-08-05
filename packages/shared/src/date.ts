@@ -17,6 +17,15 @@ export function shortDateLabel(date: string): string {
   return `${yy}.${mm}.${dd} (${DAY_OF_WEEK_KR[d.getDay()]})`;
 }
 
+/** '26.06.11' — 요일 없는 짧은 표기(문의 접수일 등). ISO 일시도 허용. */
+export function compactDateLabel(dateOrIso: string): string {
+  const d = toLocalDate(dateOrIso.slice(0, 10));
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yy}.${mm}.${dd}`;
+}
+
 /** '2026.06.11(화)' — 채팅 문의 카드 */
 export function fullDateLabel(date: string): string {
   const d = toLocalDate(date);

@@ -15,6 +15,8 @@ export interface CustomerInquiryListItem {
   inquiryId: number;
   status: InquiryStatus;
   statusLabel: string;
+  /** 문의 신청 시각(ISO). 목록/상세의 'NN.NN.NN 문의' 표기에 사용. */
+  requestedAt: string;
   artistNickname: string;
   artworkName: string;
   packageName: string;
@@ -27,6 +29,8 @@ export interface CustomerInquiryListItem {
 export interface InquiryDetail {
   inquiryId: number;
   status: InquiryStatus;
+  /** 문의 신청 시각(ISO) */
+  requestedAt: string;
   /** 고객 상세에만 있음(작가 상세엔 customerName 이 옵니다) */
   artistNickname?: string;
   /** 작가 상세에만 있음 */
@@ -138,6 +142,8 @@ export interface ArtistInquiryListItem {
   inquiryId: number;
   status: InquiryStatus;
   statusLabel: string;
+  /** 문의 신청 시각(ISO) */
+  requestedAt: string;
   customerName: string;
   customerImageUrl: string | null;
   artworkName: string;
