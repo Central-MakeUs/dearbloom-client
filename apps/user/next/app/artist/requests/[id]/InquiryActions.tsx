@@ -4,10 +4,11 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@dearbloom/ui';
+import type { InquiryStatus } from '@dearbloom/shared';
 
 type Action = 'reserve' | 'reserve-cancel' | 'cancel';
 
-export function InquiryActions({ id, status }: { id: number; status?: string }) {
+export function InquiryActions({ id, status }: { id: number; status: InquiryStatus }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -34,7 +35,7 @@ export function InquiryActions({ id, status }: { id: number; status?: string }) 
     buttons = (
       <Button type="button" variant="outline" size="lg" className="flex-1" disabled={busy} onClick={() => run('reserve-cancel', '예약을 취소했어요.')}>예약 취소</Button>
     );
-  } else if (!status || status === 'IN_PROGRESS') {
+  } else if (status === 'IN_PROGRESS') {
     buttons = (
       <>
         <Button type="button" variant="outline" size="lg" className="flex-1" disabled={busy} onClick={() => run('cancel', '문의를 취소했어요.')}>문의 취소</Button>

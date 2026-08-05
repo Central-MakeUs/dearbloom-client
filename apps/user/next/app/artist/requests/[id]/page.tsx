@@ -25,15 +25,8 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export default async function ArtistRequestDetailPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ status?: string }>;
-}) {
+export default async function ArtistRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { status } = await searchParams;
   const token = (await cookies()).get('accessToken')?.value;
 
   const d = token ? await getReceivedInquiry(id, { token }).catch(() => null) : null;
@@ -66,7 +59,8 @@ export default async function ArtistRequestDetailPage({
         </Card>
       </div>
       {token && <InquiryTimeline id={id} token={token} />}
-      <InquiryActions id={d.inquiryId} status={status} />
+      {/* 상태는 상세 응답을 신뢰한다 — 쿼리스트링으로 받으면 직접 진입/전이 직후에 실제 상태와 어긋난다. */}
+      <InquiryActions id={d.inquiryId} status={d.status} />
     </div>
   );
 }
