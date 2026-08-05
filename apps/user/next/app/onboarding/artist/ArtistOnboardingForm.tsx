@@ -7,6 +7,7 @@ import type { ArtistRegionCode } from '@dearbloom/shared';
 import { BottomButton, TextField } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
+import { isNativeApp, submitFormNavigation } from '@/src/lib/submitFormNavigation';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
@@ -100,6 +101,12 @@ export function ArtistOnboardingForm({
       formData.delete('region');
       regions.forEach((region) => formData.append('region', region));
       formData.set('imageUrl', await uploadImage(imageFile));
+
+      if (isNativeApp()) {
+        submitFormNavigation(form.action, formData);
+        return;
+      }
+
       const response = await fetch(form.action, { method: 'POST', body: formData });
 
       if (response.redirected) {
