@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ApiError, createCustomer } from '@dearbloom/shared';
+import { ApiError, createCustomer, switchMemberRole } from '@dearbloom/shared';
 
 import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
 
@@ -10,19 +10,14 @@ export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   if (!token) return errorResponse(401, '로그인이 필요합니다.');
 
-  const formSubmission = !request.headers.get('content-type')?.includes('application/json');
   const payload = await getPayload(request);
   if (!payload) return errorResponse(400, '이름, 학교 또는 지역 정보가 올바르지 않습니다.');
 
   try {
     const result = await createCustomer(payload, { token });
-    const response = formSubmission
-      ? new NextResponse(null, {
-          headers: { Location: '/app/onboarding?completed=1' },
-          status: 303,
-        })
-      : NextResponse.json({ customer: result.customer });
-    setAuthCookie(request, response, 'accessToken', result.accessToken);
+    const session = await switchMemberRole('CUSTOMER', { token: result.accessToken });
+    const response = NextResponse.json({ customer: result.customer });
+    setAuthCookie(request, response, 'accessToken', session.accessToken);
     setOnboardingPendingCookie(request, response, false);
 
     return response;
@@ -37,18 +32,7 @@ export async function POST(request: NextRequest) {
 
 async function getPayload(request: NextRequest) {
   try {
-    if (request.headers.get('content-type')?.includes('application/json')) {
-      return parseCustomerPayload(await request.json());
-    }
-
-    const formData = await request.formData();
-    const universityId = formData.get('universityId');
-
-    return parseCustomerPayload({
-      name: formData.get('name'),
-      region: formData.get('region') || undefined,
-      universityId: universityId ? Number(universityId) : undefined,
-    });
+    return parseCustomerPayload(await request.json());
   } catch {
     return undefined;
   }
