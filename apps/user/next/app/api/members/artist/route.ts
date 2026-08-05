@@ -9,7 +9,11 @@ import {
 } from '@dearbloom/shared';
 
 import { LOGIN_HREF } from '@/src/lib/env';
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
+import {
+  getTokenActiveRole,
+  setAuthCookie,
+  setOnboardingPendingCookie,
+} from '@/src/lib/authCookies';
 
 import { parseArtistRegions } from './artistRegions';
 
@@ -29,7 +33,10 @@ export async function POST(request: NextRequest) {
   let accessToken: string;
   try {
     const result = await createArtist({ nickname, regionList: regions }, { token });
-    accessToken = (await switchMemberRole('ARTIST', { token: result.accessToken })).accessToken;
+    accessToken =
+      getTokenActiveRole(result.accessToken) === 'ARTIST'
+        ? result.accessToken
+        : (await switchMemberRole('ARTIST', { token: result.accessToken })).accessToken;
   } catch (error) {
     const reason = error instanceof ApiError ? error.code ?? 'api' : 'failed';
     return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);

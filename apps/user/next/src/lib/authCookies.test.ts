@@ -6,13 +6,14 @@ import { NextResponse } from 'next/server.js';
 
 import {
   getAuthCookieOptions,
+  getTokenActiveRole,
   getTokenMaxAge,
   setAuthCookie,
   setOnboardingPendingCookie,
 } from './authCookies.ts';
 
-function token(exp: number) {
-  return `header.${Buffer.from(JSON.stringify({ exp })).toString('base64url')}.signature`;
+function token(exp: number, activeRole?: string) {
+  return `header.${Buffer.from(JSON.stringify({ activeRole, exp })).toString('base64url')}.signature`;
 }
 
 function request(
@@ -76,6 +77,12 @@ test('cookie lifetime follows JWT exp across environments', () => {
   assert.equal(getTokenMaxAge(token(20_800), 10_000), 10_800);
   assert.equal(getTokenMaxAge(token(2_602_000), 10_000), 2_592_000);
   assert.equal(getTokenMaxAge('not-a-jwt', 10_000), undefined);
+});
+
+test('JWT activeRole은 지원하는 역할만 반환한다', () => {
+  assert.equal(getTokenActiveRole(token(20_800, 'CUSTOMER')), 'CUSTOMER');
+  assert.equal(getTokenActiveRole(token(20_800, 'ARTIST')), 'ARTIST');
+  assert.equal(getTokenActiveRole(token(20_800, 'UNKNOWN')), undefined);
 });
 
 test('onboarding pending marker is set and cleared for both cookie scopes', () => {
