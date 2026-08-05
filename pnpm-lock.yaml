@@ -270,6 +270,9 @@ importers:
       eslint:
         specifier: ^9.0.0
         version: 9.39.4(jiti@1.21.7)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.19(yaml@2.9.0)
