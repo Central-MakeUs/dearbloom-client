@@ -9,5 +9,6 @@ import { BottomTab } from '@dearbloom/ui';
  */
 export function AppBottomTab() {
   const pathname = usePathname() ?? '/';
+  if (pathname.startsWith('/my/reservations')) return null;
   return <BottomTab currentPath={`/app${pathname}`} />;
 }

@@ -1,4 +1,4 @@
-/** 촬영 시간 그리드 — 09:00~21:00 을 30분 간격으로 끊은 고정 격자(Figma). */
+/** 촬영 시작 시간 그리드 — 09:00~20:30 을 30분 간격으로 끊은 24개 고정 격자. */
 
 const GRID_START_MINUTES = 9 * 60;
 const GRID_END_MINUTES = 21 * 60;
@@ -6,11 +6,11 @@ const GRID_END_MINUTES = 21 * 60;
 const toLabel = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 
-/** ['09:00', '09:30', ..., '21:00'] */
+/** ['09:00', '09:30', ..., '20:30'] */
 export function buildSlotGrid(stepMinutes: number): string[] {
   const step = stepMinutes > 0 ? stepMinutes : 30;
   const slots: string[] = [];
-  for (let m = GRID_START_MINUTES; m <= GRID_END_MINUTES; m += step) slots.push(toLabel(m));
+  for (let m = GRID_START_MINUTES; m < GRID_END_MINUTES; m += step) slots.push(toLabel(m));
   return slots;
 }
 

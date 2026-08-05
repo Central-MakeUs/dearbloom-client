@@ -114,6 +114,7 @@ export function SmartInquiryCta({ packages, inquiryHref = '/app/inquiries/new' }
         if (!next) setListOpen(false);
       }}
       title="패키지 선택"
+      showHandle={false}
     >
       {sheetHeader}
       {packageField}
