@@ -158,8 +158,10 @@ export function ChatRoomView({
     </div>
   );
 
+  // 채팅방은 (with-tab) 레이아웃 밖이라 배경을 직접 준다.
+  // 이게 없으면 페이지가 흰 바탕이 되어 수신 말풍선(neutral-0)이 배경에 묻힌다.
   return (
-    <div className="mx-auto flex max-w-md flex-col">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
       <Header title={peerName} onBack={() => (window.location.href = backHref)} />
       {list}
       <ChatComposer onSendText={sendText} onSendImage={sendImage} />
