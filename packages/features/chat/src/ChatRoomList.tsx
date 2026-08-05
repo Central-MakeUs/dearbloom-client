@@ -18,30 +18,27 @@ export function ChatRoomList({ rooms, roomHref }: ChatRoomListProps) {
         <li key={room.roomId}>
           <a href={roomHref(room.roomId)} className="flex items-center gap-3 px-4 py-3">
             {room.peerImageUrl ? (
-              <img src={room.peerImageUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+              <img src={room.peerImageUrl} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" />
             ) : (
-              <span className="h-12 w-12 shrink-0 rounded-full bg-neutral-200" aria-hidden />
+              <span className="h-14 w-14 shrink-0 rounded-full bg-neutral-200" aria-hidden />
             )}
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-body-3 text-neutral-950">{room.peerName}</span>
-                {room.lastMessageAt && (
-                  <span className="shrink-0 text-caption-2 text-neutral-500">
-                    {chatTimestampLabel(room.lastMessageAt)}
-                  </span>
-                )}
-              </div>
-              <p className="mt-0.5 truncate text-body-5 text-neutral-600">
-                {room.lastMessagePreview ?? ''}
-              </p>
+              <p className="truncate text-body-3 font-semibold text-neutral-950">{room.peerName}</p>
+              <p className="mt-1 truncate text-body-5 text-neutral-500">{room.lastMessagePreview ?? ''}</p>
             </div>
 
-            {room.unreadCount > 0 && (
-              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-caption-3 text-neutral-0">
-                {room.unreadCount}
+            {/* 시각 위, 안읽음 배지 아래로 쌓이는 우측 컬럼(Figma). */}
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <span className="text-caption-2 text-neutral-500">
+                {room.lastMessageAt ? chatTimestampLabel(room.lastMessageAt) : ''}
               </span>
-            )}
+              {room.unreadCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-caption-3 text-neutral-0">
+                  {room.unreadCount}
+                </span>
+              )}
+            </div>
           </a>
         </li>
       ))}
