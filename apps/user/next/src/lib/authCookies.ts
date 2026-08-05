@@ -2,6 +2,7 @@ import type { NextRequest, NextResponse } from 'next/server';
 
 type AuthCookieName = 'accessToken' | 'refreshToken';
 type SessionCookieName = AuthCookieName | 'onboardingPending';
+type TokenRole = 'ARTIST' | 'CUSTOMER';
 const PENDING_ONBOARDING_MAX_AGE = 60 * 60 * 24 * 30;
 
 export function setAuthCookie(
@@ -60,17 +61,27 @@ export function expireAuthCookie(
 }
 
 export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000)) {
+  const exp = getTokenPayload(token)?.exp;
+
+  return typeof exp === 'number' && Number.isFinite(exp)
+    ? Math.max(0, Math.floor(exp - now))
+    : undefined;
+}
+
+export function getTokenActiveRole(token: string): TokenRole | undefined {
+  const activeRole = getTokenPayload(token)?.activeRole;
+  return activeRole === 'ARTIST' || activeRole === 'CUSTOMER' ? activeRole : undefined;
+}
+
+function getTokenPayload(token: string): Record<string, unknown> | undefined {
   try {
     const payload = token.split('.')[1];
     if (!payload) return undefined;
 
-    const { exp } = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      exp?: unknown;
-    };
-
-    return typeof exp === 'number' && Number.isFinite(exp)
-      ? Math.max(0, Math.floor(exp - now))
-      : undefined;
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<
+      string,
+      unknown
+    >;
   } catch {
     return undefined;
   }

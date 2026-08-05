@@ -2,7 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { ApiError, createCustomer, switchMemberRole } from '@dearbloom/shared';
 
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
+import {
+  getTokenActiveRole,
+  setAuthCookie,
+  setOnboardingPendingCookie,
+} from '@/src/lib/authCookies';
 
 import { parseCustomerPayload } from './customerPayload';
 
@@ -15,9 +19,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await createCustomer(payload, { token });
-    const session = await switchMemberRole('CUSTOMER', { token: result.accessToken });
+    const accessToken =
+      getTokenActiveRole(result.accessToken) === 'CUSTOMER'
+        ? result.accessToken
+        : (await switchMemberRole('CUSTOMER', { token: result.accessToken })).accessToken;
     const response = NextResponse.json({ customer: result.customer });
-    setAuthCookie(request, response, 'accessToken', session.accessToken);
+    setAuthCookie(request, response, 'accessToken', accessToken);
     setOnboardingPendingCookie(request, response, false);
 
     return response;
