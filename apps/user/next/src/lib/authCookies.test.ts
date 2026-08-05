@@ -4,7 +4,12 @@ import test from 'node:test';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server.js';
 
-import { getAuthCookieOptions, getTokenMaxAge, setAuthCookie } from './authCookies.ts';
+import {
+  getAuthCookieOptions,
+  getTokenMaxAge,
+  setAuthCookie,
+  setOnboardingPendingCookie,
+} from './authCookies.ts';
 
 function token(exp: number) {
   return `header.${Buffer.from(JSON.stringify({ exp })).toString('base64url')}.signature`;
@@ -26,7 +31,7 @@ function request(
   } as NextRequest;
 }
 
-test('dearbloom hosts replace backend domain cookies', () => {
+test('dearbloom subdomains replace host-only cookies', () => {
   const dearBloomRequest = request(
     'user-next.vercel.app',
     'https:',
@@ -46,6 +51,17 @@ test('dearbloom hosts replace backend domain cookies', () => {
   assert.doesNotMatch(response.headers.getSetCookie()[1] ?? '', /Domain=/);
 });
 
+test('dearbloom root keeps the new domain cookie', () => {
+  const dearBloomRequest = request('dearbloom.co.kr', 'https:');
+  const response = NextResponse.json({});
+
+  setAuthCookie(dearBloomRequest, response, 'accessToken', token(Math.floor(Date.now() / 1000) + 3600));
+
+  assert.equal(response.headers.getSetCookie().length, 1);
+  assert.match(response.headers.getSetCookie()[0] ?? '', /Domain=.dearbloom.co.kr/);
+  assert.doesNotMatch(response.headers.getSetCookie()[0] ?? '', /Max-Age=0/);
+});
+
 test('local and tunnel hosts keep host-only cookies', () => {
   const local = getAuthCookieOptions(request('localhost:3000', 'http:'), 3600);
   const tunnel = getAuthCookieOptions(request('example.trycloudflare.com', 'http:', 'https'), 3600);
@@ -60,4 +76,23 @@ test('cookie lifetime follows JWT exp across environments', () => {
   assert.equal(getTokenMaxAge(token(20_800), 10_000), 10_800);
   assert.equal(getTokenMaxAge(token(2_602_000), 10_000), 2_592_000);
   assert.equal(getTokenMaxAge('not-a-jwt', 10_000), undefined);
+});
+
+test('onboarding pending marker is set and cleared for both cookie scopes', () => {
+  const dearBloomRequest = request(
+    'user-next.vercel.app',
+    'https:',
+    'https',
+    'dev.dearbloom.co.kr',
+  );
+  const pendingResponse = NextResponse.json({});
+  const completeResponse = NextResponse.json({});
+
+  setOnboardingPendingCookie(dearBloomRequest, pendingResponse, true);
+  setOnboardingPendingCookie(dearBloomRequest, completeResponse, false);
+
+  assert.match(pendingResponse.headers.getSetCookie()[0] ?? '', /onboardingPending=1/);
+  assert.equal(pendingResponse.headers.getSetCookie().length, 2);
+  assert.equal(completeResponse.headers.getSetCookie().length, 2);
+  assert.ok(completeResponse.headers.getSetCookie().every((cookie) => /Max-Age=0/.test(cookie)));
 });
