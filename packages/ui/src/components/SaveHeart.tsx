@@ -16,11 +16,6 @@ interface SaveHeartProps {
    * astro(루트) '/api/saved' 기본값, next(basePath '/app')는 '/app/api/saved' 를 넘기세요.
    */
   endpoint?: string;
-  /**
-   * 비로그인(401)일 때 이동할 로그인 경로. 기본 '/app/login'(astro/next 공용).
-   * 이동 시 현재 경로를 returnUrl 로 붙여 로그인 후 원래 보던 작품으로 복귀시킨다.
-   */
-  loginHref?: string;
 }
 
 /**
@@ -35,7 +30,6 @@ export function SaveHeart({
   className,
   onChange,
   endpoint = '/api/saved',
-  loginHref = '/app/login',
 }: SaveHeartProps) {
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
@@ -58,8 +52,7 @@ export function SaveHeart({
       if (res.status === 401) {
         setSaved(!next);
         onChange?.(!next);
-        const returnUrl = window.location.pathname + window.location.search;
-        window.location.href = `${loginHref}?returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = '/app';
         return;
       }
       if (!res.ok) throw new Error(String(res.status));

@@ -5,9 +5,7 @@ import AppShellLayout from '@/layouts/AppShellLayout.astro';
 import { ArtworkCard } from '@dearbloom/ui';
 import { getArtworks, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
 
-const token = Astro.cookies.has('onboardingPending')
-  ? undefined
-  : Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.get('accessToken')?.value;
 // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지). 비로그인은 캐시 가능(SEO).
 if (token) Astro.response.headers.set('Cache-Control', 'private, no-store');
 

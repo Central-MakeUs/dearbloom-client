@@ -9,8 +9,6 @@
     "lint": "eslint .",
     "test:artist-regions": "node --experimental-strip-types --test app/api/members/artist/artistRegions.test.ts",
     "test:auth-cookies": "node --experimental-strip-types --test src/lib/authCookies.test.ts",
-    "test:customer-onboarding": "node --experimental-strip-types --test app/api/members/customer/customerPayload.test.ts",
-    "test:onboarding-route": "node --experimental-strip-types --test src/lib/onboardingRoute.test.ts",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
