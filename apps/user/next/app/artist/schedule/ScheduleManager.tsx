@@ -100,13 +100,6 @@ export function ScheduleManager({
     if (recEnd <= v) setRecEnd(nextSlot(v));
   };
   const addRecurring = async () => {
-    const duplicate = recurring.some(
-      (r) => r.dayOfWeek === recDay && hhmm(r.startTime) === recStart && hhmm(r.endTime) === recEnd,
-    );
-    if (duplicate) {
-      toast.error('이미 추가된 반복 예약 불가예요.');
-      return;
-    }
     setBusy(true);
     const ok = await send(`${BASE}/recurring-blocks`, 'POST', {
       dayOfWeek: recDay,
@@ -130,13 +123,6 @@ export function ScheduleManager({
   };
   const addDate = async () => {
     if (!blkDate) { toast.error('날짜를 선택해주세요.'); return; }
-    const duplicate = dates.some(
-      (r) => r.blockDate === blkDate && hhmm(r.startTime) === blkStart && hhmm(r.endTime) === blkEnd,
-    );
-    if (duplicate) {
-      toast.error('이미 추가된 예약 불가 날짜예요.');
-      return;
-    }
     setBusy(true);
     const ok = await send(`${BASE}/date-blocks`, 'POST', {
       date: blkDate,

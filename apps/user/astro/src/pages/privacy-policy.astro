@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 // 개인정보 처리방침 (앱 심사/이용자 고지용)
 // 진입점 링크 없이 URL(/privacy-policy)로 직접 접근합니다.
 const CONTACT_EMAIL = 'dearbloom.qa@gmail.com';
-const EFFECTIVE_DATE = '2026년 7월 31일';
+const EFFECTIVE_DATE = '2026년 7월 27일';
 ---
 
 <BaseLayout title="개인정보 처리방침">
@@ -27,16 +27,24 @@ const EFFECTIVE_DATE = '2026년 7월 31일';
       <p>서비스는 회원가입, 서비스 이용 과정에서 아래 개인정보를 수집합니다.</p>
       <ul class="mt-2 list-disc space-y-1 pl-5">
         <li>
-          <strong>계정 및 소셜 로그인 정보</strong>: 내부 회원 식별자, 소셜 계정 고유 식별자,
-          이메일 주소, 프로필 이름(구글·애플 등 소셜 로그인 제공자로부터 전달받는 정보)
+          <strong>소셜 로그인 정보</strong>: 소셜 계정 고유 식별자, 이메일 주소, 프로필 이름,
+          프로필 이미지(구글·애플 등 소셜 로그인 제공자로부터 전달받는 정보)
         </li>
         <li>
-          <strong>프로필 및 게시 정보</strong>: 회원 유형(고객/아티스트), 이름 또는 닉네임,
-          프로필 사진, 활동 지역, 학교, 소개글, 작품 정보 및 작품·포트폴리오 이미지
+          <strong>프로필 정보</strong>: 회원 유형(고객/아티스트), 닉네임, 활동·관심 지역,
+          학교, 소개글, 아티스트가 등록한 작품·포트폴리오 이미지
         </li>
         <li>
-          <strong>서비스 이용 정보</strong>: 채팅 메시지와 채팅 이미지, 문의 요청사항 및
-          문의·예약 상태, 찜(저장) 목록, 신고 내용
+          <strong>서비스 이용 정보</strong>: 채팅 메시지, 예약·매칭 내역, 찜(저장) 목록,
+          검색어, 비교·조회 기록
+        </li>
+        <li>
+          <strong>결제·정산 정보</strong>: (아티스트) 정산 및 포인트 지급에 필요한 정보,
+          거래 내역
+        </li>
+        <li>
+          <strong>자동 수집 정보</strong>: 기기 정보(OS·모델·식별자), IP 주소, 쿠키,
+          접속 로그, 서비스 이용 기록, 오류 로그
         </li>
       </ul>
 
@@ -45,9 +53,11 @@ const EFFECTIVE_DATE = '2026년 7월 31일';
       </h2>
       <ul class="mt-2 list-disc space-y-1 pl-5">
         <li>회원 식별 및 소셜 로그인 기반 인증·계정 관리</li>
-        <li>고객–아티스트 탐색, 문의·예약, 채팅 등 핵심 기능 제공</li>
+        <li>고객–아티스트 매칭, 예약, 채팅 등 핵심 기능 제공</li>
         <li>아티스트 작품·포트폴리오 게시 및 노출</li>
-        <li>찜(저장) 목록 제공 및 신고·분쟁 처리</li>
+        <li>결제·정산 및 포인트 지급 처리</li>
+        <li>고객 문의 응대, 공지 전달, 분쟁 처리</li>
+        <li>부정 이용 방지, 서비스 안정성 확보 및 품질 개선</li>
       </ul>
 
       <h2 class="mt-8 mb-3 text-head-2 font-semibold text-neutral-900">
@@ -59,9 +69,10 @@ const EFFECTIVE_DATE = '2026년 7월 31일';
       </p>
       <ul class="mt-2 list-disc space-y-1 pl-5">
         <li>회원 정보: 회원 탈퇴 시까지</li>
-        <li>서비스 이용 정보: 회원 탈퇴 또는 해당 정보의 이용 목적 달성 시까지</li>
-        <li>계약·청약철회 기록: 해당 기록이 발생한 경우 5년 (전자상거래법)</li>
-        <li>소비자 불만·분쟁 처리 기록: 해당 기록이 발생한 경우 3년 (전자상거래법)</li>
+        <li>계약 또는 청약철회 등에 관한 기록: 5년 (전자상거래법)</li>
+        <li>대금결제 및 재화 공급에 관한 기록: 5년 (전자상거래법)</li>
+        <li>소비자 불만 또는 분쟁 처리에 관한 기록: 3년 (전자상거래법)</li>
+        <li>서비스 접속(로그인) 기록: 3개월 (통신비밀보호법)</li>
       </ul>
 
       <h2 class="mt-8 mb-3 text-head-2 font-semibold text-neutral-900">
@@ -83,7 +94,8 @@ const EFFECTIVE_DATE = '2026년 7월 31일';
       </p>
       <ul class="mt-2 list-disc space-y-1 pl-5">
         <li>소셜 로그인 인증: 구글(Google), 애플(Apple)</li>
-        <li>이미지 파일 저장: Amazon Web Services(AWS S3)</li>
+        <li>클라우드 인프라 및 데이터 저장·운영</li>
+        <li>결제·정산 대행(해당 시)</li>
       </ul>
 
       <h2 class="mt-8 mb-3 text-head-2 font-semibold text-neutral-900">
@@ -109,7 +121,8 @@ const EFFECTIVE_DATE = '2026년 7월 31일';
       </h2>
       <ul class="mt-2 list-disc space-y-1 pl-5">
         <li>개인정보 접근 권한의 최소화 및 접근 통제</li>
-        <li>전송 구간 암호화(HTTPS)</li>
+        <li>전송 구간 암호화(HTTPS) 및 주요 정보의 암호화 저장</li>
+        <li>접속 기록 보관 및 위·변조 방지</li>
         <li>내부 관리 계획 수립 및 정기적 점검</li>
       </ul>
 

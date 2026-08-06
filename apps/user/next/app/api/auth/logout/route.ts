@@ -1,8 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { logoutMember } from '@dearbloom/shared';
 
-import { expireAuthCookie } from '@/src/lib/authCookies';
-
 export async function GET(request: NextRequest) {
   // 서버측 세션(refresh) 무효화. 실패해도 쿠키는 만료시켜 클라이언트 로그아웃은 보장.
   const token = request.cookies.get('accessToken')?.value;
@@ -13,7 +11,6 @@ export async function GET(request: NextRequest) {
 
   expireAuthCookie(request, response, 'accessToken');
   expireAuthCookie(request, response, 'refreshToken');
-  expireAuthCookie(request, response, 'onboardingPending');
 
   return response;
 }
@@ -25,4 +22,16 @@ function getPublicOrigin(request: NextRequest) {
   const protocol = forwardedProto ?? request.nextUrl.protocol.replace(':', '');
 
   return `${protocol}://${host}`;
+}
+
+function expireAuthCookie(request: NextRequest, response: NextResponse, name: string) {
+  const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const hostname = host.split(':')[0] ?? request.nextUrl.hostname;
+
+  response.headers.append('Set-Cookie', expiredCookie);
+
+  if (hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr')) {
+    response.headers.append('Set-Cookie', `${expiredCookie}; Domain=.dearbloom.co.kr; Secure`);
+  }
 }

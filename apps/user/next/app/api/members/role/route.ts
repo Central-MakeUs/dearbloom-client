@@ -1,9 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ApiError, getMemberMe, switchMemberRole, type MemberRole } from '@dearbloom/shared';
+import {
+  ApiError,
+  getMemberMe,
+  switchMemberRole,
+  type MemberRole,
+} from '@dearbloom/shared';
 
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
-import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { setAuthCookie } from '@/src/lib/authCookies';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
@@ -17,17 +21,14 @@ export async function POST(request: NextRequest) {
     const hasProfile = role === 'CUSTOMER' ? member.hasCustomer : member.hasArtist;
 
     if (!hasProfile) {
-      const response = NextResponse.json({
-        destination: getOnboardingTermsPath(role),
+      return NextResponse.json({
+        destination: role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist',
       });
-      setOnboardingPendingCookie(request, response, true);
-      return response;
     }
 
     const result = await switchMemberRole(role, { token });
     const response = NextResponse.json({ destination: getHome(role) });
     setAuthCookie(request, response, 'accessToken', result.accessToken);
-    setOnboardingPendingCookie(request, response, false);
 
     return response;
   } catch (error) {

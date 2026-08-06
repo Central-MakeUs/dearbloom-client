@@ -8,7 +8,6 @@ import {
 } from '@dearbloom/features-auth';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
-import { safeReturnUrl } from '@/src/lib/returnUrl';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 
@@ -18,7 +17,6 @@ export function GET(request: NextRequest) {
   const forceOnboarding = shouldForceOnboarding(
     request.nextUrl.searchParams.get('forceOnboarding'),
   );
-  const returnUrl = safeReturnUrl(request.nextUrl.searchParams.get('returnUrl'));
 
   if (!provider || !role) {
     const reason = provider ? 'invalid_role' : 'invalid_provider';
@@ -60,13 +58,6 @@ export function GET(request: NextRequest) {
   response.cookies.set('forceOnboarding', forceOnboarding ? '1' : '', {
     httpOnly: true,
     maxAge: forceOnboarding ? 60 * 10 : 0,
-    path: '/',
-    sameSite: 'lax',
-    secure: request.nextUrl.protocol === 'https:',
-  });
-  response.cookies.set('oauthReturnUrl', returnUrl ?? '', {
-    httpOnly: true,
-    maxAge: returnUrl ? 60 * 10 : 0,
     path: '/',
     sameSite: 'lax',
     secure: request.nextUrl.protocol === 'https:',

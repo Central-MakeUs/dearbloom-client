@@ -4,9 +4,7 @@ import type { AuthRole } from '@dearbloom/features-auth';
 import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
-import { safeReturnUrl } from '@/src/lib/returnUrl';
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
-import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { setAuthCookie } from '@/src/lib/authCookies';
 
 type LocalTokenExchangeResponse = {
   accessToken?: string;
@@ -43,16 +41,7 @@ export async function GET(request: NextRequest) {
       return redirectLoginError(request, 'missing_one_time_code', role);
     }
 
-    const response = redirectAfterLogin(
-      request,
-      role,
-      forceOnboarding || needsOnboarding,
-      forceOnboarding,
-    );
-    if (needsOnboarding !== undefined) {
-      setOnboardingPendingCookie(request, response, needsOnboarding);
-    }
-    return response;
+    return redirectAfterLogin(request, role, forceOnboarding || needsOnboarding, forceOnboarding);
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
@@ -63,9 +52,7 @@ export async function GET(request: NextRequest) {
 
   const localNeedsOnboarding =
     needsOnboarding ??
-    (role
-      ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role)
-      : undefined);
+    (role ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role) : undefined);
   const response = redirectAfterLogin(
     request,
     role,
@@ -74,14 +61,15 @@ export async function GET(request: NextRequest) {
   );
   setAuthCookie(request, response, 'accessToken', tokenExchangeResult.tokens.accessToken);
   setAuthCookie(request, response, 'refreshToken', tokenExchangeResult.tokens.refreshToken);
-  setOnboardingPendingCookie(request, response, localNeedsOnboarding === true);
 
   return response;
 }
 
 async function exchangeOneTimeCode(oneTimeCode: string) {
   const apiBaseUrl = normalizeBaseUrl(
-    process.env.NEXT_PUBLIC_OAUTH_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl,
+    process.env.NEXT_PUBLIC_OAUTH_API_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      fallbackApiBaseUrl,
   );
 
   try {
@@ -144,18 +132,15 @@ function redirectAfterLogin(
     return redirectLoginError(request, 'missing_onboarding_state', role);
   }
 
-  // 온보딩이 필요하면 온보딩이 우선(returnUrl 무시). 아니면 returnUrl(찜 등에서 보던 곳)로 복귀.
-  const returnUrl = needsOnboarding
-    ? undefined
-    : safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
-  const destination =
-    returnUrl ??
-    (needsOnboarding
-      ? getOnboardingTermsPath(role, forceOnboarding)
-      : role === 'CUSTOMER'
-        ? '/snaps'
-        : '/app/artist/dashboard');
+  const destination = needsOnboarding
+    ? role === 'CUSTOMER'
+      ? '/app/onboarding'
+      : '/app/onboarding/artist'
+    : role === 'CUSTOMER'
+      ? '/snaps'
+      : '/app/artist/dashboard';
   const url = new URL(destination, getPublicOrigin(request));
+  if (forceOnboarding) url.searchParams.set('forceOnboarding', '1');
 
   return clearOAuthCookies(NextResponse.redirect(url));
 }
@@ -184,11 +169,6 @@ function clearOAuthCookies(response: NextResponse) {
     maxAge: 0,
     path: '/',
   });
-  response.cookies.set('oauthReturnUrl', '', {
-    expires: new Date(0),
-    maxAge: 0,
-    path: '/',
-  });
   return response;
 }
 
@@ -210,8 +190,7 @@ function getPublicOrigin(request: NextRequest) {
 }
 
 function isLocalRequest(request: NextRequest) {
-  const host =
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
 
   return host.startsWith('localhost') || host.startsWith('127.0.0.1');
 }
