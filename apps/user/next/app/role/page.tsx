@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 
 import type { OAuthProvider } from '@dearbloom/features-auth';
 
+import { LOGIN_REDIRECT_PATH } from '@/src/lib/env';
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 
@@ -22,10 +23,15 @@ export default async function RoleSelectionPage({ searchParams }: RoleSelectionP
   const provider = getOAuthProvider(providerParam);
   const returnUrl = safeReturnUrl(returnUrlParam);
 
-  if (!provider && !(await cookies()).has('accessToken')) redirect('/app/login');
+  // redirect() 는 basePath(`/app`)를 자동으로 붙이므로 경로에 `/app` 을 넣지 않는다.
+  if (!provider && !(await cookies()).has('accessToken')) redirect(LOGIN_REDIRECT_PATH);
 
   return (
-    <RoleSelectionForm forceOnboarding={forceOnboarding} provider={provider} returnUrl={returnUrl} />
+    <RoleSelectionForm
+      forceOnboarding={forceOnboarding}
+      provider={provider}
+      returnUrl={returnUrl}
+    />
   );
 }
 

@@ -3,28 +3,28 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
 
-import type { ArtistRegionCode } from '@dearbloom/shared';
+import { nicknameSchema, type ArtistRegionCode } from '@dearbloom/shared';
 import { BottomButton, TextField } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
-export function ArtistOnboardingForm({
-  forceOnboarding,
-  hasServerError,
-}: {
-  forceOnboarding: boolean;
-  hasServerError: boolean;
-}) {
+export function ArtistOnboardingForm({ forceOnboarding }: { forceOnboarding: boolean }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [nickname, setNickname] = useState('');
+  const [isNicknameTouched, setIsNicknameTouched] = useState(false);
   const [regions, setRegions] = useState<ArtistRegionCode[]>([]);
   const [regionError, setRegionError] = useState<string | null>(null);
-  const [error, setError] = useState(
-    hasServerError ? '작가 정보를 저장하지 못했습니다. 입력값을 확인해 주세요.' : '',
-  );
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const nicknameResult = nicknameSchema.safeParse(nickname);
+  const nicknameError =
+    isNicknameTouched && !nicknameResult.success
+      ? nicknameResult.error.issues[0]?.message
+      : undefined;
 
   function selectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -81,6 +81,11 @@ export function ArtistOnboardingForm({
       setError('프로필 사진을 선택해 주세요.');
       return;
     }
+    if (!nicknameResult.success) {
+      setIsNicknameTouched(true);
+      setError('');
+      return;
+    }
     if (regions.length === 0) {
       setRegionError('활동 지역을 1개 이상 선택해주세요');
       return;
@@ -102,12 +107,15 @@ export function ArtistOnboardingForm({
       formData.set('imageUrl', await uploadImage(imageFile));
       const response = await fetch(form.action, { method: 'POST', body: formData });
 
+      // 성공 시에만 라우트가 303 으로 새 accessToken 쿠키와 함께 대시보드로 보낸다.
+      // 실패는 JSON 이라 이 화면에 머물며, 업로드한 사진·선택한 지역이 그대로 남는다.
       if (response.redirected) {
-        document.cookie = 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
         window.location.assign(response.url);
         return;
       }
-      throw new Error('작가 정보를 저장하지 못했습니다.');
+
+      const body = (await response.json().catch(() => ({}))) as { message?: string };
+      throw new Error(body.message ?? '작가 정보를 저장하지 못했습니다.');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '오류가 발생했습니다.');
       setIsSubmitting(false);
@@ -137,7 +145,15 @@ export function ArtistOnboardingForm({
       >
         {profileImage}
         <span className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-neutral-0 bg-primary text-neutral-0">
-          <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="18">
+          <svg
+            aria-hidden
+            fill="none"
+            height="18"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="18"
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
         </span>
@@ -157,17 +173,29 @@ export function ArtistOnboardingForm({
     </div>
   );
 
+  const nicknameHelper = (
+    <span className="flex justify-between" role={nicknameError ? 'alert' : undefined}>
+      <span>{nicknameError ?? '2-12자의 한글, 영문, 숫자'}</span>
+      <span>{nickname.length}/12</span>
+    </span>
+  );
+
   const details = (
     <div className="flex flex-col gap-6">
       <TextField
         autoComplete="name"
+        error={!!nicknameError}
+        helper={nicknameHelper}
         id="artist-nickname"
         label="작가 이름"
-        maxLength={20}
-        minLength={1}
+        maxLength={12}
         name="nickname"
+        onBlur={() => setIsNicknameTouched(true)}
+        onChange={(event) => setNickname(event.target.value)}
+        onClear={() => setNickname('')}
         placeholder="이름을 입력하세요"
         required
+        value={nickname}
       />
       <ArtistRegionField
         error={regionError}
@@ -195,7 +223,12 @@ export function ArtistOnboardingForm({
   );
 
   return (
-    <form action="/app/api/members/artist" className="mt-6 flex flex-col gap-7" method="post" onSubmit={submit}>
+    <form
+      action="/app/api/members/artist"
+      className="mt-6 flex flex-col gap-7"
+      method="post"
+      onSubmit={submit}
+    >
       {imageField}
       {details}
       {errorMessage}

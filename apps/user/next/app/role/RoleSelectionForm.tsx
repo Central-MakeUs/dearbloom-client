@@ -102,9 +102,12 @@ export function RoleSelectionForm({
           );
         }
 
-        document.cookie = body.data.needsOnboarding
-          ? 'onboardingPending=1; Path=/; Max-Age=2592000; SameSite=Lax'
-          : 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
+        // 마커는 HttpOnly + Domain 스코프라 document.cookie 로는 못 지운다 — 라우트에 위임한다.
+        await fetch('/app/api/auth/onboarding', {
+          body: JSON.stringify({ needsOnboarding: body.data.needsOnboarding }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
 
         window.location.replace(
           getLoginDestination(

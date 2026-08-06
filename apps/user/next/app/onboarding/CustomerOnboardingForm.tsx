@@ -244,7 +244,7 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
 
       if (!response.ok) throw new Error(body.message ?? '고객 정보를 저장하지 못했습니다.');
 
-      document.cookie = 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
+      // onboardingPending 해제는 라우트 응답의 Set-Cookie 가 처리한다(HttpOnly 라 JS 로는 못 지움).
       setStep('complete');
       setIsSubmitting(false);
     } catch (submitError) {

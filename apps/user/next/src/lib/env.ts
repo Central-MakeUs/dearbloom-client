@@ -13,3 +13,11 @@ export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN !== 'f
  * 앱은 basePath `/app` 하위로 서빙되므로 경로에 `/app` 접두어를 포함한다.
  */
 export const LOGIN_HREF = '/app/login';
+
+/**
+ * 서버 컴포넌트의 `redirect()` 전용 로그인 경로.
+ * next 의 `redirect()` 는 Location 을 만들 때 basePath(`/app`)를 자동으로 붙이므로
+ * `LOGIN_HREF` 를 그대로 넘기면 `/app/app/login`(404)이 된다. 여기서는 basePath 를 뺀 경로를 쓴다.
+ * `<a href>` 등 브라우저가 그대로 쓰는 값에는 `LOGIN_HREF` 를 쓸 것.
+ */
+export const LOGIN_REDIRECT_PATH = '/login';
