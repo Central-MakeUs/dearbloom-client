@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
   expireAuthCookie(request, response, 'accessToken');
   expireAuthCookie(request, response, 'refreshToken');
+  expireAuthCookie(request, response, 'activeRole');
 
   return response;
 }
