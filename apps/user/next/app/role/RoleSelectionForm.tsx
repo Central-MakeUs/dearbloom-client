@@ -6,7 +6,7 @@ import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
 import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
 
-import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
+import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -223,7 +223,7 @@ export function RoleSelectionForm({
 
 function getLoginDestination(role: AuthRole, needsOnboarding: boolean, forceOnboarding = false) {
   if (needsOnboarding) {
-    return getOnboardingFormPath(role, forceOnboarding);
+    return getOnboardingTermsPath(role, forceOnboarding);
   }
 
   return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
