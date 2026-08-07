@@ -6,6 +6,8 @@ import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
 import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
 
+import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
@@ -44,9 +46,11 @@ declare global {
 export function RoleSelectionForm({
   forceOnboarding,
   provider,
+  returnUrl,
 }: {
   forceOnboarding: boolean;
   provider?: OAuthProvider;
+  returnUrl?: string;
 }) {
   const [role, setRole] = useState<MemberRole>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,8 +97,14 @@ export function RoleSelectionForm({
         const body = (await response.json()) as NativeLoginResponse;
 
         if (!response.ok || !body.data) {
-          throw new Error(body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`);
+          throw new Error(
+            body.error?.message ?? `로그인 서버가 HTTP ${response.status}로 응답했습니다.`,
+          );
         }
+
+        document.cookie = body.data.needsOnboarding
+          ? 'onboardingPending=1; Path=/; Max-Age=2592000; SameSite=Lax'
+          : 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
 
         window.location.replace(
           getLoginDestination(
@@ -104,7 +114,9 @@ export function RoleSelectionForm({
           ),
         );
       } catch (loginError) {
-        setError(loginError instanceof Error ? loginError.message : '로그인 서버 요청에 실패했습니다.');
+        setError(
+          loginError instanceof Error ? loginError.message : '로그인 서버 요청에 실패했습니다.',
+        );
         setIsSubmitting(false);
       }
     };
@@ -139,8 +151,9 @@ export function RoleSelectionForm({
       }
 
       const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+      const returnUrlQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
       window.location.assign(
-        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}`,
+        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}${returnUrlQuery}`,
       );
       return;
     }
@@ -184,10 +197,6 @@ export function RoleSelectionForm({
       >
         <span className="block text-head-2 text-neutral-950">{title}</span>
         <span className="mt-2 block w-[175px] text-body-2 text-neutral-950">{description}</span>
-        <span
-          aria-hidden
-          className="absolute right-[23px] top-[30px] h-[84px] w-[84px] rounded-full bg-neutral-0"
-        />
       </Card>
     </button>
   );
@@ -244,14 +253,9 @@ export function RoleSelectionForm({
   );
 }
 
-function getLoginDestination(
-  role: AuthRole,
-  needsOnboarding: boolean,
-  forceOnboarding = false,
-) {
+function getLoginDestination(role: AuthRole, needsOnboarding: boolean, forceOnboarding = false) {
   if (needsOnboarding) {
-    const destination = role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist';
-    return forceOnboarding ? `${destination}?forceOnboarding=1` : destination;
+    return getOnboardingTermsPath(role, forceOnboarding);
   }
 
   return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';

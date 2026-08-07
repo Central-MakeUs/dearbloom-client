@@ -1,22 +1,31 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ApiError, createCustomer, type CreateCustomerPayload } from '@dearbloom/shared';
+import { ApiError, createCustomer, switchMemberRole } from '@dearbloom/shared';
 
-import { setAuthCookie } from '@/src/lib/authCookies';
+import {
+  getTokenActiveRole,
+  setAuthCookie,
+  setOnboardingPendingCookie,
+} from '@/src/lib/authCookies';
 
-const namePattern = /^[A-Za-z가-힣]{2,5}$/;
+import { parseCustomerPayload } from './customerPayload';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   if (!token) return errorResponse(401, '로그인이 필요합니다.');
 
   const payload = await getPayload(request);
-  if (!payload) return errorResponse(400, '이름 또는 학교 정보가 올바르지 않습니다.');
+  if (!payload) return errorResponse(400, '이름, 학교 또는 지역 정보가 올바르지 않습니다.');
 
   try {
     const result = await createCustomer(payload, { token });
+    const accessToken =
+      getTokenActiveRole(result.accessToken) === 'CUSTOMER'
+        ? result.accessToken
+        : (await switchMemberRole('CUSTOMER', { token: result.accessToken })).accessToken;
     const response = NextResponse.json({ customer: result.customer });
-    setAuthCookie(request, response, 'accessToken', result.accessToken);
+    setAuthCookie(request, response, 'accessToken', accessToken);
+    setOnboardingPendingCookie(request, response, false);
 
     return response;
   } catch (error) {
@@ -28,18 +37,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function getPayload(request: NextRequest): Promise<CreateCustomerPayload | undefined> {
+async function getPayload(request: NextRequest) {
   try {
-    const body = (await request.json()) as { name?: unknown; universityId?: unknown };
-    const name = typeof body.name === 'string' ? body.name.trim() : '';
-    const universityId = body.universityId;
-
-    if (!namePattern.test(name)) return undefined;
-    if (universityId !== undefined && (!Number.isInteger(universityId) || Number(universityId) <= 0)) {
-      return undefined;
-    }
-
-    return { name, ...(universityId === undefined ? {} : { universityId: Number(universityId) }) };
+    return parseCustomerPayload(await request.json());
   } catch {
     return undefined;
   }
