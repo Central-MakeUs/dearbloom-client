@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
 
 import type { ArtistRegionCode } from '@dearbloom/shared';
-import { BottomButton, TextField } from '@dearbloom/ui';
+import { BottomButton } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 
@@ -157,17 +157,7 @@ export function ArtistOnboardingForm({
   );
 
   const details = (
-    <div className="flex flex-col gap-6">
-      <TextField
-        autoComplete="name"
-        id="artist-nickname"
-        label="작가 이름"
-        maxLength={20}
-        minLength={1}
-        name="nickname"
-        placeholder="이름을 입력하세요"
-        required
-      />
+    <div>
       <ArtistRegionField
         error={regionError}
         onValueChange={(next) => {
