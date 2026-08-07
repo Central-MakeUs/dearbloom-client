@@ -1,6 +1,17 @@
 import type { NextRequest, NextResponse } from 'next/server';
 
-type AuthCookieName = 'accessToken' | 'refreshToken';
+export type MemberRole = 'CUSTOMER' | 'ARTIST';
+type AuthCookieName = 'accessToken' | 'refreshToken' | 'activeRole';
+
+const DEVELOPMENT_TOKEN_MAX_AGE = {
+  accessToken: 10_800,
+  refreshToken: 604_800,
+} as const;
+
+const PRODUCTION_TOKEN_MAX_AGE = {
+  accessToken: 1_800,
+  refreshToken: 2_592_000,
+} as const;
 
 export function setAuthCookie(
   request: NextRequest,
@@ -8,15 +19,17 @@ export function setAuthCookie(
   name: AuthCookieName,
   value: string,
 ) {
-  const options = getAuthCookieOptions(request, getTokenMaxAge(value));
-  response.cookies.set(name, value, options);
+  const writtenNames: AuthCookieName[] = [name];
+  const clearsHostOnlyCookie = writeAuthCookie(request, response, name, value);
 
-  if (options.domain) {
-    response.headers.append(
-      'Set-Cookie',
-      `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure`,
-    );
+  if (name === 'accessToken') {
+    const role = getTokenActiveRole(value);
+    if (role) writeAuthCookie(request, response, 'activeRole', role);
+    if (role) writtenNames.push('activeRole');
   }
+
+  if (clearsHostOnlyCookie)
+    writtenNames.forEach((cookieName) => clearHostOnlyCookie(response, cookieName));
 }
 
 export function expireAuthCookie(
@@ -36,18 +49,26 @@ export function expireAuthCookie(
   }
 }
 
-export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000)) {
+export function getAuthCookieMaxAge(
+  name: AuthCookieName,
+  apiBaseUrl = process.env.NEXT_PUBLIC_API_URL,
+) {
+  const maxAge =
+    apiBaseUrl?.replace(/\/$/, '') === 'https://api.dearbloom.co.kr'
+      ? PRODUCTION_TOKEN_MAX_AGE
+      : DEVELOPMENT_TOKEN_MAX_AGE;
+  return name === 'accessToken' ? maxAge.accessToken : maxAge.refreshToken;
+}
+
+export function getTokenActiveRole(token: string): MemberRole | undefined {
   try {
     const payload = token.split('.')[1];
     if (!payload) return undefined;
 
-    const { exp } = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      exp?: unknown;
+    const { activeRole } = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
+      activeRole?: unknown;
     };
-
-    return typeof exp === 'number' && Number.isFinite(exp)
-      ? Math.max(0, Math.floor(exp - now))
-      : undefined;
+    return activeRole === 'CUSTOMER' || activeRole === 'ARTIST' ? activeRole : undefined;
   } catch {
     return undefined;
   }
@@ -56,8 +77,7 @@ export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000
 export function getAuthCookieOptions(request: NextRequest, maxAge?: number) {
   const hostname = getRequestHostname(request);
   const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
-  const isDearBloomHost =
-    hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr');
+  const isDearBloomHost = hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr');
 
   return {
     httpOnly: true,
@@ -75,4 +95,22 @@ function getRequestHostname(request: NextRequest) {
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
   const host = forwardedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
   return (host.split(':')[0] ?? request.nextUrl.hostname).toLowerCase();
+}
+
+function writeAuthCookie(
+  request: NextRequest,
+  response: NextResponse,
+  name: AuthCookieName,
+  value: string,
+) {
+  const options = getAuthCookieOptions(request, getAuthCookieMaxAge(name));
+  response.cookies.set(name, value, options);
+  return Boolean(options.domain);
+}
+
+function clearHostOnlyCookie(response: NextResponse, name: AuthCookieName) {
+  response.headers.append(
+    'Set-Cookie',
+    `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure`,
+  );
 }

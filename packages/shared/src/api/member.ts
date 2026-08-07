@@ -54,6 +54,16 @@ export interface CreateArtistResult {
   };
 }
 
+export interface RefreshTokenPayload {
+  refreshToken: string;
+  role: MemberRole;
+}
+
+export interface RefreshTokenResult {
+  accessToken: string;
+  refreshToken: string;
+}
+
 /** 내 계정 정보 조회 */
 export function getMemberMe(opts: RequestOptions): Promise<MemberMe> {
   return apiGet<MemberMe>('/api/members/me', opts);
@@ -73,6 +83,11 @@ export function createArtist(
   opts: RequestOptions,
 ): Promise<CreateArtistResult> {
   return apiPost<CreateArtistResult>('/api/members/artist', payload, opts);
+}
+
+/** 만료된 accessToken 을 기존 refreshToken 과 마지막 활동 role 로 재발급. */
+export function refreshMemberToken(payload: RefreshTokenPayload): Promise<RefreshTokenResult> {
+  return apiPost<RefreshTokenResult>('/api/members/refresh', payload);
 }
 
 /** 로그아웃 — 서버측 세션(refresh) 무효화. 쿠키 만료는 호출한 프론트가 별도로 처리. */
