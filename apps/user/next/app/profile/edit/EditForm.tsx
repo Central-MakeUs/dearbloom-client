@@ -63,7 +63,7 @@ export function EditForm({ initialName, initialRegion }: { initialName: string; 
           label="사용자 이름"
           htmlFor="username"
           error={errors.name?.message}
-          helper="2-5자의 한글 또는 영문만 가능합니다"
+          helper="이름은 2~12글자 한글 또는 영문만 허용하며, 공백이나 숫자는 입력할 수 없습니다"
         >
           <div className="relative">
             <Input
