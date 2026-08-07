@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ApiError, getMemberMe, switchMemberRole, type MemberRole } from '@dearbloom/shared';
 
 import { setAuthCookie } from '@/src/lib/authCookies';
-import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!hasProfile) {
       return NextResponse.json({
-        destination: getOnboardingTermsPath(role),
+        destination: getOnboardingFormPath(role),
       });
     }
 

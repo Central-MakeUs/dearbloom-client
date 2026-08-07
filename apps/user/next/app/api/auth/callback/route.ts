@@ -6,7 +6,7 @@ import { getMemberMe } from '@dearbloom/shared';
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { setAuthCookie } from '@/src/lib/authCookies';
-import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
 
 type LocalTokenExchangeResponse = {
   accessToken?: string;
@@ -146,7 +146,7 @@ function redirectAfterLogin(
   const destination =
     returnUrl ??
     (needsOnboarding
-      ? getOnboardingTermsPath(role, forceOnboarding)
+      ? getOnboardingFormPath(role, forceOnboarding)
       : role === 'CUSTOMER'
         ? '/snaps'
         : '/app/artist/dashboard');
