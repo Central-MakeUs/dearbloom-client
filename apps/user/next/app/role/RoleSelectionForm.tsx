@@ -100,6 +100,15 @@ export function RoleSelectionForm({
           );
         }
 
+        const roleCookieResponse = await fetch('/app/api/auth/active-role', {
+          body: JSON.stringify({ role: body.data.selectedRole }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
+        if (!roleCookieResponse.ok) {
+          throw new Error('로그인 역할을 저장하지 못했습니다. 다시 시도해 주세요.');
+        }
+
         window.location.replace(
           getLoginDestination(
             body.data.selectedRole,
