@@ -12,12 +12,14 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 
 import {
   defaultNativeSafeAreaColors,
   nativeSafeAreaSyncScript,
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
+import { getSessionWebViewUrl } from './nativeSession';
 
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
@@ -198,9 +200,14 @@ async function signInWithApple(): Promise<NativeLoginResult> {
 }
 
 export default function App() {
-  const webViewUrl = getWebViewUrl();
+  const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
   const isNativeLoginPending = useRef(false);
+  const sessionBootstrapState = useRef<'checking' | 'reading' | 'redirecting' | 'ready'>(
+    'checking',
+  );
+  const [webViewUrl, setWebViewUrl] = useState(initialWebViewUrl);
+  const [isSessionReady, setIsSessionReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
 
@@ -215,6 +222,35 @@ export default function App() {
       webClientId: googleWebClientId,
     });
   }, []);
+
+  const finishSessionBootstrap = () => {
+    sessionBootstrapState.current = 'ready';
+    setIsSessionReady(true);
+  };
+
+  const handleWebViewLoadEnd = async () => {
+    if (sessionBootstrapState.current === 'ready') return;
+    if (sessionBootstrapState.current === 'redirecting') {
+      finishSessionBootstrap();
+      return;
+    }
+    if (sessionBootstrapState.current !== 'checking') return;
+
+    sessionBootstrapState.current = 'reading';
+    try {
+      const cookies = await CookieManager.get(initialWebViewUrl, Platform.OS === 'ios');
+      const sessionWebViewUrl = getSessionWebViewUrl(initialWebViewUrl, cookies);
+      if (sessionWebViewUrl !== initialWebViewUrl) {
+        sessionBootstrapState.current = 'redirecting';
+        setWebViewUrl(sessionWebViewUrl);
+        return;
+      }
+    } catch {
+      // 쿠키 저장소 조회 실패 시 기존 탐색 진입을 유지한다.
+    }
+
+    finishSessionBootstrap();
+  };
 
   const handleWebViewMessage = async (event: WebViewMessageEvent) => {
     const { data, url } = event.nativeEvent;
@@ -267,7 +303,11 @@ export default function App() {
 
   const topSafeAreaStyle = { backgroundColor: safeAreaColors.top };
   const bottomSafeAreaStyle = { backgroundColor: safeAreaColors.bottom };
-  const webViewStyle = [styles.webView, { backgroundColor: safeAreaColors.top }];
+  const webViewStyle = [
+    styles.webView,
+    { backgroundColor: safeAreaColors.top },
+    !isSessionReady && styles.hiddenWebView,
+  ];
   const webView = (
     <WebView
       ref={webViewRef}
@@ -277,12 +317,14 @@ export default function App() {
       onError={(event: WebViewLoadErrorEvent) => {
         const { code, description, url } = event.nativeEvent;
         setLoadError(`${description} (${code})\n${url}`);
+        finishSessionBootstrap();
       }}
       onHttpError={(event: WebViewHttpLoadErrorEvent) => {
         const { statusCode, url } = event.nativeEvent;
         setLoadError(`HTTP ${statusCode}\n${url}`);
       }}
       onLoadStart={() => setLoadError(null)}
+      onLoadEnd={handleWebViewLoadEnd}
       onMessage={handleWebViewMessage}
       pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
@@ -302,6 +344,7 @@ export default function App() {
         <SafeAreaView edges={['top']} style={topSafeAreaStyle} />
         <SafeAreaView edges={['bottom']} style={[styles.webViewContainer, bottomSafeAreaStyle]}>
           {webView}
+          {!isSessionReady ? <View style={styles.startupLoading}>{loading}</View> : null}
         </SafeAreaView>
       </View>
     </SafeAreaProvider>
@@ -344,6 +387,12 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
+  },
+  hiddenWebView: {
+    opacity: 0,
+  },
+  startupLoading: {
+    ...StyleSheet.absoluteFill,
   },
   webViewContainer: {
     flex: 1,
