@@ -19,6 +19,23 @@ export function setAuthCookie(
   }
 }
 
+export function expireAuthCookie(
+  request: NextRequest,
+  response: NextResponse,
+  name: AuthCookieName,
+) {
+  const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
+  const host =
+    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host;
+  const hostname = host.split(':')[0] ?? request.nextUrl.hostname;
+
+  response.headers.append('Set-Cookie', expiredCookie);
+
+  if (hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr')) {
+    response.headers.append('Set-Cookie', `${expiredCookie}; Domain=.dearbloom.co.kr; Secure`);
+  }
+}
+
 export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000)) {
   try {
     const payload = token.split('.')[1];
@@ -37,9 +54,7 @@ export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000
 }
 
 export function getAuthCookieOptions(request: NextRequest, maxAge?: number) {
-  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
-  const host = forwardedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
-  const hostname = (host.split(':')[0] ?? request.nextUrl.hostname).toLowerCase();
+  const hostname = getRequestHostname(request);
   const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
   const isDearBloomHost =
     hostname === 'dearbloom.co.kr' || hostname.endsWith('.dearbloom.co.kr');
@@ -54,4 +69,10 @@ export function getAuthCookieOptions(request: NextRequest, maxAge?: number) {
     ...(maxAge === undefined ? {} : { maxAge }),
     ...(isDearBloomHost ? { domain: '.dearbloom.co.kr' } : {}),
   };
+}
+
+function getRequestHostname(request: NextRequest) {
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
+  const host = forwardedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
+  return (host.split(':')[0] ?? request.nextUrl.hostname).toLowerCase();
 }

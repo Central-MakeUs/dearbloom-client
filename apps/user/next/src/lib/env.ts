@@ -6,8 +6,10 @@
 export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN !== 'false';
 
 /**
- * 로그인이 필요할 때 이동할 경로.
- * dev 로그인이 켜져 있으면 개발용 로그인, 아니면 실제(소셜) 로그인으로 보낸다.
+ * 로그인이 필요할 때 이동할 경로. **항상 실제(소셜) 로그인 페이지**로 보낸다.
+ * NEXT_PUBLIC_* 값은 클라이언트 번들에 빌드타임 인라인되므로, 여기서 dev 로그인 경로를
+ * 분기하면 빌드/런타임 시점이 어긋날 때 프로덕션에서도 dev 로그인으로 새어나갈 수 있다.
+ * 그래서 진입점은 하나로 고정하고, dev 로그인은 로그인 페이지 안에서 dev 환경일 때만 노출한다.
  * 앱은 basePath `/app` 하위로 서빙되므로 경로에 `/app` 접두어를 포함한다.
  */
-export const LOGIN_HREF = DEV_LOGIN_ENABLED ? '/app/dev/login' : '/app/login';
+export const LOGIN_HREF = '/app/login';

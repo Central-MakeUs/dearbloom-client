@@ -6,7 +6,8 @@ import { LOGIN_HREF } from '@/src/lib/env';
 export const dynamic = 'force-dynamic';
 
 export default async function SavedPage() {
-  const token = (await cookies()).get('accessToken')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('accessToken')?.value;
 
   if (!token) {
     return (

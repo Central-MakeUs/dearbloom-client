@@ -5,19 +5,25 @@ import { Badge, Button } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
+import { MemberRoleSwitchButton } from '@/src/components/common/MemberRoleSwitchButton';
 import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
 
 export const dynamic = 'force-dynamic';
 
-/** href 없는 항목은 아직 백엔드가 없어 노출만(준비중). */
+/**
+ * 마이 메뉴. href 있는 항목은 이동, href 없는 항목은 '준비중' Badge로 노출.
+ * 준비중(포인트·채팅 템플릿 관리·공지사항)은 출시 전 숨김 — 백엔드 준비 후 주석 해제로 복구.
+ */
 const menu: { label: string; href?: string }[] = [
-  { label: '포인트' },
-  { label: '채팅 템플릿 관리' },
-  { label: '공지사항' },
+  { label: '개인정보 처리방침', href: '/privacy-policy' },
+  // { label: '포인트' },
+  // { label: '채팅 템플릿 관리' },
+  // { label: '공지사항' },
 ];
 
 export default async function ArtistMyPage() {
-  const token = (await cookies()).get('accessToken')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -39,9 +45,11 @@ export default async function ArtistMyPage() {
     getMemberMe({ token }).catch(() => null),
     getArtistMe({ token }).catch(() => null),
   ]);
-  if (!me) return login('계정 정보를 불러오지 못했어요. 다시 로그인해주세요.');
+  if (!me || !artist) return login('작가 계정으로 로그인해주세요.');
 
-  const displayName = artist?.nickname ?? me.name;
+  const displayName = artist.nickname;
+  const roleSwitch =
+    me.hasCustomer && me.hasArtist ? <MemberRoleSwitchButton targetRole="CUSTOMER" /> : null;
 
   return (
     <div className="mx-auto max-w-md">
@@ -52,7 +60,7 @@ export default async function ArtistMyPage() {
       {/* 프로필 */}
       <section className="flex items-center justify-between px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          {artist?.imageUrl ? (
+          {artist.imageUrl ? (
             <img src={artist.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
           ) : (
             <div className="h-12 w-12 shrink-0 rounded-full bg-neutral-300" />
@@ -82,6 +90,7 @@ export default async function ArtistMyPage() {
             </div>
           ),
         )}
+        {roleSwitch}
         <MemberLogoutButton />
         <MemberWithdrawalButton />
       </nav>

@@ -9,6 +9,9 @@
     "./eslint-next": "./eslint.next.mjs",
     "./prettier": "./prettier.config.mjs"
   },
+  "dependencies": {
+    "tailwindcss-animate": "^1.0.7"
+  },
   "peerDependencies": {
     "eslint": "^9.0.0",
     "tailwindcss": "^3.4.0",
