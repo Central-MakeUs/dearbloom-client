@@ -244,7 +244,6 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
 
       if (!response.ok) throw new Error(body.message ?? '고객 정보를 저장하지 못했습니다.');
 
-      document.cookie = 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
       setStep('complete');
       setIsSubmitting(false);
     } catch (submitError) {

@@ -1,9 +1,6 @@
 import type { NextRequest, NextResponse } from 'next/server';
 
 type AuthCookieName = 'accessToken' | 'refreshToken';
-type SessionCookieName = AuthCookieName | 'onboardingPending';
-type TokenRole = 'ARTIST' | 'CUSTOMER';
-const PENDING_ONBOARDING_MAX_AGE = 60 * 60 * 24 * 30;
 
 export function setAuthCookie(
   request: NextRequest,
@@ -14,7 +11,7 @@ export function setAuthCookie(
   const options = getAuthCookieOptions(request, getTokenMaxAge(value));
   response.cookies.set(name, value, options);
 
-  if (options.domain && getRequestHostname(request) !== 'dearbloom.co.kr') {
+  if (options.domain) {
     response.headers.append(
       'Set-Cookie',
       `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure`,
@@ -22,31 +19,10 @@ export function setAuthCookie(
   }
 }
 
-export function setOnboardingPendingCookie(
-  request: NextRequest,
-  response: NextResponse,
-  pending: boolean,
-) {
-  if (!pending) {
-    expireAuthCookie(request, response, 'onboardingPending');
-    return;
-  }
-
-  const options = getAuthCookieOptions(request, PENDING_ONBOARDING_MAX_AGE);
-  response.cookies.set('onboardingPending', '1', options);
-
-  if (options.domain) {
-    response.headers.append(
-      'Set-Cookie',
-      'onboardingPending=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure',
-    );
-  }
-}
-
 export function expireAuthCookie(
   request: NextRequest,
   response: NextResponse,
-  name: SessionCookieName,
+  name: AuthCookieName,
 ) {
   const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
   const host =
@@ -61,27 +37,17 @@ export function expireAuthCookie(
 }
 
 export function getTokenMaxAge(token: string, now = Math.floor(Date.now() / 1000)) {
-  const exp = getTokenPayload(token)?.exp;
-
-  return typeof exp === 'number' && Number.isFinite(exp)
-    ? Math.max(0, Math.floor(exp - now))
-    : undefined;
-}
-
-export function getTokenActiveRole(token: string): TokenRole | undefined {
-  const activeRole = getTokenPayload(token)?.activeRole;
-  return activeRole === 'ARTIST' || activeRole === 'CUSTOMER' ? activeRole : undefined;
-}
-
-function getTokenPayload(token: string): Record<string, unknown> | undefined {
   try {
     const payload = token.split('.')[1];
     if (!payload) return undefined;
 
-    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<
-      string,
-      unknown
-    >;
+    const { exp } = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
+      exp?: unknown;
+    };
+
+    return typeof exp === 'number' && Number.isFinite(exp)
+      ? Math.max(0, Math.floor(exp - now))
+      : undefined;
   } catch {
     return undefined;
   }

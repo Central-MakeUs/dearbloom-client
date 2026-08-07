@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { ApiError, getMemberMe, switchMemberRole, type MemberRole } from '@dearbloom/shared';
 
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
+import { setAuthCookie } from '@/src/lib/authCookies';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 export async function POST(request: NextRequest) {
@@ -17,17 +17,14 @@ export async function POST(request: NextRequest) {
     const hasProfile = role === 'CUSTOMER' ? member.hasCustomer : member.hasArtist;
 
     if (!hasProfile) {
-      const response = NextResponse.json({
+      return NextResponse.json({
         destination: getOnboardingTermsPath(role),
       });
-      setOnboardingPendingCookie(request, response, true);
-      return response;
     }
 
     const result = await switchMemberRole(role, { token });
     const response = NextResponse.json({ destination: getHome(role) });
     setAuthCookie(request, response, 'accessToken', result.accessToken);
-    setOnboardingPendingCookie(request, response, false);
 
     return response;
   } catch (error) {

@@ -103,7 +103,6 @@ export function ArtistOnboardingForm({
       const response = await fetch(form.action, { method: 'POST', body: formData });
 
       if (response.redirected) {
-        document.cookie = 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
         window.location.assign(response.url);
         return;
       }

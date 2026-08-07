@@ -5,7 +5,7 @@ import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
+import { setAuthCookie } from '@/src/lib/authCookies';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 type LocalTokenExchangeResponse = {
@@ -43,16 +43,12 @@ export async function GET(request: NextRequest) {
       return redirectLoginError(request, 'missing_one_time_code', role);
     }
 
-    const response = redirectAfterLogin(
+    return redirectAfterLogin(
       request,
       role,
       forceOnboarding || needsOnboarding,
       forceOnboarding,
     );
-    if (needsOnboarding !== undefined) {
-      setOnboardingPendingCookie(request, response, needsOnboarding);
-    }
-    return response;
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
@@ -74,7 +70,6 @@ export async function GET(request: NextRequest) {
   );
   setAuthCookie(request, response, 'accessToken', tokenExchangeResult.tokens.accessToken);
   setAuthCookie(request, response, 'refreshToken', tokenExchangeResult.tokens.refreshToken);
-  setOnboardingPendingCookie(request, response, localNeedsOnboarding === true);
 
   return response;
 }

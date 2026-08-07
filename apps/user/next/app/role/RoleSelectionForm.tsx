@@ -102,10 +102,6 @@ export function RoleSelectionForm({
           );
         }
 
-        document.cookie = body.data.needsOnboarding
-          ? 'onboardingPending=1; Path=/; Max-Age=2592000; SameSite=Lax'
-          : 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
-
         window.location.replace(
           getLoginDestination(
             body.data.selectedRole,

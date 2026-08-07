@@ -23,9 +23,7 @@ const menu: { label: string; href?: string }[] = [
 
 export default async function ArtistMyPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.has('onboardingPending')
-    ? undefined
-    : cookieStore.get('accessToken')?.value;
+  const token = cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
