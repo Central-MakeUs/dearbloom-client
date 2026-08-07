@@ -54,7 +54,7 @@ export default async function MyPage() {
       </section>
 
       {/* 메뉴 + 로그아웃/탈퇴 모달 */}
-      <MyMenu showRoleSwitch={member.hasCustomer && member.hasArtist} />
+      <MyMenu />
     </div>
   );
 }

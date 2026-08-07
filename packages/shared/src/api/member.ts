@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPatch, apiPost, type RequestOptions } from './http';
+import { apiDelete, apiGet, apiPost, type RequestOptions } from './http';
 import type { ArtistRegionCode } from './regions';
 
 /**
@@ -54,11 +54,6 @@ export interface CreateArtistResult {
   };
 }
 
-export interface SwitchMemberRoleResult {
-  accessToken: string;
-  activeRole: MemberRole;
-}
-
 /** 내 계정 정보 조회 */
 export function getMemberMe(opts: RequestOptions): Promise<MemberMe> {
   return apiGet<MemberMe>('/api/members/me', opts);
@@ -78,14 +73,6 @@ export function createArtist(
   opts: RequestOptions,
 ): Promise<CreateArtistResult> {
   return apiPost<CreateArtistResult>('/api/members/artist', payload, opts);
-}
-
-/** 기존 프로필의 활성 역할 전환. */
-export function switchMemberRole(
-  role: MemberRole,
-  opts: RequestOptions,
-): Promise<SwitchMemberRoleResult> {
-  return apiPatch<SwitchMemberRoleResult>('/api/members/me/role', { role }, opts);
 }
 
 /** 로그아웃 — 서버측 세션(refresh) 무효화. 쿠키 만료는 호출한 프론트가 별도로 처리. */

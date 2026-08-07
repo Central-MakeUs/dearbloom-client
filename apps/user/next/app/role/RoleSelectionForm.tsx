@@ -6,7 +6,7 @@ import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
 import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
 
-import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
+import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -49,7 +49,7 @@ export function RoleSelectionForm({
   returnUrl,
 }: {
   forceOnboarding: boolean;
-  provider?: OAuthProvider;
+  provider: OAuthProvider;
   returnUrl?: string;
 }) {
   const [role, setRole] = useState<MemberRole>();
@@ -57,8 +57,6 @@ export function RoleSelectionForm({
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!provider) return;
-
     const handleNativeLoginResult = async (event: Event) => {
       const result = (event as CustomEvent<NativeLoginResult>).detail;
       const expectedProvider = provider.toUpperCase();
@@ -128,54 +126,28 @@ export function RoleSelectionForm({
     setIsSubmitting(true);
     setError(undefined);
 
-    if (provider) {
-      if (window.__DEARBLOOM_NATIVE_APP__?.platform) {
-        const bridge = window.ReactNativeWebView;
+    if (window.__DEARBLOOM_NATIVE_APP__?.platform) {
+      const bridge = window.ReactNativeWebView;
 
-        if (!bridge) {
-          setError('앱 로그인 브리지를 찾지 못했습니다.');
-          setIsSubmitting(false);
-          return;
-        }
-
-        bridge.postMessage(
-          JSON.stringify({
-            type: provider === 'google' ? NATIVE_GOOGLE_LOGIN : NATIVE_APPLE_LOGIN,
-          }),
-        );
+      if (!bridge) {
+        setError('앱 로그인 브리지를 찾지 못했습니다.');
+        setIsSubmitting(false);
         return;
       }
 
-      const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
-      const returnUrlQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
-      window.location.assign(
-        `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}${returnUrlQuery}`,
+      bridge.postMessage(
+        JSON.stringify({
+          type: provider === 'google' ? NATIVE_GOOGLE_LOGIN : NATIVE_APPLE_LOGIN,
+        }),
       );
       return;
     }
 
-    if (forceOnboarding) {
-      window.location.replace(getLoginDestination(role, true, true));
-      return;
-    }
-
-    try {
-      const response = await fetch('/app/api/members/role', {
-        body: JSON.stringify({ role }),
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-      });
-      const body = (await response.json()) as { destination?: string; message?: string };
-
-      if (!response.ok || !body.destination) {
-        throw new Error(body.message ?? '역할을 선택하지 못했습니다.');
-      }
-
-      window.location.replace(body.destination);
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : '역할을 선택하지 못했습니다.');
-      setIsSubmitting(false);
-    }
+    const forceOnboardingQuery = forceOnboarding ? '&forceOnboarding=1' : '';
+    const returnUrlQuery = returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '';
+    window.location.assign(
+      `/app/api/auth/login?provider=${provider}&role=${role}${forceOnboardingQuery}${returnUrlQuery}`,
+    );
   };
 
   const roleCard = (value: MemberRole, title: string, description: ReactNode) => (
@@ -251,7 +223,7 @@ export function RoleSelectionForm({
 
 function getLoginDestination(role: AuthRole, needsOnboarding: boolean, forceOnboarding = false) {
   if (needsOnboarding) {
-    return getOnboardingFormPath(role, forceOnboarding);
+    return getOnboardingTermsPath(role, forceOnboarding);
   }
 
   return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
