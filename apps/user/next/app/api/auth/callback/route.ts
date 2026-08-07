@@ -43,12 +43,14 @@ export async function GET(request: NextRequest) {
       return redirectLoginError(request, 'missing_one_time_code', role);
     }
 
-    return redirectAfterLogin(
+    const response = redirectAfterLogin(
       request,
       role,
       forceOnboarding || needsOnboarding,
       forceOnboarding,
     );
+    if (role) setAuthCookie(request, response, 'activeRole', role);
+    return response;
   }
 
   const tokenExchangeResult = await exchangeOneTimeCode(oneTimeCode);
