@@ -64,7 +64,7 @@ function getWebViewUrl() {
 
   if (!webViewUrl) throw new Error('EXPO_PUBLIC_WEBVIEW_URL이 설정되지 않았습니다.');
 
-  return webViewUrl;
+  return new URL('/app/launch', webViewUrl).toString();
 }
 
 function parseNativeLoginRequest(message: string): NativeLoginRequest | undefined {
