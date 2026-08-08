@@ -6,9 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function MyPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.has('onboardingPending')
-    ? undefined
-    : cookieStore.get('accessToken')?.value;
+  const token = cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -56,7 +54,7 @@ export default async function MyPage() {
       </section>
 
       {/* 메뉴 + 로그아웃/탈퇴 모달 */}
-      <MyMenu showRoleSwitch={member.hasCustomer && member.hasArtist} />
+      <MyMenu />
     </div>
   );
 }

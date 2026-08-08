@@ -5,7 +5,7 @@ import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
-import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
+import { setAuthCookie } from '@/src/lib/authCookies';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 type LocalTokenExchangeResponse = {
@@ -49,9 +49,7 @@ export async function GET(request: NextRequest) {
       forceOnboarding || needsOnboarding,
       forceOnboarding,
     );
-    if (needsOnboarding !== undefined) {
-      setOnboardingPendingCookie(request, response, needsOnboarding);
-    }
+    if (role) setAuthCookie(request, response, 'activeRole', role);
     return response;
   }
 
@@ -74,7 +72,6 @@ export async function GET(request: NextRequest) {
   );
   setAuthCookie(request, response, 'accessToken', tokenExchangeResult.tokens.accessToken);
   setAuthCookie(request, response, 'refreshToken', tokenExchangeResult.tokens.refreshToken);
-  setOnboardingPendingCookie(request, response, localNeedsOnboarding === true);
 
   return response;
 }

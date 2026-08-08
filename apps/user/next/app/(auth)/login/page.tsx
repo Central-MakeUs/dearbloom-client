@@ -26,10 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   //       basePath 밖의 astro 경로로 보내려면 절대 URL을 써야 한다.
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
-  const member =
-    !auth && token && !cookieStore.has('onboardingPending')
-      ? await getMemberMe({ token }).catch(() => undefined)
-      : undefined;
+  const member = !auth && token ? await getMemberMe({ token }).catch(() => undefined) : undefined;
   if (member?.hasCustomer || member?.hasArtist) {
     const h = await headers();
     const host = h.get('x-forwarded-host') ?? h.get('host') ?? '';

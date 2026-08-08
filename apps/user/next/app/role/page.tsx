@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import type { OAuthProvider } from '@dearbloom/features-auth';
@@ -22,7 +21,7 @@ export default async function RoleSelectionPage({ searchParams }: RoleSelectionP
   const provider = getOAuthProvider(providerParam);
   const returnUrl = safeReturnUrl(returnUrlParam);
 
-  if (!provider && !(await cookies()).has('accessToken')) redirect('/app/login');
+  if (!provider) redirect('/app/login');
 
   return (
     <RoleSelectionForm forceOnboarding={forceOnboarding} provider={provider} returnUrl={returnUrl} />
