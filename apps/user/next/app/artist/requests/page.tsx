@@ -2,7 +2,8 @@ import { cookies } from 'next/headers';
 import { getReceivedInquiries, type ArtistInquiryListItem } from '@dearbloom/shared';
 import { Badge, type BadgeProps } from '@dearbloom/ui';
 import { shootLabel } from '@/src/lib/inquiry';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
+import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,11 +14,7 @@ const statusVariant = (status: string): BadgeProps['variant'] =>
 export default async function ArtistRequestsPage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = (
-    <header className="flex h-[52px] items-center justify-center">
-      <h1 className="text-head-3 text-neutral-950">신청 관리</h1>
-    </header>
-  );
+  const header = <AppLogoHeader logoHref={ARTIST_HOME_HREF} />;
 
   if (!token) {
     return (
