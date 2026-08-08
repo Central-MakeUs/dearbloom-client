@@ -5,14 +5,14 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server.js';
 
 import {
+  getAuthCookieMaxAge,
   getAuthCookieOptions,
-  getTokenMaxAge,
+  getTokenActiveRole,
   setAuthCookie,
-  setOnboardingPendingCookie,
 } from './authCookies.ts';
 
-function token(exp: number) {
-  return `header.${Buffer.from(JSON.stringify({ exp })).toString('base64url')}.signature`;
+function token(activeRole: 'CUSTOMER' | 'ARTIST' = 'CUSTOMER') {
+  return `header.${Buffer.from(JSON.stringify({ activeRole })).toString('base64url')}.signature`;
 }
 
 function request(
@@ -41,25 +41,36 @@ test('dearbloom subdomains replace host-only cookies', () => {
   const options = getAuthCookieOptions(dearBloomRequest, 3600);
   const response = NextResponse.json({});
 
-  setAuthCookie(dearBloomRequest, response, 'accessToken', token(Math.floor(Date.now() / 1000) + 3600));
+  setAuthCookie(dearBloomRequest, response, 'accessToken', token());
 
+  const setCookies = response.headers.getSetCookie();
   assert.equal(options.domain, '.dearbloom.co.kr');
   assert.equal(options.secure, true);
   assert.equal(options.maxAge, 3600);
-  assert.equal(response.headers.getSetCookie().length, 2);
-  assert.match(response.headers.getSetCookie()[0] ?? '', /Domain=.dearbloom.co.kr/);
-  assert.doesNotMatch(response.headers.getSetCookie()[1] ?? '', /Domain=/);
+  assert.equal(setCookies.length, 4);
+  assert.equal(setCookies.filter((cookie) => cookie.includes('Domain=.dearbloom.co.kr')).length, 2);
+  assert.equal(setCookies.filter((cookie) => !cookie.includes('Domain=')).length, 2);
 });
 
-test('dearbloom root keeps the new domain cookie', () => {
+test('dearbloom root replaces stale host-only cookies', () => {
   const dearBloomRequest = request('dearbloom.co.kr', 'https:');
   const response = NextResponse.json({});
 
-  setAuthCookie(dearBloomRequest, response, 'accessToken', token(Math.floor(Date.now() / 1000) + 3600));
+  setAuthCookie(dearBloomRequest, response, 'accessToken', token());
 
-  assert.equal(response.headers.getSetCookie().length, 1);
-  assert.match(response.headers.getSetCookie()[0] ?? '', /Domain=.dearbloom.co.kr/);
-  assert.doesNotMatch(response.headers.getSetCookie()[0] ?? '', /Max-Age=0/);
+  const setCookies = response.headers.getSetCookie();
+  assert.equal(setCookies.length, 4);
+  assert.equal(
+    setCookies.filter(
+      (cookie) => cookie.includes('Domain=.dearbloom.co.kr') && !cookie.includes('Max-Age=0'),
+    ).length,
+    2,
+  );
+  assert.equal(
+    setCookies.filter((cookie) => !cookie.includes('Domain=') && cookie.includes('Max-Age=0'))
+      .length,
+    2,
+  );
 });
 
 test('local and tunnel hosts keep host-only cookies', () => {
@@ -72,27 +83,16 @@ test('local and tunnel hosts keep host-only cookies', () => {
   assert.equal(tunnel.secure, true);
 });
 
-test('cookie lifetime follows JWT exp across environments', () => {
-  assert.equal(getTokenMaxAge(token(20_800), 10_000), 10_800);
-  assert.equal(getTokenMaxAge(token(2_602_000), 10_000), 2_592_000);
-  assert.equal(getTokenMaxAge('not-a-jwt', 10_000), undefined);
+test('cookie lifetime follows fixed backend settings by environment', () => {
+  assert.equal(getAuthCookieMaxAge('accessToken', 'https://dev-api.dearbloom.co.kr'), 10_800);
+  assert.equal(getAuthCookieMaxAge('refreshToken', 'https://dev-api.dearbloom.co.kr'), 604_800);
+  assert.equal(getAuthCookieMaxAge('accessToken', 'https://api.dearbloom.co.kr'), 1_800);
+  assert.equal(getAuthCookieMaxAge('accessToken', 'https://api.dearbloom.co.kr/'), 1_800);
+  assert.equal(getAuthCookieMaxAge('refreshToken', 'https://api.dearbloom.co.kr'), 2_592_000);
+  assert.equal(getAuthCookieMaxAge('activeRole', 'https://api.dearbloom.co.kr'), 2_592_000);
 });
 
-test('onboarding pending marker is set and cleared for both cookie scopes', () => {
-  const dearBloomRequest = request(
-    'user-next.vercel.app',
-    'https:',
-    'https',
-    'dev.dearbloom.co.kr',
-  );
-  const pendingResponse = NextResponse.json({});
-  const completeResponse = NextResponse.json({});
-
-  setOnboardingPendingCookie(dearBloomRequest, pendingResponse, true);
-  setOnboardingPendingCookie(dearBloomRequest, completeResponse, false);
-
-  assert.match(pendingResponse.headers.getSetCookie()[0] ?? '', /onboardingPending=1/);
-  assert.equal(pendingResponse.headers.getSetCookie().length, 2);
-  assert.equal(completeResponse.headers.getSetCookie().length, 2);
-  assert.ok(completeResponse.headers.getSetCookie().every((cookie) => /Max-Age=0/.test(cookie)));
+test('active role is preserved separately for access token refresh', () => {
+  assert.equal(getTokenActiveRole(token('ARTIST')), 'ARTIST');
+  assert.equal(getTokenActiveRole('not-a-jwt'), undefined);
 });

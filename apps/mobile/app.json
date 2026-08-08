@@ -14,7 +14,10 @@
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "졸업 스냅 촬영 및 사진 등록을 위해 카메라를 사용합니다.",
+        "NSPhotoLibraryUsageDescription": "프로필 및 촬영 사진을 선택하기 위해 사진 보관함에 접근합니다.",
+        "NSPhotoLibraryAddUsageDescription": "촬영하거나 저장한 사진을 사진 보관함에 저장하기 위해 사용합니다."
       }
     },
     "android": {

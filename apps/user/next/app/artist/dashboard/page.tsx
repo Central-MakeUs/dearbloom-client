@@ -11,25 +11,12 @@ const items: { label: string; desc: string; href?: string }[] = [
   // { label: '포인트 현황', desc: '준비중', href: '/app/artist/points' },
 ];
 
-export default async function ArtistDashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const { error } = await searchParams;
-  const imageError = error === 'profile-image' ? (
-    <p className="mx-4 mt-2 rounded-lg bg-danger/10 px-4 py-3 text-caption-1 text-danger" role="alert">
-      프로필 사진을 저장하지 못했어요. 작가 프로필에서 다시 등록해 주세요.
-    </p>
-  ) : null;
-
+export default function ArtistDashboardPage() {
   return (
     <div className="mx-auto max-w-md">
       <header className="flex h-[52px] items-center justify-center">
         <h1 className="text-head-3 text-neutral-950">대시보드</h1>
       </header>
-
-      {imageError}
 
       <div className="mt-2 flex flex-col gap-2 px-4">
         {items.map((it) =>

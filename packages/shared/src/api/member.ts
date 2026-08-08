@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPatch, apiPost, type RequestOptions } from './http';
+import { apiDelete, apiGet, apiPost, type RequestOptions } from './http';
 import type { ArtistRegionCode } from './regions';
 
 /**
@@ -24,7 +24,6 @@ export interface MemberMe {
 }
 
 export interface CreateCustomerPayload {
-  name: string;
   region?: ArtistRegionCode;
   universityId?: number;
 }
@@ -42,7 +41,7 @@ export interface CreateCustomerResult {
 }
 
 export interface CreateArtistPayload {
-  nickname: string;
+  imageUrl: string;
   regionList: ArtistRegionCode[];
 }
 
@@ -54,9 +53,14 @@ export interface CreateArtistResult {
   };
 }
 
-export interface SwitchMemberRoleResult {
+export interface RefreshTokenPayload {
+  refreshToken: string;
+  role: MemberRole;
+}
+
+export interface RefreshTokenResult {
   accessToken: string;
-  activeRole: MemberRole;
+  refreshToken: string;
 }
 
 /** 내 계정 정보 조회 */
@@ -80,12 +84,9 @@ export function createArtist(
   return apiPost<CreateArtistResult>('/api/members/artist', payload, opts);
 }
 
-/** 기존 프로필의 활성 역할 전환. */
-export function switchMemberRole(
-  role: MemberRole,
-  opts: RequestOptions,
-): Promise<SwitchMemberRoleResult> {
-  return apiPatch<SwitchMemberRoleResult>('/api/members/me/role', { role }, opts);
+/** 만료된 accessToken 을 기존 refreshToken 과 마지막 활동 role 로 재발급. */
+export function refreshMemberToken(payload: RefreshTokenPayload): Promise<RefreshTokenResult> {
+  return apiPost<RefreshTokenResult>('/api/members/refresh', payload);
 }
 
 /** 로그아웃 — 서버측 세션(refresh) 무효화. 쿠키 만료는 호출한 프론트가 별도로 처리. */

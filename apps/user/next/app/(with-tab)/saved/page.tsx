@@ -7,9 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function SavedPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.has('onboardingPending')
-    ? undefined
-    : cookieStore.get('accessToken')?.value;
+  const token = cookieStore.get('accessToken')?.value;
 
   if (!token) {
     return (

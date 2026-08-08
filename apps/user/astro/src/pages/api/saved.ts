@@ -32,7 +32,6 @@ async function isIncompleteCustomer(token: string, error: unknown) {
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (cookies.has('onboardingPending')) return fail(401, 'unauthorized');
   const token = cookies.get('accessToken')?.value;
   if (!token) return fail(401, 'unauthorized');
 
@@ -52,7 +51,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 };
 
 export const DELETE: APIRoute = async ({ request, cookies }) => {
-  if (cookies.has('onboardingPending')) return fail(401, 'unauthorized');
   const token = cookies.get('accessToken')?.value;
   if (!token) return fail(401, 'unauthorized');
 

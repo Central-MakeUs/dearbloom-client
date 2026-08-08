@@ -11,7 +11,7 @@ import {
   UniversitySearchScreen,
 } from '@/src/components/common/UniversitySearchScreen';
 
-type OnboardingStep = 'complete' | 'name' | 'region' | 'school';
+type OnboardingStep = 'complete' | 'region' | 'school';
 
 const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) =>
   region.label
@@ -19,8 +19,8 @@ const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) =>
     .replace('경기남부', '경기 남부')
     .replace('대전·세종', '대전/세종');
 
-function StepProgress({ step }: { step: 1 | 2 | 3 }) {
-  const bars = [1, 2, 3].map((index) => (
+function StepProgress({ step }: { step: 1 | 2 }) {
+  const bars = [1, 2].map((index) => (
     <span
       aria-hidden
       className={cn('h-1 flex-1 rounded-full', index <= step ? 'bg-primary-400' : 'bg-neutral-200')}
@@ -42,7 +42,7 @@ function StepHeader({
 }: {
   onBack: () => void;
   onSkip?: () => void;
-  step: 1 | 2 | 3;
+  step: 1 | 2;
 }) {
   const skipButton = onSkip ? (
     <button className="px-2 text-caption-1 text-neutral-600" onClick={onSkip} type="button">
@@ -60,9 +60,7 @@ function StepHeader({
 
 export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: boolean }) {
   const router = useRouter();
-  const [step, setStep] = useState<OnboardingStep>('name');
-  const [name, setName] = useState('');
-  const [isNameTouched, setIsNameTouched] = useState(false);
+  const [step, setStep] = useState<OnboardingStep>('school');
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
   const [manualUniversityName, setManualUniversityName] = useState('');
   const [isManualUniversityInputVisible, setIsManualUniversityInputVisible] = useState(false);
@@ -71,23 +69,8 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
 
-  const trimmedName = name.trim();
-  const isNameValid = /^[A-Za-z가-힣]{2,5}$/.test(name);
-  const shouldShowNameError = isNameTouched || name.length > 0;
-  const nameError = shouldShowNameError
-    ? trimmedName.length === 0
-      ? '이름을 입력해 주세요.'
-      : !/^[A-Za-z가-힣]+$/.test(name)
-        ? '한글 또는 영문만 입력할 수 있어요.'
-        : name.length < 2
-          ? '최소 2자 이상 입력해 주세요.'
-          : name.length > 5
-            ? '최대 5자까지 입력할 수 있어요.'
-            : undefined
-    : undefined;
-
   const submit = async () => {
-    if (!isNameValid || isSubmitting) return;
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     setError(undefined);
@@ -101,7 +84,6 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     try {
       const response = await fetch('/app/api/members/customer', {
         body: JSON.stringify({
-          name: trimmedName,
           region,
           universityId: selectedUniversity?.universityId,
           // ponytail: API는 universityId만 지원한다. 자율입력 필드는 backend 지원 시 전송한다.
@@ -113,7 +95,6 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
 
       if (!response.ok) throw new Error(body.message ?? '고객 정보를 저장하지 못했습니다.');
 
-      document.cookie = 'onboardingPending=; Path=/; Max-Age=0; SameSite=Lax';
       setStep('complete');
       setIsSubmitting(false);
     } catch (submitError) {
@@ -145,13 +126,6 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     );
   }
 
-  const nameHelper = (
-    <span className="flex justify-between" role={nameError ? 'alert' : undefined}>
-      <span>{nameError}</span>
-      <span>{name.length}/5</span>
-    </span>
-  );
-
   const pageShell = (header: ReactNode, content: ReactNode, footer: ReactNode) => (
     <main className="min-h-dvh bg-neutral-100">
       <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
@@ -174,41 +148,6 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
       </BottomButton>
     </div>
   );
-
-  if (step === 'name') {
-    const content = (
-      <section className="px-4 pt-7">
-        <h1 className="text-head-3 text-neutral-950">이름을 입력해 주세요.</h1>
-        <p className="mt-3 text-body-6 text-neutral-700">
-          작가님과 원활하게 소통할 수 있도록
-          <br />
-          사용자 이름은 실명으로 입력하는 것을 권장해요.
-        </p>
-        <TextField
-          autoComplete="name"
-          className="mt-8"
-          error={!!nameError}
-          helper={nameHelper}
-          id="customer-name"
-          label="사용자 이름"
-          minLength={2}
-          onBlur={() => setIsNameTouched(true)}
-          onChange={(event) => setName(event.target.value)}
-          onClear={() => setName('')}
-          pattern="[A-Za-z가-힣]{2,5}"
-          placeholder="이름을 입력하세요"
-          required
-          value={name}
-        />
-      </section>
-    );
-
-    return pageShell(
-      <StepHeader onBack={() => router.back()} step={1} />,
-      content,
-      footer('다음', () => setStep('school'), !isNameValid),
-    );
-  }
 
   if (step === 'school') {
     const schoolButton = (
@@ -265,7 +204,7 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('name')} onSkip={() => setStep('region')} step={2} />,
+      <StepHeader onBack={() => router.back()} onSkip={() => setStep('region')} step={1} />,
       content,
       footer('다음', () => setStep('region')),
     );
@@ -302,7 +241,7 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={3} />,
+      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={2} />,
       content,
       footer('완료', submit),
     );

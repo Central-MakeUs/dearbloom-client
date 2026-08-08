@@ -5,7 +5,6 @@ import { Badge, Button } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
-import { MemberRoleSwitchButton } from '@/src/components/common/MemberRoleSwitchButton';
 import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
 
 export const dynamic = 'force-dynamic';
@@ -23,9 +22,7 @@ const menu: { label: string; href?: string }[] = [
 
 export default async function ArtistMyPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.has('onboardingPending')
-    ? undefined
-    : cookieStore.get('accessToken')?.value;
+  const token = cookieStore.get('accessToken')?.value;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -50,8 +47,6 @@ export default async function ArtistMyPage() {
   if (!me || !artist) return login('작가 계정으로 로그인해주세요.');
 
   const displayName = artist.nickname;
-  const roleSwitch =
-    me.hasCustomer && me.hasArtist ? <MemberRoleSwitchButton targetRole="CUSTOMER" /> : null;
 
   return (
     <div className="mx-auto max-w-md">
@@ -92,7 +87,6 @@ export default async function ArtistMyPage() {
             </div>
           ),
         )}
-        {roleSwitch}
         <MemberLogoutButton />
         <MemberWithdrawalButton />
       </nav>

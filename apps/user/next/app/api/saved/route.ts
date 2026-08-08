@@ -14,7 +14,6 @@ import {
  */
 
 function authToken(request: NextRequest) {
-  if (request.cookies.has('onboardingPending')) return undefined;
   return request.cookies.get('accessToken')?.value;
 }
 
