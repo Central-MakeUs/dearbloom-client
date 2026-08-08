@@ -7,6 +7,7 @@ import { getMemberMe } from '@dearbloom/shared';
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
+import { getMemberHome } from '@/src/lib/memberHome';
 
 import dearBloomLogo from '../../../public/images/dearbloom-logo.png';
 import { SocialLoginButtons } from '../SocialLoginButtons';
@@ -31,7 +32,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     const h = await headers();
     const host = h.get('x-forwarded-host') ?? h.get('host') ?? '';
     const proto = h.get('x-forwarded-proto') ?? 'https';
-    redirect(`${proto}://${host}/snaps`);
+    const destination = getMemberHome(cookieStore.get('activeRole')?.value, member);
+    redirect(`${proto}://${host}${destination}`);
   }
 
   const brand = (
