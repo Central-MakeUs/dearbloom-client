@@ -27,6 +27,7 @@ export * from './components/DeleteButton';
 export * from './components/TextField';
 export * from './components/SearchField';
 export * from './components/Header';
+export * from './components/AppHeader';
 export * from './components/SearchResultItem';
 export * from './components/TabButton';
 export * from './components/BottomTab';
