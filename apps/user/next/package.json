@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "build": "next build",
+    "dev": "dearbloom-copy-ui-assets public/images && node scripts/dev.mjs",
+    "build": "dearbloom-copy-ui-assets public/images && next build",
     "start": "next start",
     "lint": "eslint .",
     "test:artist-regions": "node --experimental-strip-types --test app/api/members/artist/artistRegions.test.ts",

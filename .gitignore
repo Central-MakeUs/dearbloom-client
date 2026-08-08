@@ -18,3 +18,6 @@ apps/mobile/android/
 .DS_Store
 coverage/
 .vercel
+
+# packages/ui/assets 원본에서 복사되는 공용 에셋 (빌드 시 생성)
+apps/user/*/public/images/dearbloom-logo.svg
