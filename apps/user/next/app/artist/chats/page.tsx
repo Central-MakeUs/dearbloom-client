@@ -2,15 +2,12 @@ import { cookies } from 'next/headers';
 import { getChatRooms, type ChatRoomSummary } from '@dearbloom/shared';
 import { ChatRoomList } from '@dearbloom/features-chat';
 import { Button } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
+import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => (
-  <header className="sticky top-0 z-10 flex h-[52px] items-center justify-center bg-neutral-100">
-    <h1 className="text-head-3 text-neutral-950">채팅 목록</h1>
-  </header>
-);
+const Header = () => <AppLogoHeader logoHref={ARTIST_HOME_HREF} />;
 
 export default async function ArtistChatsPage() {
   const token = (await cookies()).get('accessToken')?.value;

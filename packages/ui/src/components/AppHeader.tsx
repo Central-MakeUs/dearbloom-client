@@ -1,12 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
-/**
- * 고정된 `AppHeader` 높이(44px)만큼 본문을 아래로 미는 클래스. safe-area 까지 더합니다.
- * 헤더가 fixed 라 본문이 그 아래로 깔리므로, AppHeader 를 쓰는 화면은 이 클래스를 함께 적용하세요.
- */
-export const APP_HEADER_OFFSET = 'pt-[calc(44px+env(safe-area-inset-top))]';
-
 interface AppHeaderProps {
   /**
    * 로고 이미지 경로. 원본은 `packages/ui/assets` 에 있고 빌드 시 각 앱 public 으로 복사됩니다.
@@ -27,9 +21,11 @@ interface AppHeaderProps {
 
 /**
  * app_header — 로고형 상단 앱바 (Figma 437:7469 탐색 메인 실측).
+ * 하단탭으로 진입하는 최상위 화면에서 씁니다. 하위 화면은 `Header`(뒤로가기+타이틀).
  *
  * 높이 44px, bg-neutral-100, 화면 상단 고정. 로고 132x19(좌 20px) + 우측 44x44 슬롯(우 6px).
- * 고정이므로 이 헤더를 쓰는 화면의 본문에는 `pt-11` 만큼 여백이 필요합니다.
+ * 고정이라 본문이 아래로 깔리므로 같은 높이의 spacer 를 함께 렌더합니다 —
+ * 쓰는 쪽에서 상단 여백을 따로 챙길 필요가 없습니다.
  */
 export function AppHeader({
   logoSrc = '/images/dearbloom-logo.svg',
@@ -57,17 +53,20 @@ export function AppHeader({
   );
 
   return (
-    <header
-      className={cn(
-        'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)]',
-        className,
-      )}
-    >
-      <div className="mx-auto flex h-11 max-w-md items-center justify-between pl-5 pr-1.5">
-        {logo}
-        {rightSlot}
-      </div>
-    </header>
+    <>
+      <header
+        className={cn(
+          'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)]',
+          className,
+        )}
+      >
+        <div className="mx-auto flex h-11 max-w-md items-center justify-between pl-5 pr-1.5">
+          {logo}
+          {rightSlot}
+        </div>
+      </header>
+      <div className="h-[calc(44px+env(safe-area-inset-top))]" aria-hidden />
+    </>
   );
 }
 

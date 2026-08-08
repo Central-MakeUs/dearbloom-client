@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { Header } from '@dearbloom/ui';
+
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 
 import { ArtistOnboardingForm } from './ArtistOnboardingForm';
@@ -14,29 +16,7 @@ export default async function ArtistOnboardingPage({ searchParams }: ArtistOnboa
 
   const { error, forceOnboarding: forceOnboardingParam } = await searchParams;
   const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
-  const header = (
-    <header className="flex h-[52px] items-center px-2">
-      <a
-        aria-label="뒤로가기"
-        className="flex h-11 w-11 items-center justify-center text-neutral-950"
-        href="/app/role"
-      >
-        <svg
-          aria-hidden
-          fill="none"
-          height="24"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          width="24"
-        >
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-      </a>
-    </header>
-  );
+  const header = <Header backHref="/app/role" />;
 
   const content = (
     <section className="px-4 pt-2">

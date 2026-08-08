@@ -13,3 +13,10 @@ export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN !== 'f
  * 앱은 basePath `/app` 하위로 서빙되므로 경로에 `/app` 접두어를 포함한다.
  */
 export const LOGIN_HREF = '/app/login';
+
+/**
+ * 헤더 로고를 눌렀을 때 돌아갈 홈.
+ * 고객은 Astro 가 서빙하는 탐색(`/snaps`), 작가는 next 의 대시보드라 basePath 접두어가 붙는다.
+ */
+export const CUSTOMER_HOME_HREF = '/snaps';
+export const ARTIST_HOME_HREF = '/app/artist/dashboard';

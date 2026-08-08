@@ -1,14 +1,12 @@
 import { cookies } from 'next/headers';
 import { getWeeklyAvailability, getRecurringBlocks, getDateBlocks, type ScheduleRule } from '@dearbloom/shared';
-import { Button, Header } from '@dearbloom/ui';
 import { ScheduleManager } from './ScheduleManager';
 import { LOGIN_HREF } from '@/src/lib/env';
+import { Button, Header as TitleHeader } from '@dearbloom/ui';
 
 export const dynamic = 'force-dynamic';
 
-const header = (
-  <Header title="일정 관리" backHref="/app/artist/dashboard" className="sticky top-0 z-10" />
-);
+const Header = () => <TitleHeader backHref="/app/artist/dashboard" title="일정 관리" />;
 
 export default async function ArtistSchedulePage() {
   const token = (await cookies()).get('accessToken')?.value;
@@ -16,7 +14,7 @@ export default async function ArtistSchedulePage() {
   if (!token) {
     return (
       <div className="mx-auto max-w-md">
-        {header}
+        <Header />
         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <p className="text-body-5 text-neutral-500">작가 계정으로 로그인해주세요.</p>
           <Button asChild size="sm">
@@ -35,7 +33,7 @@ export default async function ArtistSchedulePage() {
 
   return (
     <div className="mx-auto max-w-md">
-      {header}
+      <Header />
       <ScheduleManager weekly={weekly} recurring={recurring} dates={dates} />
     </div>
   );
