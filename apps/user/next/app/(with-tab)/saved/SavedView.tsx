@@ -129,7 +129,7 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   const grid = (
     <>
     {!editing && <p className="px-4 pb-3 pt-3 text-caption-1 text-neutral-600">전체 {items.length}</p>}
-    <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
       {items.map((a) => (
         <ArtworkCard
           key={a.artworkId}

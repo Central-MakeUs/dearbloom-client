@@ -43,7 +43,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: ArtworkL
         </a>
       </div>
     ) : (
-      <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-28 pt-3">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3">
         {items.map((a) => (
           <ArtworkCard
             key={a.artworkId}

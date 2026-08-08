@@ -64,15 +64,20 @@ export function ArtworkCard({
     />
   );
 
+  // Figma 437:7469 실측 — 제목/작가 간격 0, 작가↔가격줄 4, 가격↔태그그룹 8, 태그끼리 4.
   const meta = (
     <div className="min-w-0">
-      <div className="truncate text-body-4 text-neutral-950">{title}</div>
-      <div className="mt-0.5 truncate text-body-6 text-neutral-600">{artistNickname}</div>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-        <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
-        {regions?.map((r) => (
-          <RegionTag key={r}>{r}</RegionTag>
-        ))}
+      <div className="truncate text-body-3 text-neutral-900">{title}</div>
+      <div className="truncate text-body-6 text-neutral-900">{artistNickname}</div>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <span className="text-body-3 text-primary">{formatPrice(price)}</span>
+        {!!regions?.length && (
+          <div className="flex flex-wrap items-center gap-1">
+            {regions.map((r) => (
+              <RegionTag key={r}>{r}</RegionTag>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -112,10 +117,11 @@ export function ArtworkCard({
         <SaveHeart
           artworkId={artworkId}
           initialSaved={initialSaved}
-          size={20}
+          size={24}
+          strokeWidth={1.5}
           endpoint={saveEndpoint}
           onChange={onSavedChange}
-          className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-0/80 text-neutral-700 backdrop-blur transition-transform active:scale-90"
+          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-neutral-0 transition-transform active:scale-90"
         />
       </div>
       <a href={detailHref} className="block">

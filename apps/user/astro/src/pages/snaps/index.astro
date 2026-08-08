@@ -39,7 +39,7 @@ try {
     ) : artworks.length === 0 ? (
       <p class="px-4 py-16 text-center text-body-4 text-neutral-500">아직 등록된 작품이 없어요.</p>
     ) : (
-      <div class="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
+      <div class="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
         {artworks.map((a) => (
           <ArtworkCard
             artworkId={a.artworkId}

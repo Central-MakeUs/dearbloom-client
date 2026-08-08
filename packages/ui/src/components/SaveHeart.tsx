@@ -7,6 +7,8 @@ interface SaveHeartProps {
   artworkId: number;
   initialSaved?: boolean;
   size?: number;
+  /** 하트 외곽선 두께. Figma 카드 오버레이는 1.5. */
+  strokeWidth?: number;
   /** 어두운 배경 위에 올릴 때 등 색 오버라이드 */
   className?: string;
   /** 토글 결과 콜백(낙관적/롤백 포함한 최종 상태). 목록에서 언세이브 시 제거용. */
@@ -32,6 +34,7 @@ export function SaveHeart({
   artworkId,
   initialSaved = false,
   size = 24,
+  strokeWidth = 1.8,
   className,
   onChange,
   endpoint = '/api/saved',
@@ -79,7 +82,7 @@ export function SaveHeart({
       aria-label={saved ? '저장 취소' : '저장'}
       className={className ?? 'shrink-0 text-neutral-800 transition-transform active:scale-90'}
     >
-      <Heart size={size} strokeWidth={1.8} fill={saved ? 'currentColor' : 'none'} aria-hidden />
+      <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
     </button>
   );
 }
