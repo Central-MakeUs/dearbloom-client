@@ -3,7 +3,8 @@ import { getMyArtworks, type MyArtworkListItem } from '@dearbloom/shared';
 import { Plus } from 'lucide-react';
 import { Button } from '@dearbloom/ui';
 import { MyArtworkList } from './MyArtworkList';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
+import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,18 +19,17 @@ export default async function ArtistProductsPage() {
     items = await getMyArtworks({ token }).catch(() => []);
   }
 
-  const header = (
-    <header className="flex items-center justify-between px-4 pt-6">
-      <h1 className="text-head-2 text-neutral-950">내 작품</h1>
-      {!needLogin && items.length > 0 && (
-        <Button asChild size="sm">
-          <a href="/app/artist/products/new">
-            <Plus className="size-4" /> 작품 등록
-          </a>
-        </Button>
-      )}
-    </header>
-  );
+  // mr-2.5: 헤더 우측 여백은 44x44 아이콘 버튼 기준(6px)이라 텍스트 버튼은 16px 이 되도록 보정
+  const registerButton =
+    !needLogin && items.length > 0 ? (
+      <Button asChild size="sm" className="mr-2.5">
+        <a href="/app/artist/products/new">
+          <Plus className="size-4" /> 작품 등록
+        </a>
+      </Button>
+    ) : undefined;
+
+  const header = <AppLogoHeader logoHref={ARTIST_HOME_HREF} right={registerButton} />;
 
   const body = needLogin ? (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
