@@ -73,6 +73,11 @@ interface DeleteTarget {
 const REC_DEFAULT = { day: 'MONDAY' as DayOfWeek, start: '12:00', end: '13:00' };
 const BLK_DEFAULT = { start: '09:00', end: '18:00' };
 
+/** 저장된 일정이 없을 때 켜둘 요일 — 평일. */
+const DEFAULT_DAYS: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+const DAY_HOURS_DEFAULT = { start: '09:00', end: '18:00' };
+const MIN_DAY_MESSAGE = '촬영 가능 요일은 1개 이상 선택해야 해요.';
+
 export function ScheduleManager({
   weekly,
   recurring,
@@ -96,28 +101,40 @@ export function ScheduleManager({
   // 기본 촬영 가능 일정 — 요일별 상태
   const [days, setDays] = useState<Record<DayOfWeek, DayState>>(() => {
     const init = {} as Record<DayOfWeek, DayState>;
+    // 저장된 일정이 하나도 없으면 평일을 미리 켜둔다 — 최소 1개 규칙을 처음부터 만족시킨다.
+    const useDefault = weekly.length === 0;
     for (const d of DAYS) {
       const rule = weekly.find((w) => w.dayOfWeek === d.key);
       init[d.key] = rule
         ? { enabled: true, start: hhmm(rule.startTime), end: hhmm(rule.endTime) }
-        : { enabled: false, start: '09:00', end: '18:00' };
+        : { enabled: useDefault && DEFAULT_DAYS.includes(d.key), ...DAY_HOURS_DEFAULT };
     }
     return init;
   });
 
-  const toggleDay = (key: DayOfWeek) =>
+  const enabledDayCount = DAYS.filter((d) => days[d.key].enabled).length;
+  const toggleDay = (key: DayOfWeek) => {
+    if (days[key].enabled && enabledDayCount <= 1) {
+      toast.error(MIN_DAY_MESSAGE);
+      return;
+    }
     setDays((p) => ({ ...p, [key]: { ...p[key], enabled: !p[key].enabled } }));
+  };
   const setDayStart = (key: DayOfWeek, v: string) =>
     setDays((p) => ({ ...p, [key]: { ...p[key], start: v, end: p[key].end <= v ? nextSlot(v) : p[key].end } }));
   const setDayEnd = (key: DayOfWeek, v: string) => setDays((p) => ({ ...p, [key]: { ...p[key], end: v } }));
 
   const saveWeekly = async () => {
-    setBusy(true);
     const availabilityList = DAYS.filter((d) => days[d.key].enabled).map((d) => ({
       dayOfWeek: d.key,
       startTime: hhmmss(days[d.key].start),
       endTime: hhmmss(days[d.key].end),
     }));
+    if (availabilityList.length === 0) {
+      toast.error(MIN_DAY_MESSAGE);
+      return;
+    }
+    setBusy(true);
     const ok = await send(`${BASE}/weekly`, 'PUT', { availabilityList });
     setBusy(false);
     if (ok) {
