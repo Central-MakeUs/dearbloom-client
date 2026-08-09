@@ -2,17 +2,13 @@ import { clsx, type ClassValue } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
 
 /**
- * 프리셋(`packages/config/tailwind.preset.mjs`)에 정의한 폰트 크기 토큰들.
+ * 프리셋(@dearbloom/config)에서 정의한 커스텀 폰트 스케일.
  *
- * tailwind-merge 는 이 이름들을 모르기 때문에 `text-caption-2` 를 폰트 크기가 아니라
- * **글자색**으로 오분류한다. 그러면 `text-caption-2 ... text-neutral-600` 처럼 한 번에 합쳐질 때
- * 둘이 같은 그룹으로 취급돼 뒤엣값만 남고 폰트 크기가 통째로 사라진다.
- * (Badge 의 12px 이 사라져 16px 로 커지고, primary 버튼의 `text-neutral-0` 이 사라져
- *  녹색 배경에 어두운 글자가 나오던 버그가 전부 여기서 비롯됐다.)
- *
- * 토큰을 추가하면 이 배열에도 반드시 추가할 것.
+ * tailwind-merge 는 기본적으로 `text-sm` 같은 표준 스케일만 font-size 로 인식한다.
+ * 등록하지 않으면 `text-caption-1` 을 **글자색**으로 오인해서
+ * `cn('text-caption-1 text-neutral-800')` 이 `text-neutral-800` 으로 뭉개진다(크기 소실).
  */
-const FONT_SIZE_TOKENS = [
+const FONT_SIZES = [
   'head-1',
   'head-2',
   'head-3',
@@ -28,7 +24,7 @@ const FONT_SIZE_TOKENS = [
 ];
 
 const twMerge = extendTailwindMerge({
-  extend: { classGroups: { 'font-size': [{ text: FONT_SIZE_TOKENS }] } },
+  extend: { classGroups: { 'font-size': [{ text: FONT_SIZES }] } },
 });
 
 /**
