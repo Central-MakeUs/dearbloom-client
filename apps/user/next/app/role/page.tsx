@@ -21,7 +21,8 @@ export default async function RoleSelectionPage({ searchParams }: RoleSelectionP
   const provider = getOAuthProvider(providerParam);
   const returnUrl = safeReturnUrl(returnUrlParam);
 
-  if (!provider) redirect('/app/login');
+  // next/navigation 의 redirect 는 basePath('/app')를 자동으로 붙인다 — 경로에 /app 을 쓰면 /app/app/... 이 된다.
+  if (!provider) redirect('/login');
 
   return (
     <RoleSelectionForm forceOnboarding={forceOnboarding} provider={provider} returnUrl={returnUrl} />
