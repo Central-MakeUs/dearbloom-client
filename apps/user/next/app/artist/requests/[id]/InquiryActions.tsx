@@ -5,22 +5,9 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button, cn } from '@dearbloom/ui';
 import type { InquiryStatus } from '@dearbloom/shared';
+import { ACTION_BAR_BOTTOM } from './actionBar';
 
 type Action = 'reserve' | 'reserve-cancel' | 'cancel';
-
-/** 하단 고정 액션바가 뜨는 상태. 페이지 여백 계산에도 쓴다. */
-export function hasInquiryActions(status: InquiryStatus): boolean {
-  return status === 'RESERVED' || status === 'IN_PROGRESS';
-}
-
-/**
- * 액션바(패딩 16*2 + 버튼 52 + 보더 1 ≈ 85px)만큼 본문을 밀어주는 클래스.
- * 하단탭 높이는 `ArtistLayout` 의 `pb-20` 이 이미 확보하므로 여기선 바 높이만 더한다.
- */
-export const ACTION_BAR_OFFSET = 'pb-[calc(88px+env(safe-area-inset-bottom))]';
-
-/** 하단탭(60px + safe-area) 바로 위에 붙는다. */
-const ACTION_BAR_BOTTOM = 'bottom-[calc(60px+env(safe-area-inset-bottom))]';
 
 export function InquiryActions({ id, status }: { id: number; status: InquiryStatus }) {
   const router = useRouter();

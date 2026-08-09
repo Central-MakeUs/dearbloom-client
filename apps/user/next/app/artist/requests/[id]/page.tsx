@@ -2,7 +2,8 @@ import { cookies } from 'next/headers';
 import { ampmTimeLabel, getReceivedInquiry, shortDateLabel } from '@dearbloom/shared';
 import { Card, CardContent, Header as TitleHeader, cn } from '@dearbloom/ui';
 import { durationLabel } from '@/src/lib/inquiry';
-import { InquiryActions, hasInquiryActions, ACTION_BAR_OFFSET } from './InquiryActions';
+import { InquiryActions } from './InquiryActions';
+import { ACTION_BAR_OFFSET, hasInquiryActions } from './actionBar';
 import { InquiryTimeline } from './InquiryTimeline';
 
 export const dynamic = 'force-dynamic';
