@@ -37,7 +37,7 @@ export function DateField({
   const display = (
     <span
       aria-hidden
-      className={cn(buttonVariants({ variant: 'outline' }), 'pointer-events-none')}
+      className={cn(buttonVariants({ variant: 'outline' }), 'pointer-events-none w-full justify-start')}
     >
       <Calendar className="text-neutral-400" aria-hidden />
       <span className={cn(value ? 'text-neutral-950' : 'text-neutral-400')}>

@@ -340,19 +340,21 @@ export function ScheduleManager({
         ) : (
           emptyText('등록된 예약 불가 날짜가 없어요.')
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-3">
+        <div className="mt-3 flex flex-col gap-2 border-t border-neutral-200 pt-3">
           <DateField value={blkDate} onChange={setBlkDate} min={today} ariaLabel="개인 예약불가 날짜" />
-          <TimeSelect value={blkStart} options={START_SLOTS} onChange={setBlkStartV} ariaLabel="개인 예약불가 시작 시간" />
-          <span className="text-body-6 text-neutral-500">~</span>
-          <TimeSelect
-            value={blkEnd}
-            options={endSlotsAfter(blkStart)}
-            onChange={setBlkEnd}
-            ariaLabel="개인 예약불가 종료 시간"
-          />
-          <Button type="button" variant="primary" size="sm" onClick={addDate} disabled={disabled} className="ml-auto">
-            추가
-          </Button>
+          <div className="flex items-center gap-2">
+            <TimeSelect value={blkStart} options={START_SLOTS} onChange={setBlkStartV} ariaLabel="개인 예약불가 시작 시간" />
+            <span className="text-body-6 text-neutral-500">~</span>
+            <TimeSelect
+              value={blkEnd}
+              options={endSlotsAfter(blkStart)}
+              onChange={setBlkEnd}
+              ariaLabel="개인 예약불가 종료 시간"
+            />
+            <Button type="button" variant="primary" size="sm" onClick={addDate} disabled={disabled} className="ml-auto">
+              추가
+            </Button>
+          </div>
         </div>
       </Card>
     </section>
