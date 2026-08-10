@@ -77,7 +77,8 @@ const CHIP_CLASS =
       </a>
 
       {[
-        { href: `${filterHref}#date`, label: chips.date },
+        // 날짜는 첫 섹션이라 해시 없이 들어가면 그대로 맨 위 — 탭바 아래로 어중간하게 내려가지 않는다.
+        { href: filterHref, label: chips.date },
         { href: `${filterHref}#region`, label: chips.region },
         { href: `${filterHref}#headCount`, label: chips.headCount },
       ].map((chip) => (
@@ -97,15 +98,20 @@ const CHIP_CLASS =
         <span class="text-body-5 text-neutral-600">전체 {page.totalCount}</span>
         <div class="flex items-center">
           <ArtworkSortSheet current={filter.sort ?? 'LATEST'} filterQuery={filterOnlyQuery} client:load />
-          {/* 격자 버튼 — Figma icons/40/3Grid. 2열 ↔ 3열(작게 보기) 전환. */}
+          {/*
+            격자 버튼 — Figma icons/40/3Grid(점 3x3). 누르면 바뀔 상태의 아이콘을 보여준다.
+            2열용 아이콘은 시안에 없어 3Grid 와 같은 폭(14~26)·같은 점 굵기로 2x2 를 만들었다.
+          */}
           <a
             href={`/snaps${toQueryString(filter, cols === 3 ? 2 : 3)}`}
             aria-label={cols === 3 ? '2열로 보기' : '3열로 보기'}
-            class={`flex h-10 w-10 items-center justify-center ${cols === 3 ? 'text-primary' : 'text-neutral-800'}`}
+            class="flex h-10 w-10 items-center justify-center text-neutral-800"
           >
             <svg viewBox="0 0 40 40" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              {[14, 20, 26].map((cy) => [14, 20, 26].map((cx) => <circle cx={cx} cy={cy} r="1" />))}
+              {(cols === 3 ? [14, 26] : [14, 20, 26]).map((cy) =>
+                (cols === 3 ? [14, 26] : [14, 20, 26]).map((cx) => <circle cx={cx} cy={cy} r="1" />),
+              )}
             </svg>
           </a>
         </div>

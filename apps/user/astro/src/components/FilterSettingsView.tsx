@@ -110,6 +110,11 @@ export function FilterSettingsView({ initial }: Props) {
 
   const scrollToSection = (key: TabKey) => {
     setActiveTab(key);
+    // 첫 섹션은 맨 위로 — 위에 아무것도 없는데 탭바 높이만큼 내려가면 어중간해 보인다.
+    if (key === TABS[0].key) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     document.getElementById(key)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 

@@ -9,7 +9,10 @@ interface ScrollFadeProps {
    * 하단탭 화면은 60(탭 높이), 하단 CTA 화면은 68 처럼.
    */
   offset?: number;
-  /** 그라데이션 높이. 기본은 Figma 실측(72px). */
+  /**
+   * 그라데이션 높이. 시안 실측은 72px 이지만 실제로 깔아보니 너무 세서 48px 로 줄였습니다.
+   * "더 있다"는 힌트만 주면 되는 장치라 콘텐츠를 가릴 만큼 진할 이유가 없습니다.
+   */
   height?: number;
   className?: string;
 }
@@ -23,7 +26,7 @@ const BOTTOM_EPSILON = 8;
  * 콘텐츠가 잘린 게 아니라 "더 있다"는 걸 알리는 장치라, 끝까지 내려가면 사라집니다.
  * 스크롤이 없는 짧은 화면에서는 아예 뜨지 않습니다.
  */
-export function ScrollFade({ offset = 0, height = 72, className }: ScrollFadeProps) {
+export function ScrollFade({ offset = 0, height = 48, className }: ScrollFadeProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ export function ScrollFade({ offset = 0, height = 72, className }: ScrollFadePro
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none fixed inset-x-0 z-30 bg-gradient-to-b from-transparent to-neutral-0 transition-opacity duration-200',
+        'pointer-events-none fixed inset-x-0 z-30 bg-gradient-to-b from-transparent to-neutral-0/70 transition-opacity duration-200',
         visible ? 'opacity-100' : 'opacity-0',
         className,
       )}
