@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { devLogin } from '@dearbloom/shared';
+import { devLogin, type DevRole } from '@dearbloom/shared';
 
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 import { setAuthCookie } from '@/src/lib/authCookies';
@@ -26,26 +26,38 @@ function redirectRelative(
   return response;
 }
 
-async function handleLogin(request: NextRequest, memberId: number) {
+function readRole(value: unknown): DevRole | undefined {
+  return value === 'CUSTOMER' || value === 'ARTIST' ? value : undefined;
+}
+
+/** 역할을 지정해 로그인하면 역할 선택을 건너뛰고 그 역할의 홈으로 보낸다. */
+const HOME_BY_ROLE: Record<DevRole, string> = {
+  ARTIST: '/app/artist/dashboard',
+  CUSTOMER: '/snaps',
+  ONBOARDING: '/app/role',
+};
+
+async function handleLogin(request: NextRequest, memberId: number, role?: DevRole) {
   if (!Number.isFinite(memberId)) return redirectRelative(request, '/app/dev/login?error=invalid');
 
   let tokens;
   try {
-    tokens = await devLogin(memberId);
+    tokens = await devLogin(memberId, role);
   } catch {
     return redirectRelative(request, '/app/dev/login?error=login_failed');
   }
 
-  return redirectRelative(request, '/app/role', tokens);
+  return redirectRelative(request, role ? HOME_BY_ROLE[role] : '/app/role', tokens);
 }
 
 export async function POST(request: NextRequest) {
   if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
   const formData = await request.formData();
-  return handleLogin(request, Number(formData.get('memberId')));
+  return handleLogin(request, Number(formData.get('memberId')), readRole(formData.get('role')));
 }
 
 export async function GET(request: NextRequest) {
   if (!DEV_LOGIN_ENABLED) return new NextResponse(null, { status: 404 });
-  return handleLogin(request, Number(request.nextUrl.searchParams.get('memberId')));
+  const { searchParams } = request.nextUrl;
+  return handleLogin(request, Number(searchParams.get('memberId')), readRole(searchParams.get('role')));
 }
