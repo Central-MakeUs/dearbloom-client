@@ -1,7 +1,5 @@
 import { ChevronRight } from 'lucide-react';
-import { Badge, Card } from '@dearbloom/ui';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { ARTIST_HOME_HREF } from '@/src/lib/env';
+import { Badge, Card, Header } from '@dearbloom/ui';
 
 const items: { label: string; desc: string; href?: string }[] = [
   { label: '일정 관리', desc: '촬영 가능 일정 · 예약 불가 관리', href: '/app/artist/schedule' },
@@ -16,7 +14,7 @@ const items: { label: string; desc: string; href?: string }[] = [
 export default function ArtistDashboardPage() {
   return (
     <div className="mx-auto max-w-md">
-      <AppLogoHeader logoHref={ARTIST_HOME_HREF} />
+      <Header showBack={false} title="대시보드" />
 
       <div className="mt-2 flex flex-col gap-2 px-4">
         {items.map((it) =>
