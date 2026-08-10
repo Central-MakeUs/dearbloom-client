@@ -12,6 +12,8 @@ interface Props {
   initialPage: ArtworkPage;
   /** 현재 필터·정렬 쿼리스트링('?region=SEOUL' 또는 ''). 다음 페이지 요청에 그대로 실립니다. */
   query: string;
+  /** 한 줄에 놓을 카드 수. 격자 버튼으로 2 ↔ 3 을 오갑니다. */
+  columns?: 2 | 3;
 }
 
 /**
@@ -20,7 +22,7 @@ interface Props {
  * 필터/정렬이 바뀌면 URL 이 바뀌면서 페이지가 통째로 다시 그려지므로, 이 컴포넌트는
  * "고정된 필터 안에서 커서를 이어받는" 일만 합니다. 커서 도중에 조건이 바뀔 일이 없습니다.
  */
-export function ArtworkFeed({ initialPage, query }: Props) {
+export function ArtworkFeed({ initialPage, query, columns = 2 }: Props) {
   const [items, setItems] = useState<ArtworkListItem[]>(initialPage.artworkList);
   const [cursor, setCursor] = useState<string | null>(initialPage.nextCursor);
   const [hasNext, setHasNext] = useState(initialPage.hasNext);
@@ -68,7 +70,8 @@ export function ArtworkFeed({ initialPage, query }: Props) {
   }, [loadMore, hasNext, failed]);
 
   const grid = (
-    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
+    // 3열은 카드가 좁아 제목이 잘 넘치므로 열 간격만 줄인다(행 간격은 시안 20 유지).
+    <div className={`grid gap-y-5 px-4 pb-6 ${columns === 3 ? 'grid-cols-3 gap-x-1.5' : 'grid-cols-2 gap-x-2'}`}>
       {items.map((a) => (
         <ArtworkCard
           key={a.artworkId}
