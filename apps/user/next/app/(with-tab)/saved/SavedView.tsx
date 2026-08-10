@@ -26,8 +26,6 @@ import {
 import { artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
 import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { CUSTOMER_HOME_HREF } from '@/src/lib/env';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
 const SAVED_ENDPOINT = '/app/api/saved';
@@ -113,11 +111,11 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   );
 
   const showEditIcon = tab === 'saved' && items.length > 0;
-  // 탭 최상위라 기본은 로고형. 편집 모드는 빠져나올 뒤로가기가 필요해 타이틀형으로 바뀝니다.
+  // 편집 모드에선 빠져나올 뒤로가기가 필요해 타이틀이 '내 저장 편집'으로 바뀝니다.
   const header = editing ? (
     <Header showBack onBack={exitEdit} title="내 저장 편집" />
   ) : (
-    <AppLogoHeader logoHref={CUSTOMER_HOME_HREF} right={showEditIcon ? editIcon : undefined} />
+    <Header showBack={false} title="저장 목록" right={showEditIcon ? editIcon : undefined} />
   );
 
   const emptySaved = (

@@ -1,10 +1,9 @@
 import { cookies } from 'next/headers';
 import { getMyArtworks, type MyArtworkListItem } from '@dearbloom/shared';
 import { Plus } from 'lucide-react';
-import { Button } from '@dearbloom/ui';
+import { Button, Header } from '@dearbloom/ui';
 import { MyArtworkList } from './MyArtworkList';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +28,7 @@ export default async function ArtistProductsPage() {
       </Button>
     ) : undefined;
 
-  const header = <AppLogoHeader logoHref={ARTIST_HOME_HREF} right={registerButton} />;
+  const header = <Header showBack={false} title="내 작품" right={registerButton} />;
 
   const body = needLogin ? (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">

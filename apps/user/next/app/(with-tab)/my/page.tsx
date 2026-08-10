@@ -1,8 +1,7 @@
 import { cookies } from 'next/headers';
 import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { CUSTOMER_HOME_HREF } from '@/src/lib/env';
+import { Header } from '@dearbloom/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +11,7 @@ export default async function MyPage() {
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
-      <AppLogoHeader logoHref={CUSTOMER_HOME_HREF} />
+      <Header showBack={false} title="마이페이지" />
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
         <a href="/app/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
@@ -32,7 +31,7 @@ export default async function MyPage() {
 
   return (
     <div className="mx-auto max-w-md">
-      <AppLogoHeader logoHref={CUSTOMER_HOME_HREF} />
+      <Header showBack={false} title="마이페이지" />
 
       {/* 프로필 */}
       <section className="flex items-center justify-between px-4 py-3">
