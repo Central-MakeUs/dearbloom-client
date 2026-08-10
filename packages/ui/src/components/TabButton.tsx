@@ -33,13 +33,14 @@ export function TabButton({
       {...rest}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors',
+        'flex flex-1 flex-col items-center justify-center gap-1 transition-colors',
         active ? activeClassName : inactiveClassName,
         className,
       )}
     >
       {icon(active)}
-      <span className={cn('text-caption-3', active && 'font-semibold')}>{label}</span>
+      {/* 시안(Caption3_r_11)은 선택 여부와 무관하게 400 — 색으로만 구분한다. */}
+      <span className="text-caption-3">{label}</span>
     </a>
   );
 }

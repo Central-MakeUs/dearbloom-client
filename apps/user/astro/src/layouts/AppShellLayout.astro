@@ -1,5 +1,5 @@
 ---
-import { BottomTab } from '@dearbloom/ui';
+import { BottomTab, ScrollFade } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -24,6 +24,8 @@ const currentPath = Astro.url.pathname;
   </head>
   <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
     <slot />
+    {/* 하단탭(60px) 바로 위에 깔리는 스크롤 페이드 — 더 볼 게 남았을 때만 보입니다. */}
+    <ScrollFade offset={60} client:load />
     <BottomTab currentPath={currentPath} variant={navVariant} client:load />
   </body>
 </html>
