@@ -29,8 +29,9 @@ interface HeaderProps {
  * 고정이라 본문이 아래로 깔리므로 같은 높이의 spacer 를 함께 렌더합니다 —
  * 쓰는 쪽에서 상단 여백을 따로 챙길 필요가 없습니다.
  */
+// Figma icons/44/arrow/left — 44x44 터치 영역 안 28px 아이콘, 색은 neutral/n800.
 const BACK_CLASS =
-  'flex h-11 w-11 items-center justify-center text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
+  'flex h-11 w-11 items-center justify-center text-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
 
 export function Header({
   title,
@@ -40,7 +41,7 @@ export function Header({
   right,
   className,
 }: HeaderProps) {
-  const backIcon = <ChevronLeft size={24} strokeWidth={2} aria-hidden />;
+  const backIcon = <ChevronLeft size={28} strokeWidth={2} aria-hidden />;
 
   const backButton = !showBack ? (
     <span className="h-11 w-11" aria-hidden />
@@ -72,8 +73,8 @@ export function Header({
           className,
         )}
       >
-        {/* 우측 4px 은 Figma header_title 실측(아이콘 44x44 가 x=327, 프레임 375). */}
-        <div className="relative mx-auto flex h-[52px] max-w-md items-center justify-between pl-2 pr-1">
+        {/* 좌우 4px 은 Figma header_title 실측(아이콘 44x44 가 각각 x=4, x=327, 프레임 375). */}
+        <div className="relative mx-auto flex h-[52px] max-w-md items-center justify-between px-1">
           {backButton}
           {titleNode}
           {rightSlot}

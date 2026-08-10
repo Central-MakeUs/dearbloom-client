@@ -58,7 +58,8 @@ export default {
         // Head — 140% line-height
         'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '700' }], // Head1_b_20
         'head-2': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '600' }], // Head2_sb_20
-        'head-3': ['16px', { lineHeight: '1.5em', letterSpacing: '-0.01em', fontWeight: '600' }], // Head3_sb_16
+        // Head3_sb_16 — Figma 에 자간 값이 없어 0. (Head1/Head2 만 자간을 가진다)
+        'head-3': ['16px', { lineHeight: '1.5em', fontWeight: '600' }],
         // Body — 150%
         'body-1': ['16px', { lineHeight: '1.5em', fontWeight: '500' }], // Body1_m_16
         'body-2': ['16px', { lineHeight: '1.5em', fontWeight: '400' }], // Body2_r_16
