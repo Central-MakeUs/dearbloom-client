@@ -72,10 +72,13 @@ export function FilterCalendar({ month, onMonthChange, start, end, onSelect, min
     </div>
   );
 
+  // 열은 40px 고정 + 간격 8px(시안 실측 피치 48). 균등 분배로 두면 넓은 화면에서 열이 벌어진다.
+  const GRID_CLASS = 'grid grid-cols-[repeat(7,40px)] justify-center gap-x-2';
+
   const weekdayRow = (
-    <div className="grid grid-cols-7">
+    <div className={GRID_CLASS}>
       {WEEKDAYS.map((w) => (
-        <span key={w} className="mx-auto flex h-10 w-10 items-center justify-center text-body-2 text-neutral-800">
+        <span key={w} className="flex h-10 w-10 items-center justify-center text-body-2 text-neutral-800">
           {w}
         </span>
       ))}
@@ -99,7 +102,7 @@ export function FilterCalendar({ month, onMonthChange, start, end, onSelect, min
         disabled={disabled}
         onClick={() => onSelect(key)}
         aria-pressed={selected}
-        className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full ${
+        className={`flex h-10 w-10 items-center justify-center rounded-full ${
           selected
             ? 'bg-primary text-body-1 font-semibold text-neutral-0'
             : disabled
@@ -112,12 +115,13 @@ export function FilterCalendar({ month, onMonthChange, start, end, onSelect, min
     );
   });
 
+  // 월 타이틀·요일·날짜가 같은 폭(7*40 + 6*8 = 328)을 공유해야 첫 열과 타이틀 왼쪽이 맞는다.
   return (
-    <div className="flex flex-col gap-2">
+    <div className="mx-auto flex w-full max-w-[328px] flex-col gap-2">
       {header}
       <div className="flex flex-col gap-3">
         {weekdayRow}
-        <div className="grid grid-cols-7 gap-y-1">{dayCells}</div>
+        <div className={`${GRID_CLASS} gap-y-1`}>{dayCells}</div>
       </div>
     </div>
   );

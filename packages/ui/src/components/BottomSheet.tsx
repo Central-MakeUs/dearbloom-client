@@ -36,8 +36,9 @@ export function BottomSheet({
             className,
           )}
         >
+          {/* 크기·색은 vaul 기본 스타일이 클래스를 이기므로 ! 로 덮는다. Figma 실측 45x4 / neutral-500. */}
           {showHandle && (
-            <Drawer.Handle className="mx-auto mt-3 mb-2 h-1 w-10 shrink-0 rounded-full bg-neutral-300" />
+            <Drawer.Handle className="mx-auto mt-3 mb-2 !h-1 !w-[45px] shrink-0 rounded-full !bg-neutral-500" />
           )}
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
           {children}

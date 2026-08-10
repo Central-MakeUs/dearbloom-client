@@ -59,7 +59,8 @@ export function FilterSettingsView({ initial }: Props) {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length > 0) setActiveTab(visible[0]!.target.id as TabKey);
       },
-      { rootMargin: '-120px 0px -60% 0px' },
+      // 상단 100px(헤더+탭바)은 가려진 영역이라 판정에서 뺍니다.
+      { rootMargin: '-100px 0px -60% 0px' },
     );
     for (const tab of TABS) {
       const el = document.getElementById(tab.key);
@@ -118,8 +119,9 @@ export function FilterSettingsView({ initial }: Props) {
         : 'border-transparent bg-neutral-200 text-neutral-800'
     }`;
 
+  // 헤더가 fixed 52px 이므로 탭바는 그 아래에 붙인다(top-0 이면 헤더 뒤로 깔려 사라진다).
   const tabBar = (
-    <div className="sticky top-0 z-10 flex bg-neutral-100">
+    <div className="sticky top-[52px] z-30 flex h-12 bg-neutral-100">
       {TABS.map((tab) => {
         const active = tab.key === activeTab;
         return (
@@ -127,8 +129,8 @@ export function FilterSettingsView({ initial }: Props) {
             key={tab.key}
             type="button"
             onClick={() => scrollToSection(tab.key)}
-            className={`flex-1 border-b py-2.5 text-head-3 ${
-              active ? 'border-primary text-primary' : 'border-neutral-400 font-medium text-neutral-700'
+            className={`flex-1 border-b ${
+              active ? 'border-primary text-head-3 text-primary' : 'border-neutral-400 text-body-1 text-neutral-700'
             }`}
           >
             {tab.label}
@@ -146,7 +148,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const dateSection = (
-    <section id="date" className="flex scroll-mt-14 flex-col gap-5 px-4">
+    <section id="date" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
       {sectionHeading('날짜 설정', '설정한 날짜에 예약 가능한 곳만 볼 수 있어요.')}
       <FilterCalendar
         month={month}
@@ -172,7 +174,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const regionSection = (
-    <section id="region" className="flex scroll-mt-14 flex-col gap-5 px-4">
+    <section id="region" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
       {sectionHeading('지역 설정', '원하는 촬영 지역을 선택해 주세요.')}
       <div className="flex flex-wrap gap-2">
         {ARTIST_REGION_OPTIONS.map((option) => (
@@ -192,7 +194,9 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const headCountSection = (
-    <section id="headCount" className="flex scroll-mt-14 flex-col gap-5 px-4">
+    // 마지막 섹션은 화면 한 판을 채운다 — 그래야 "인원" 탭을 눌렀을 때 이 섹션이 탭바 바로 아래까지
+    // 올라올 스크롤 여유가 생긴다. 섹션 높이를 계산해 패딩을 맞추는 방식은 글자 크기에 따라 어긋난다.
+    <section id="headCount" className="flex min-h-[calc(100vh-100px)] scroll-mt-[100px] flex-col gap-5 px-4">
       {sectionHeading('인원 설정', '촬영 희망 인원을 설정해 주세요.')}
       <div className="flex flex-wrap gap-2">
         {HEAD_COUNTS.map((n) => (
@@ -233,7 +237,7 @@ export function FilterSettingsView({ initial }: Props) {
   return (
     <div className="mx-auto max-w-md">
       {tabBar}
-      <div className="flex flex-col gap-[60px] pb-28 pt-5">
+      <div className="flex flex-col gap-[60px] pb-20 pt-5">
         {dateSection}
         {regionSection}
         {headCountSection}

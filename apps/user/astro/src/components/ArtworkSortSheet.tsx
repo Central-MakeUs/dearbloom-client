@@ -45,14 +45,15 @@ export function ArtworkSortSheet({ current, filterQuery }: Props) {
       <span className="h-[22px] w-[22px] rounded-full border-[1.5px] border-neutral-600" aria-hidden />
     );
 
+    // Figma 1110:20896 — 항목 24px, 구분선까지 위아래 16px. 첫 항목만 위 여백이 없다.
     return (
       <button
         key={option.value}
         type="button"
         onClick={() => apply(option.value)}
         aria-pressed={selected}
-        className={`flex w-full items-center justify-between py-2 text-body-1 text-neutral-900 ${
-          i > 0 ? 'border-t border-neutral-200' : ''
+        className={`flex w-full items-center justify-between px-[15px] py-4 text-body-1 text-neutral-900 ${
+          i > 0 ? 'border-t border-neutral-200' : 'pt-0'
         }`}
       >
         {option.label}
@@ -65,8 +66,9 @@ export function ArtworkSortSheet({ current, filterQuery }: Props) {
     <>
       {trigger}
       <BottomSheet open={open} onOpenChange={setOpen} title="정렬 설정" className="rounded-t-lg">
-        <p className="pb-4 text-center text-head-3 text-neutral-950">정렬 설정</p>
-        <div className="px-4">{options}</div>
+        {/* 핸들 아래 20px, 타이틀 아래 28px — 시트 기본 마진(8px)을 감안해 pt 로 보정. */}
+        <p className="pb-7 pt-3 text-center text-head-3 text-neutral-950">정렬 설정</p>
+        <div className="px-2">{options}</div>
       </BottomSheet>
     </>
   );
