@@ -1,5 +1,9 @@
 import { cookies } from 'next/headers';
-import { getSavedArtworks, type ArtworkListItem } from '@dearbloom/shared';
+import {
+  getSavedArtworks,
+  getSharedBoardSavedArtworks,
+  type SharedSavedArtwork,
+} from '@dearbloom/shared';
 import { AddClient } from './AddClient';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +12,12 @@ export const dynamic = 'force-dynamic';
 export default async function BoardAddPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const token = (await cookies()).get('accessToken')?.value;
-  const items: ArtworkListItem[] = token ? await getSavedArtworks({ token }).catch(() => []) : [];
+  const items: SharedSavedArtwork[] = token
+    ? await getSharedBoardSavedArtworks(id, { token }).catch(async () => {
+        const saved = await getSavedArtworks({ token }).catch(() => []);
+        return saved.map((artworkSummaryResponse) => ({ artworkSummaryResponse, isShared: false }));
+      })
+    : [];
 
   return <AddClient boardId={id} items={items} />;
 }

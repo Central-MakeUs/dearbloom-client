@@ -3,6 +3,7 @@ export * from './api/http';
 export * from './api/regions';
 export * from './api/artworks';
 export * from './api/saved';
+export * from './api/sharedArtworks';
 export * from './api/artist';
 export * from './api/schedule';
 export * from './api/inquiry';

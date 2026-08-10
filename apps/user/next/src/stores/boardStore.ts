@@ -42,6 +42,7 @@ interface BoardState {
   renameBoard: (id: string, name: string) => void;
   deleteBoard: (id: string) => void;
   addArtworks: (id: string, artworks: BoardArtwork[]) => void;
+  setArtworks: (id: string, artworks: BoardArtwork[]) => void;
   removeArtwork: (id: string, artworkId: number) => void;
   addComment: (id: string, text: string) => void;
 }
@@ -49,31 +50,10 @@ interface BoardState {
 const randomCode = () => `#${Math.floor(100000 + Math.random() * 900000)}`;
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-/** 첫 실행 데모용 시드 보드 1개(썸네일은 없음 → 그라디언트 플레이스홀더). */
-const seedBoards: Board[] = [
-  {
-    id: 'seed-1',
-    name: '우정스냅 보드',
-    // 공유 코드(색상 아님) — no-restricted-syntax(hex) 오탐 방지
-    // eslint-disable-next-line no-restricted-syntax
-    code: '#123456',
-    artworks: [
-      { artworkId: 9001, title: '졸업스냅 후보 1', artistNickname: '드림 스튜디오', price: 150000, thumbnailUrl: null, regions: ['서울'] },
-      { artworkId: 9002, title: '졸업스냅 후보 2', artistNickname: '디어리 필름', price: 250000, thumbnailUrl: null, regions: ['서울', '경기'] },
-      { artworkId: 9003, title: '졸업스냅 후보 3', artistNickname: '시월 사진관', price: 300000, thumbnailUrl: null, regions: ['경기'] },
-      { artworkId: 9004, title: '졸업스냅 후보 4', artistNickname: '블루밍데이즈', price: 180000, thumbnailUrl: null, regions: ['서울'] },
-    ],
-    comments: [
-      { id: 'c1', author: '이름', text: '머시기 머시기 무드가 맘에 듦' },
-      { id: 'c2', author: '이름', text: '가성비가 좋은 듯' },
-    ],
-  },
-];
-
 export const useBoardStore = create<BoardState>()(
   persist(
     (set, get) => ({
-      boards: seedBoards,
+      boards: [],
       getBoard: (id) => get().boards.find((b) => b.id === id),
       createBoard: (name, code) => {
         const board: Board = { id: uid(), name: name.trim() || '새 공동보드', code: code ?? randomCode(), artworks: [], comments: [] };
@@ -92,6 +72,10 @@ export const useBoardStore = create<BoardState>()(
             return { ...b, artworks: merged };
           }),
         })),
+      setArtworks: (id, artworks) =>
+        set((s) => ({
+          boards: s.boards.map((b) => (b.id === id ? { ...b, artworks } : b)),
+        })),
       removeArtwork: (id, artworkId) =>
         set((s) => ({
           boards: s.boards.map((b) => (b.id === id ? { ...b, artworks: b.artworks.filter((a) => a.artworkId !== artworkId) } : b)),
@@ -103,6 +87,13 @@ export const useBoardStore = create<BoardState>()(
           ),
         })),
     }),
-    { name: 'dearbloom-board-store' },
+    {
+      name: 'dearbloom-board-store',
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as BoardState;
+        return { ...state, boards: state.boards.filter((board) => board.id !== 'seed-1') };
+      },
+    },
   ),
 );
