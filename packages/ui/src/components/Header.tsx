@@ -72,7 +72,8 @@ export function Header({
           className,
         )}
       >
-        <div className="relative mx-auto flex h-[52px] max-w-md items-center justify-between px-2">
+        {/* 우측 4px 은 Figma header_title 실측(아이콘 44x44 가 x=327, 프레임 375). */}
+        <div className="relative mx-auto flex h-[52px] max-w-md items-center justify-between pl-2 pr-1">
           {backButton}
           {titleNode}
           {rightSlot}

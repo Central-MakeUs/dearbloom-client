@@ -77,8 +77,22 @@ export function parseFilterParams(url: URL): ArtworkListParams {
   return params;
 }
 
-/** 필터를 쿼리스트링으로. 빈 값은 넣지 않아 주소가 지저분해지지 않게 합니다. */
-export function toSearchParams(params: ArtworkListParams): URLSearchParams {
+/** 목록 열 수. 2 가 기본이고, 격자 버튼으로 3 열(작게 보기)로 바꿉니다. */
+export type ArtworkColumns = 2 | 3;
+
+/**
+ * 열 수는 보기 방식일 뿐 조회 조건이 아니라서 ArtworkListParams 와 분리합니다 —
+ * 섞어두면 API 요청에 cols 가 딸려 나갑니다.
+ */
+export function parseColumns(url: URL): ArtworkColumns {
+  return url.searchParams.get('cols') === '3' ? 3 : 2;
+}
+
+/**
+ * 필터를 쿼리스트링으로. 빈 값은 넣지 않아 주소가 지저분해지지 않게 합니다.
+ * cols 는 기본값(2)이면 생략합니다.
+ */
+export function toSearchParams(params: ArtworkListParams, cols?: ArtworkColumns): URLSearchParams {
   const q = new URLSearchParams();
   if (params.startDate && params.endDate) {
     q.set('startDate', params.startDate);
@@ -87,12 +101,13 @@ export function toSearchParams(params: ArtworkListParams): URLSearchParams {
   if (params.region) q.set('region', params.region);
   if (params.headCount !== undefined) q.set('headCount', String(params.headCount));
   if (params.sort && params.sort !== 'LATEST') q.set('sort', params.sort);
+  if (cols === 3) q.set('cols', '3');
   return q;
 }
 
 /** '?a=b' 또는 '' — 링크에 바로 이어붙일 수 있는 형태. */
-export function toQueryString(params: ArtworkListParams): string {
-  const q = toSearchParams(params);
+export function toQueryString(params: ArtworkListParams, cols?: ArtworkColumns): string {
+  const q = toSearchParams(params, cols);
   return q.size > 0 ? `?${q}` : '';
 }
 

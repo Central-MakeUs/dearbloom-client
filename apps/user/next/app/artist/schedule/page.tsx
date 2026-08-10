@@ -25,16 +25,24 @@ export default async function ArtistSchedulePage() {
     );
   }
 
+  // 실패를 빈 배열로 삼키면 '조회 실패'와 '아직 설정 안 함'이 구분되지 않는다.
+  // (실패인데 기본값이 채워진 화면에서 저장하면 서버의 기존 일정을 덮어쓴다)
   const [weekly, recurring, dates] = await Promise.all([
-    getWeeklyAvailability({ token }).catch(() => [] as ScheduleRule[]),
-    getRecurringBlocks({ token }).catch(() => [] as ScheduleRule[]),
-    getDateBlocks({ token }).catch(() => [] as ScheduleRule[]),
+    getWeeklyAvailability({ token }).catch(() => null),
+    getRecurringBlocks({ token }).catch(() => null),
+    getDateBlocks({ token }).catch(() => null),
   ]);
+  const loadFailed = weekly === null || recurring === null || dates === null;
 
   return (
     <div className="mx-auto max-w-md">
       <Header />
-      <ScheduleManager weekly={weekly} recurring={recurring} dates={dates} />
+      <ScheduleManager
+        weekly={weekly ?? ([] as ScheduleRule[])}
+        recurring={recurring ?? ([] as ScheduleRule[])}
+        dates={dates ?? ([] as ScheduleRule[])}
+        loadFailed={loadFailed}
+      />
     </div>
   );
 }

@@ -1,9 +1,8 @@
 import { cookies } from 'next/headers';
 import { ChevronRight } from 'lucide-react';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
-import { Badge, Button } from '@dearbloom/ui';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
+import { Badge, Button, Header } from '@dearbloom/ui';
+import { LOGIN_HREF } from '@/src/lib/env';
 
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
 import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
@@ -27,7 +26,7 @@ export default async function ArtistMyPage() {
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
-      <AppLogoHeader logoHref={ARTIST_HOME_HREF} />
+      <Header showBack={false} title="마이페이지" />
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
         <Button asChild>
@@ -49,7 +48,7 @@ export default async function ArtistMyPage() {
 
   return (
     <div className="mx-auto max-w-md">
-      <AppLogoHeader logoHref={ARTIST_HOME_HREF} />
+      <Header showBack={false} title="마이페이지" />
 
       {/* 프로필 */}
       <section className="flex items-center justify-between px-4 py-3">
