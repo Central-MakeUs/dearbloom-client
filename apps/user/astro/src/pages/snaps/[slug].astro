@@ -72,7 +72,7 @@ if (artwork && token) {
       ) : (
         <>
           {/* Header */}
-          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-0 px-2">
+          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-2">
             <a href="/snaps" aria-label="뒤로가기" class="flex h-11 w-11 items-center justify-center text-neutral-950">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
             </a>
@@ -85,10 +85,10 @@ if (artwork && token) {
             </div>
           </header>
 
-          {/* 상단 화이트 블록: 캐러셀 + 제목 + 탭 */}
-          <div class="bg-neutral-0">
+          {/* 상단 블록: 캐러셀 + 제목 + 탭 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
+          <div>
             {photos.length > 0 && (
-              <div class="flex snap-x gap-1 overflow-x-auto px-2 pb-2">
+              <div class="flex snap-x gap-1 overflow-x-auto px-4">
                 {photos.map((p) =>
                   p.fileType === 'VIDEO' ? (
                     <video src={p.fileUrl} class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg object-cover" controls />
@@ -99,13 +99,17 @@ if (artwork && token) {
               </div>
             )}
 
-            {/* 제목 + 지역칩 + 작가 */}
-            <div class="px-4 pt-3">
-              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {/* 제목 + 지역칩 + 작가 — Figma: 제목↔칩그룹 12, 칩끼리 4 */}
+            <div class="px-4 pt-4">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
-                {artwork.artist.regionList?.map((code) => (
-                  <RegionTag>{artistRegionLabel(code)}</RegionTag>
-                ))}
+                {artwork.artist.regionList?.length > 0 && (
+                  <div class="flex flex-wrap items-center gap-1">
+                    {artwork.artist.regionList.map((code) => (
+                      <RegionTag>{artistRegionLabel(code)}</RegionTag>
+                    ))}
+                  </div>
+                )}
               </div>
               <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
               {artwork.artistEmail && (
@@ -122,10 +126,10 @@ if (artwork && token) {
           <div class="pb-28 pt-4">
             {/* 작품 정보 — 기본 가격 + 촬영 경험 학교 (Figma) */}
             {(lowestPrice != null || shootPlaces.length > 0) && (
-              <section class="mb-6">
-                <h3 class="mb-2 px-4 text-head-3 font-bold text-neutral-900">작품 정보</h3>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">작품 정보</h3>
                 <div class="mx-4 rounded-md bg-neutral-0 p-5">
-                  <dl class="flex flex-col gap-3">
+                  <dl class="flex flex-col gap-4">
                     {lowestPrice != null && (
                       <div class="flex items-center justify-between gap-4">
                         <dt class="text-body-5 text-neutral-800">기본 가격</dt>
@@ -147,16 +151,16 @@ if (artwork && token) {
 
             {/* 패키지 구분 — 패키지 카드 리스트 + 더보기 토글 (Figma) */}
             {packages.length > 0 && (
-              <section class="mb-6">
-                <h3 class="mb-2 px-4 text-head-3 font-bold text-neutral-900">패키지 구분</h3>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">패키지 구분</h3>
                 <PackageList packages={packages} client:load />
               </section>
             )}
 
             {/* 출장비 안내 */}
             {artwork.artist.travelFee && (
-              <section class="mb-6">
-                <h3 class="mb-2 px-4 text-head-3 font-bold text-neutral-900">출장비 안내</h3>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">출장비 안내</h3>
                 <div class="mx-4 rounded-md bg-neutral-0 p-5">
                   <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.travelFee}</p>
                 </div>
@@ -165,8 +169,8 @@ if (artwork && token) {
 
             {/* 이용 안내 — 작가 소개 + 작품 안내 통합 카드 (Figma) */}
             {(artwork.artist.intro || artwork.artist.etcInfo) && (
-              <section class="mb-6">
-                <h3 class="mb-2 px-4 text-head-3 font-bold text-neutral-900">이용 안내</h3>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h3>
                 <div class="mx-4 flex flex-col gap-6 rounded-md bg-neutral-0 p-5">
                   {artwork.artist.intro && (
                     <div class="flex flex-col gap-3">
@@ -186,8 +190,8 @@ if (artwork && token) {
 
             {/* 이 작가의 다른 작품 (Figma: 최하단, CTA 위) */}
             {artwork.otherArtworkList?.length > 0 && (
-              <section class="mb-6">
-                <h3 class="mb-3 px-4 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
                 <div class="grid grid-cols-3 gap-2 px-4">
                   {artwork.otherArtworkList.map((o) => (
                     <a href={`/snaps/${o.artworkId}`} class="block">

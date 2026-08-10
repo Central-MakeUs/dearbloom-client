@@ -74,7 +74,9 @@ export function ArtworkCard({
         {!!regions?.length && (
           <div className="flex flex-wrap items-center gap-1">
             {regions.map((r) => (
-              <RegionTag key={r}>{r}</RegionTag>
+              <RegionTag key={r} size="sm">
+                {r}
+              </RegionTag>
             ))}
           </div>
         )}
