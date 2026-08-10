@@ -9,10 +9,7 @@ interface ScrollFadeProps {
    * 하단탭 화면은 60(탭 높이), 하단 CTA 화면은 68 처럼.
    */
   offset?: number;
-  /**
-   * 그라데이션 높이. 시안 실측은 72px 이지만 실제로 깔아보니 너무 세서 48px 로 줄였습니다.
-   * "더 있다"는 힌트만 주면 되는 장치라 콘텐츠를 가릴 만큼 진할 이유가 없습니다.
-   */
+  /** 그라데이션 높이. 시안 실측은 72px 이지만 그만큼 깔면 콘텐츠를 덮어서 32px 로 줄였습니다. */
   height?: number;
   className?: string;
 }
@@ -21,12 +18,16 @@ interface ScrollFadeProps {
 const BOTTOM_EPSILON = 8;
 
 /**
- * 아래로 더 스크롤할 게 남았을 때만 깔리는 흰색 페이드 — Figma 2269:21567(375x72).
+ * 아래로 더 스크롤할 게 남았을 때만 깔리는 페이드 — Figma 2269:21567.
+ *
+ * 색은 흰색이 아니라 **배경색(neutral-100)** 입니다. 시안은 흰색이지만 배경이 #F8F8F8 이라
+ * 흰색으로 깔면 콘텐츠가 배경에 묻히는 대신 흰 띠가 얹힌 것처럼 보입니다. 배경과 같은 색이어야
+ * "아래 내용이 서서히 사라지는" 효과만 남습니다. 배경이 다른 화면에서는 className 으로 덮으세요.
  *
  * 콘텐츠가 잘린 게 아니라 "더 있다"는 걸 알리는 장치라, 끝까지 내려가면 사라집니다.
  * 스크롤이 없는 짧은 화면에서는 아예 뜨지 않습니다.
  */
-export function ScrollFade({ offset = 0, height = 48, className }: ScrollFadeProps) {
+export function ScrollFade({ offset = 0, height = 32, className }: ScrollFadeProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function ScrollFade({ offset = 0, height = 48, className }: ScrollFadePro
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none fixed inset-x-0 z-30 bg-gradient-to-b from-transparent to-neutral-0/70 transition-opacity duration-200',
+        'pointer-events-none fixed inset-x-0 z-30 bg-gradient-to-b from-transparent to-neutral-100 transition-opacity duration-200',
         visible ? 'opacity-100' : 'opacity-0',
         className,
       )}

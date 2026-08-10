@@ -1,7 +1,7 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import { SaveHeart, RegionTag } from '@dearbloom/ui';
+import { SaveHeart, RegionTag, ScrollFade } from '@dearbloom/ui';
 import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
@@ -211,6 +211,7 @@ if (artwork && token) {
           </div>
 
           {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입 */}
+          <ScrollFade offset={88} client:load />
           <SmartInquiryCta packages={packages} client:load />
         </>
       )
