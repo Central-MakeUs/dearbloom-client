@@ -10,7 +10,7 @@ export const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.List ref={ref} className={cn('flex w-full border-b border-neutral-200', className)} {...props} />
+  <TabsPrimitive.List ref={ref} className={cn('flex w-full border-b border-neutral-400', className)} {...props} />
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
@@ -21,7 +21,8 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'relative flex-1 whitespace-nowrap border-b-2 border-transparent py-3 text-center text-body-1 text-neutral-400 outline-none transition-colors focus-visible:text-neutral-700 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary data-[state=active]:font-semibold data-[state=active]:text-primary',
+      // -mb-px: 트리거의 1px 밑줄이 List 의 밑줄 위에 겹치도록(합쳐서 2px 이 되지 않게)
+      'relative -mb-px flex-1 whitespace-nowrap border-b border-transparent py-3 text-center text-body-1 text-neutral-700 outline-none transition-colors focus-visible:text-neutral-900 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary data-[state=active]:font-semibold data-[state=active]:text-primary',
       className,
     )}
     {...props}

@@ -87,8 +87,9 @@ if (artwork && token) {
 
           {/* 상단 블록: 캐러셀 + 제목 + 탭 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
           <div>
+            {/* scroll-pl-4: 스냅이 좌측 패딩을 건너뛰어 첫 장이 화면 끝에 붙는 것 방지 */}
             {photos.length > 0 && (
-              <div class="flex snap-x gap-1 overflow-x-auto px-4">
+              <div class="flex snap-x scroll-pl-4 gap-1 overflow-x-auto px-4">
                 {photos.map((p) =>
                   p.fileType === 'VIDEO' ? (
                     <video src={p.fileUrl} class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg object-cover" controls />

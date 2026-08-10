@@ -9,9 +9,7 @@ export function SnapDetailTabs() {
   return (
     <Tabs defaultValue="info" className="mt-3">
       <TabsList>
-        <TabsTrigger value="info" className="text-head-3">
-          상세정보
-        </TabsTrigger>
+        <TabsTrigger value="info">상세정보</TabsTrigger>
       </TabsList>
     </Tabs>
   );
