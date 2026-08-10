@@ -1,8 +1,7 @@
 import { cookies } from 'next/headers';
 import { getReceivedInquiries } from '@dearbloom/shared';
-import { Button } from '@dearbloom/ui';
-import { AppLogoHeader } from '@/src/components/common/AppLogoHeader';
-import { ARTIST_HOME_HREF, LOGIN_HREF } from '@/src/lib/env';
+import { Button, Header } from '@dearbloom/ui';
+import { LOGIN_HREF } from '@/src/lib/env';
 import { RequestList } from './RequestList';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function ArtistRequestsPage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = <AppLogoHeader logoHref={ARTIST_HOME_HREF} />;
+  const header = <Header showBack={false} title="신청 관리" />;
 
   if (!token) {
     return (

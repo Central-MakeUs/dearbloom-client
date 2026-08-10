@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
+import type { VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { buttonVariants } from './button';
 
@@ -50,11 +51,22 @@ export const AlertDialogDescription = React.forwardRef<
 ));
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 
+/**
+ * 실행 버튼. 되돌릴 수 없는 행동이면 `variant="danger"` 를 쓰세요.
+ *
+ * variant 는 prop 으로 받습니다 — `className` 에 `buttonVariants({ variant })` 를 겹쳐 넘기면
+ * 배경색만 덮이고 `hover:bg-primary-hover` 는 그대로 남아 hover 시 색이 튑니다.
+ */
 export const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
->(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants(), className)} {...props} />
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> &
+    Pick<VariantProps<typeof buttonVariants>, 'variant'>
+>(({ className, variant, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants({ variant }), className)}
+    {...props}
+  />
 ));
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
