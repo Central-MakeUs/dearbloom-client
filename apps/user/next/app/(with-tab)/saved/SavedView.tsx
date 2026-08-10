@@ -45,9 +45,15 @@ const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
  * 저장 화면 — 헤더('저장 목록' + 편집) / 탭(내 저장·공동보드) / 편집 모드(다중 선택 삭제·보드에 추가).
  * 내 저장은 서버 목록, 공동보드는 목(zustand) 스토어로 관리한다.
  */
-export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] }) {
+export function SavedView({
+  initialItems,
+  initialTab,
+}: {
+  initialItems: ArtworkListItem[];
+  initialTab: Tab;
+}) {
   const [items, setItems] = useState(initialItems);
-  const [tab, setTab] = useState<Tab>('saved');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -56,6 +62,15 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   const boards = useBoardStore((s) => s.boards);
   const addArtworks = useBoardStore((s) => s.addArtworks);
+
+  const changeTab = (value: string) => {
+    const nextTab = value as Tab;
+    const url = new URL(window.location.href);
+    if (nextTab === 'board') url.searchParams.set('tab', 'board');
+    else url.searchParams.delete('tab');
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`);
+    setTab(nextTab);
+  };
 
   const exitEdit = () => {
     setEditing(false);
@@ -158,24 +173,26 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
 
   // 공동보드 목록 — 목 스토어. 보드 카드(콜라주) + 생성 FAB.
   const createFab = (
-    <Button
-      asChild
-      size="icon"
-      aria-label="공동보드 만들기"
-      className="fixed bottom-24 right-4 z-20 h-14 w-14 rounded-full text-neutral-0 shadow-elevation [&_svg]:size-[26px]"
-    >
-      <a href="/app/boards/new">
-        <Plus strokeWidth={2} aria-hidden />
-      </a>
-    </Button>
+    <div className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 mx-auto flex max-w-md justify-end px-4 py-3">
+      <Button
+        asChild
+        size="icon"
+        aria-label="공동보드 만들기"
+        className="pointer-events-auto h-12 w-12 rounded-full text-neutral-0 shadow-elevation [&_svg]:size-6"
+      >
+        <a href="/app/boards/new">
+          <Plus strokeWidth={2} aria-hidden />
+        </a>
+      </Button>
+    </div>
   );
 
   const boardBody = (
-    <div className="relative min-h-[60vh]">
+    <div className="relative min-h-[calc(100dvh-180px)]">
       {boards.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 px-6 py-24 text-center">
-          <p className="text-body-4 text-neutral-950">공동보드가 없어요</p>
-          <p className="text-body-5 text-neutral-500">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 pb-12 text-center">
+          <p className="text-body-1 text-neutral-950">공동보드가 없어요</p>
+          <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
@@ -273,11 +290,11 @@ export function SavedView({ initialItems }: { initialItems: ArtworkListItem[] })
   return (
     <div className="mx-auto max-w-md">
       {header}
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+      <Tabs value={tab} onValueChange={changeTab}>
         {!editing && (
-          <TabsList className="px-4">
+          <TabsList>
             <TabsTrigger value="saved">내 저장</TabsTrigger>
-            <TabsTrigger className="hidden" value="board">공동보드</TabsTrigger>
+            <TabsTrigger value="board">공동보드</TabsTrigger>
           </TabsList>
         )}
         <TabsContent value="saved">{savedBody}</TabsContent>

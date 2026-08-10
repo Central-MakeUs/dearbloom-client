@@ -5,8 +5,13 @@ import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SavedPage() {
+export default async function SavedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const cookieStore = await cookies();
+  const { tab } = await searchParams;
   const token = cookieStore.get('accessToken')?.value;
 
   if (!token) {
@@ -24,5 +29,5 @@ export default async function SavedPage() {
 
   const items: ArtworkListItem[] = await getSavedArtworks({ token }).catch(() => []);
 
-  return <SavedView initialItems={items} />;
+  return <SavedView initialItems={items} initialTab={tab === 'board' ? 'board' : 'saved'} />;
 }
