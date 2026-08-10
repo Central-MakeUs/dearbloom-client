@@ -5,15 +5,39 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button, cn } from '@dearbloom/ui';
 import type { InquiryStatus } from '@dearbloom/shared';
+import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { ACTION_BAR_BOTTOM } from './actionBar';
 
 type Action = 'reserve' | 'reserve-cancel' | 'cancel';
 
+/**
+ * 세 액션 모두 화면에서 되돌릴 수 없는 상태 전이라 확인을 한 번 받는다.
+ * (취소된 문의를 되살리거나 예약을 되돌리는 화면이 없다)
+ */
+const CONFIRM: Record<Action, { title: string; message: string; success: string }> = {
+  cancel: {
+    title: '문의를 취소할까요?',
+    message: '취소하면 고객에게 취소로 안내되고, 이 문의는 되돌릴 수 없어요.',
+    success: '문의를 취소했어요.',
+  },
+  reserve: {
+    title: '예약을 확정할까요?',
+    message: '확정하면 고객에게 예약 완료로 안내되고, 해당 시간은 예약으로 잡혀요.',
+    success: '예약을 완료했어요.',
+  },
+  'reserve-cancel': {
+    title: '예약을 취소할까요?',
+    message: '취소하면 고객에게 예약 취소로 안내되고, 되돌릴 수 없어요.',
+    success: '예약을 취소했어요.',
+  },
+};
+
 export function InquiryActions({ id, status }: { id: number; status: InquiryStatus }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Action>();
 
-  const run = async (action: Action, successMsg: string) => {
+  const run = async (action: Action) => {
     setBusy(true);
     const res = await fetch(`/app/api/artist/inquiries/${id}`, {
       method: 'PATCH',
@@ -22,7 +46,8 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
     });
     setBusy(false);
     if (res.ok) {
-      toast.success(successMsg);
+      setPending(undefined);
+      toast.success(CONFIRM[action].success);
       router.push('/artist/requests');
       router.refresh();
     } else {
@@ -40,7 +65,7 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
         size="lg"
         className="flex-1"
         disabled={busy}
-        onClick={() => run('reserve-cancel', '예약을 취소했어요.')}
+        onClick={() => setPending('reserve-cancel')}
       >
         예약 취소
       </Button>
@@ -54,7 +79,7 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
           size="lg"
           className="flex-1"
           disabled={busy}
-          onClick={() => run('cancel', '문의를 취소했어요.')}
+          onClick={() => setPending('cancel')}
         >
           문의 취소
         </Button>
@@ -64,7 +89,7 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
           size="lg"
           className="flex-1"
           disabled={busy}
-          onClick={() => run('reserve', '예약을 완료했어요.')}
+          onClick={() => setPending('reserve')}
         >
           예약 완료
         </Button>
@@ -75,8 +100,18 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
   if (!buttons) return null;
 
   return (
-    <div className={cn('fixed inset-x-0 z-20 border-t border-neutral-200 bg-neutral-0 p-4', ACTION_BAR_BOTTOM)}>
-      <div className="mx-auto flex max-w-md gap-2">{buttons}</div>
-    </div>
+    <>
+      <div className={cn('fixed inset-x-0 z-20 border-t border-neutral-200 bg-neutral-0 p-4', ACTION_BAR_BOTTOM)}>
+        <div className="mx-auto flex max-w-md gap-2">{buttons}</div>
+      </div>
+      <ConfirmDialog
+        isOpen={pending !== undefined}
+        isPending={busy}
+        title={pending ? CONFIRM[pending].title : ''}
+        message={pending ? CONFIRM[pending].message : ''}
+        onCancel={() => setPending(undefined)}
+        onConfirm={() => pending && run(pending)}
+      />
+    </>
   );
 }

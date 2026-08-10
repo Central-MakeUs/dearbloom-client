@@ -1,6 +1,13 @@
 import { cookies } from 'next/headers';
-import { ampmTimeLabel, getReceivedInquiry, shortDateLabel } from '@dearbloom/shared';
-import { Card, CardContent, Header as TitleHeader, cn } from '@dearbloom/ui';
+import { User } from 'lucide-react';
+import {
+  ampmTimeLabel,
+  compactDateLabel,
+  getReceivedInquiry,
+  shortDateLabel,
+  type InquiryStatus,
+} from '@dearbloom/shared';
+import { Badge, Card, CardContent, Header as TitleHeader, cn, type BadgeProps } from '@dearbloom/ui';
 import { durationLabel } from '@/src/lib/inquiry';
 import { InquiryActions } from './InquiryActions';
 import { ACTION_BAR_OFFSET, hasInquiryActions } from './actionBar';
@@ -17,6 +24,17 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+/** 목록 응답과 달리 상세 응답에는 statusLabel 이 없어 여기서 붙인다. */
+const STATUS_LABEL: Record<InquiryStatus, string> = {
+  IN_PROGRESS: '문의 진행중',
+  RESERVED: '예약 완료',
+  INQUIRY_CANCELED: '문의 취소',
+  RESERVATION_CANCELED: '예약 취소',
+};
+
+const statusVariant = (status: InquiryStatus): BadgeProps['variant'] =>
+  status === 'RESERVED' ? 'primary' : status.includes('CANCEL') ? 'muted' : 'default';
+
 export default async function ArtistRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const token = (await cookies()).get('accessToken')?.value;
@@ -31,6 +49,32 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
     );
   }
 
+  // 작가에게 가장 먼저 필요한 정보는 "누가, 언제 신청했고, 지금 어떤 상태인가" 다.
+  const requester = (
+    <div className="px-4 pt-3">
+      <Card className="p-4">
+        <div className="flex items-center gap-2">
+          <Badge variant={statusVariant(d.status)} className="shrink-0">
+            {STATUS_LABEL[d.status]}
+          </Badge>
+          <span className="truncate text-caption-1 text-neutral-500">
+            {compactDateLabel(d.requestedAt)} 문의
+          </span>
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <span
+            aria-hidden
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-500"
+          >
+            <User size={16} strokeWidth={2} />
+          </span>
+          <span className="truncate text-body-4 text-neutral-950">{d.customerName ?? '고객'}</span>
+          <span className="shrink-0 text-caption-1 text-neutral-500">{d.headCount}인</span>
+        </div>
+      </Card>
+    </div>
+  );
+
   const detail = (
     <div className="px-4 py-3">
       <Card className="overflow-hidden">
@@ -39,8 +83,8 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
         <CardContent>
           <h2 className="text-head-3 text-neutral-950">{d.artworkName}</h2>
           <dl className="mt-2 border-t border-neutral-200 pt-2">
+            {/* 인원은 위 신청자 카드에 이미 있어 여기서는 생략한다. */}
             <Row label="패키지" value={d.packageName} />
-            <Row label="인원" value={`${d.headCount}인`} />
             <Row label="가격" value={`${d.price.toLocaleString()}원`} />
             <Row label="학교" value={d.schoolName} />
             <Row label="촬영 날짜" value={shortDateLabel(d.shootDate)} />
@@ -66,6 +110,7 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
     // 하단 고정 액션바가 콘텐츠를 덮지 않도록, 버튼이 뜨는 상태에서만 그만큼 여백을 준다.
     <div className={cn('mx-auto max-w-md', hasInquiryActions(d.status) && ACTION_BAR_OFFSET)}>
       <Header />
+      {requester}
       {detail}
       {token && <InquiryTimeline id={id} token={token} />}
       {/* 상태는 상세 응답을 신뢰한다 — 쿼리스트링으로 받으면 직접 진입/전이 직후에 실제 상태와 어긋난다. */}
