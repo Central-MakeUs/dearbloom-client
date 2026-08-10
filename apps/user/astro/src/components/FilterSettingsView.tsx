@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { RotateCw } from 'lucide-react';
+import { ScrollFade } from '@dearbloom/ui';
 import {
   ARTIST_REGION_OPTIONS,
   ARTWORK_DATE_RANGE_MAX_DAYS,
@@ -194,9 +195,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const headCountSection = (
-    // 마지막 섹션은 화면 한 판을 채운다 — 그래야 "인원" 탭을 눌렀을 때 이 섹션이 탭바 바로 아래까지
-    // 올라올 스크롤 여유가 생긴다. 섹션 높이를 계산해 패딩을 맞추는 방식은 글자 크기에 따라 어긋난다.
-    <section id="headCount" className="flex min-h-[calc(100vh-100px)] scroll-mt-[100px] flex-col gap-5 px-4">
+    <section id="headCount" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
       {sectionHeading('인원 설정', '촬영 희망 인원을 설정해 주세요.')}
       <div className="flex flex-wrap gap-2">
         {HEAD_COUNTS.map((n) => (
@@ -237,11 +236,17 @@ export function FilterSettingsView({ initial }: Props) {
   return (
     <div className="mx-auto max-w-md">
       {tabBar}
-      <div className="flex flex-col gap-[60px] pb-20 pt-5">
+      {/*
+        하단 여백은 고정 CTA(68px)에 마지막 칩이 가리지 않을 만큼만 둔다.
+        마지막 섹션을 화면 높이만큼 늘리면 "인원" 탭이 탭바 바로 아래까지 올라오지만,
+        그 대가로 스크롤 끝에 빈 화면 한 판이 남는다 — 빈 화면 쪽이 더 어색하다.
+      */}
+      <div className="flex flex-col gap-[60px] pb-24 pt-5">
         {dateSection}
         {regionSection}
         {headCountSection}
       </div>
+      <ScrollFade offset={68} />
       {bottomBar}
     </div>
   );
