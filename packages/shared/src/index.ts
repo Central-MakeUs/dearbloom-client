@@ -14,6 +14,7 @@ export * from './api/customer';
 export * from './api/member';
 export * from './validation';
 export * from './date';
+export * from './webShare';
 export * from './api/files';
 export * from './api/university';
 export * from './api/dev';

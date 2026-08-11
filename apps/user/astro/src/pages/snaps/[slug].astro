@@ -91,7 +91,7 @@ if (artwork && token) {
                 className="flex h-11 w-11 shrink-0 items-center justify-center text-neutral-800 transition-transform active:scale-90"
                 client:load
               />
-              <SnapShareButton client:load />
+              <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:load />
             </div>
           </header>
 

@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { isMobileShareDevice, isShareCancelled } from './webShare.ts';
+import {
+  isMobileShareDevice,
+  isShareCancelled,
+} from '../../../../../packages/shared/src/webShare.ts';
 
 test('공유 취소만 오류 토스트 대상에서 제외한다', () => {
   assert.equal(isShareCancelled({ name: 'AbortError' }), true);
