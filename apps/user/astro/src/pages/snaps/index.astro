@@ -5,6 +5,7 @@ import AppShellLayout from '@/layouts/AppShellLayout.astro';
 import { AppHeader } from '@dearbloom/ui';
 import { ArtworkFeed } from '@/components/ArtworkFeed';
 import { ArtworkSortSheet } from '@/components/ArtworkSortSheet';
+import ViewToggleIcon from '@/components/ViewToggleIcon.astro';
 import {
   getArtworkPage,
   fetchPublicWithAuthFallback,
@@ -107,12 +108,7 @@ const CHIP_CLASS =
             aria-label={view === 'list' ? '격자로 보기' : '리스트로 보기'}
             class="flex h-10 w-10 items-center justify-center text-neutral-800"
           >
-            <svg viewBox="0 0 40 40" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              {(view === 'list' ? [14, 26] : [14, 20, 26]).map((cy) =>
-                (view === 'list' ? [14, 26] : [14, 20, 26]).map((cx) => <circle cx={cx} cy={cy} r="1" />),
-              )}
-            </svg>
+            <ViewToggleIcon view={view} />
           </a>
         </div>
       </div>
