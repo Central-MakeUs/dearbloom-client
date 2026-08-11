@@ -80,9 +80,14 @@ if (artwork && token) {
             {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
             <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
             <div class="flex items-center">
-              <div class="flex h-11 w-11 items-center justify-center">
-                <SaveHeart artworkId={artwork.artworkId} initialSaved={!!artwork.isSaved} size={24} client:load />
-              </div>
+              {/* 감싸는 div 대신 버튼 자체를 44x44 로 — Figma icons/44/Heart 는 터치 영역이 44 다. */}
+              <SaveHeart
+                artworkId={artwork.artworkId}
+                initialSaved={!!artwork.isSaved}
+                size={24}
+                className="flex h-11 w-11 shrink-0 items-center justify-center text-neutral-800 transition-transform active:scale-90"
+                client:load
+              />
               <SnapShareButton client:load />
             </div>
           </header>
