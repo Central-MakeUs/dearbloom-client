@@ -34,6 +34,8 @@ import { showCandidateToast } from './CandidateToast';
 import { ShareBoardSheet } from './ShareBoardSheet';
 
 const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()}만원`;
+const artworkHref = (artworkId: number, boardId: number) =>
+  `/snaps/${artworkId}?returnTo=${encodeURIComponent(`/app/boards/${boardId}`)}`;
 
 type BoardDetail = SharedBoardSummary &
   SharedBoardPage & { comments: SharedComment[]; hasMySharedArtworks: boolean; isOwner: boolean };
@@ -173,16 +175,21 @@ export default function BoardDetailPage() {
       {board.sharedArtworkList.map((artwork: SharedArtwork) => (
         <div key={artwork.sharedArtworkId} className="flex flex-col">
           <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
-            {artwork.thumbnailUrl ? (
-              <img
-                src={artwork.thumbnailUrl}
-                alt={artwork.title}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="h-full w-full bg-gradient-to-br from-primary-100 to-primary-300" />
-            )}
+            <a
+              href={artworkHref(artwork.artworkId, board.sharedBoardId)}
+              className="block h-full w-full"
+            >
+              {artwork.thumbnailUrl ? (
+                <img
+                  src={artwork.thumbnailUrl}
+                  alt={artwork.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-br from-primary-100 to-primary-300" />
+              )}
+            </a>
             <span
               aria-hidden
               className="absolute bottom-[9px] right-[9px] flex size-9 items-center justify-center rounded-full bg-neutral-950/30 text-neutral-0"
@@ -194,16 +201,18 @@ export default function BoardDetailPage() {
               />
             </span>
           </div>
-          <div className="truncate text-body-3 text-neutral-900">{artwork.title}</div>
-          <div className="truncate text-body-6 text-neutral-900">{artwork.artistNickname}</div>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <span className="text-body-3 text-primary">{formatPrice(artwork.lowestPrice)}</span>
-            <div className="flex flex-wrap items-center gap-1">
-              {artwork.artistRegionList.map((region) => (
-                <RegionTag key={region}>{artistRegionLabel(region)}</RegionTag>
-              ))}
+          <a href={artworkHref(artwork.artworkId, board.sharedBoardId)} className="block">
+            <div className="truncate text-body-3 text-neutral-900">{artwork.title}</div>
+            <div className="truncate text-body-6 text-neutral-900">{artwork.artistNickname}</div>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="text-body-3 text-primary">{formatPrice(artwork.lowestPrice)}</span>
+              <div className="flex flex-wrap items-center gap-1">
+                {artwork.artistRegionList.map((region) => (
+                  <RegionTag key={region}>{artistRegionLabel(region)}</RegionTag>
+                ))}
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       ))}
     </div>

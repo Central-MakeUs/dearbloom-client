@@ -22,6 +22,7 @@ export interface SharedMember {
 
 export interface SharedArtwork {
   sharedArtworkId: number;
+  artworkId: number;
   title: string;
   lowestPrice: number;
   minHeadCount: number;
