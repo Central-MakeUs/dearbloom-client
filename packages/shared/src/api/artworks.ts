@@ -17,6 +17,11 @@ export interface ArtworkListItem {
   artistNickname: string;
   artistRegionList: ArtistRegionCode[];
   thumbnailUrl: string;
+  /**
+   * 작품 사진 URL 목록(상세와 같은 sortOrder). 리스트뷰의 가로 스크롤용입니다.
+   * 상세의 photoList 는 객체 배열이지만 목록은 URL 문자열만 내려옵니다.
+   */
+  photoList?: string[];
   /** 비로그인 시 null */
   isSaved: boolean | null;
 }
