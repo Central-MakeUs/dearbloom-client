@@ -1,12 +1,22 @@
 import { cookies } from 'next/headers';
-import { getSavedArtworks, type ArtworkListItem } from '@dearbloom/shared';
+import {
+  getSavedArtworks,
+  getSharedBoards,
+  type ArtworkListItem,
+  type SharedBoardSummary,
+} from '@dearbloom/shared';
 import { SavedView } from './SavedView';
 import { LOGIN_HREF } from '@/src/lib/env';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SavedPage() {
+export default async function SavedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const cookieStore = await cookies();
+  const { tab } = await searchParams;
   const token = cookieStore.get('accessToken')?.value;
 
   if (!token) {
@@ -22,7 +32,16 @@ export default async function SavedPage() {
     );
   }
 
-  const items: ArtworkListItem[] = await getSavedArtworks({ token }).catch(() => []);
+  const [items, boards]: [ArtworkListItem[], SharedBoardSummary[]] = await Promise.all([
+    getSavedArtworks({ token }).catch(() => []),
+    getSharedBoards({ token }).catch(() => []),
+  ]);
 
-  return <SavedView initialItems={items} />;
+  return (
+    <SavedView
+      initialItems={items}
+      initialBoards={boards}
+      initialTab={tab === 'board' ? 'board' : 'saved'}
+    />
+  );
 }

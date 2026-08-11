@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Share, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
@@ -19,7 +19,9 @@ import {
   nativeSafeAreaSyncScript,
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
+import { getInviteWebViewUrl } from './nativeDeepLink';
 import { getSessionWebViewUrl } from './nativeSession';
+import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
 
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
@@ -212,6 +214,24 @@ export default function App() {
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
 
   useEffect(() => {
+    const openDeepLink = (url: string | null) => {
+      if (!url) return;
+
+      const inviteWebViewUrl = getInviteWebViewUrl(url, initialWebViewUrl);
+      if (!inviteWebViewUrl) return;
+
+      sessionBootstrapState.current = 'ready';
+      setIsSessionReady(true);
+      setWebViewUrl(inviteWebViewUrl);
+    };
+
+    void Linking.getInitialURL().then(openDeepLink);
+    const subscription = Linking.addEventListener('url', ({ url }) => openDeepLink(url));
+
+    return () => subscription.remove();
+  }, [initialWebViewUrl]);
+
+  useEffect(() => {
     if (!googleWebClientId) {
       return;
     }
@@ -267,6 +287,14 @@ export default function App() {
         currentColors.bottom === nextSafeAreaColors.bottom
           ? currentColors
           : nextSafeAreaColors,
+      );
+      return;
+    }
+
+    const shareRequest = parseNativeShareRequest(data, new URL(webViewUrl).origin);
+    if (shareRequest) {
+      await Share.share(
+        getNativeShareContent(shareRequest, Platform.OS === 'ios' ? 'ios' : 'android'),
       );
       return;
     }

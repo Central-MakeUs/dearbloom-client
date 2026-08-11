@@ -1,6 +1,5 @@
 'use client';
 
-import { Check } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { SaveHeart } from './SaveHeart';
 import { RegionTag } from './ui/region-tag';
@@ -87,14 +86,23 @@ export function ArtworkCard({
   // 편집(선택) 모드 — 우상단 체크 원, 카드 전체 토글
   if (selectable) {
     const checkCircle = (
-      <span
-        aria-hidden
-        className={cn(
-          'absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors',
-          selected ? 'border-neutral-950 bg-neutral-950 text-neutral-0' : 'border-neutral-0 bg-neutral-950/15',
+      <span aria-hidden className="absolute right-3 top-3 flex size-6 items-center justify-center">
+        <img
+          src={
+            selected
+              ? '/app/images/candidate-selected-circle.svg'
+              : '/app/images/candidate-unselected-circle.svg'
+          }
+          alt=""
+          className="absolute inset-0 size-6"
+        />
+        {selected && (
+          <img
+            src="/app/images/candidate-check.svg"
+            alt=""
+            className="relative h-[7.86px] w-[11.05px]"
+          />
         )}
-      >
-        {selected && <Check size={14} strokeWidth={3} aria-hidden />}
       </span>
     );
 

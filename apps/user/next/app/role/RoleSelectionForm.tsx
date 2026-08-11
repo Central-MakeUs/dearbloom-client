@@ -114,6 +114,7 @@ export function RoleSelectionForm({
             body.data.selectedRole,
             forceOnboarding || body.data.needsOnboarding,
             forceOnboarding,
+            returnUrl,
           ),
         );
       } catch (loginError) {
@@ -127,7 +128,7 @@ export function RoleSelectionForm({
     window.addEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
 
     return () => window.removeEventListener(NATIVE_SOCIAL_LOGIN_RESULT, handleNativeLoginResult);
-  }, [forceOnboarding, provider, role]);
+  }, [forceOnboarding, provider, returnUrl, role]);
 
   const submit = async () => {
     if (!role || isSubmitting) return;
@@ -230,10 +231,15 @@ export function RoleSelectionForm({
   );
 }
 
-function getLoginDestination(role: AuthRole, needsOnboarding: boolean, forceOnboarding = false) {
+function getLoginDestination(
+  role: AuthRole,
+  needsOnboarding: boolean,
+  forceOnboarding = false,
+  returnUrl?: string,
+) {
   if (needsOnboarding) {
-    return getOnboardingTermsPath(role, forceOnboarding);
+    return getOnboardingTermsPath(role, forceOnboarding, returnUrl);
   }
 
-  return role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
+  return returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
 }

@@ -1,14 +1,27 @@
 import type { MemberRole } from '@dearbloom/shared';
 
-export function getOnboardingTermsPath(role: MemberRole, forceOnboarding = false) {
+export function getOnboardingTermsPath(
+  role: MemberRole,
+  forceOnboarding = false,
+  returnUrl?: string,
+) {
   const params = new URLSearchParams({ role });
   if (forceOnboarding) params.set('forceOnboarding', '1');
+  if (returnUrl) params.set('returnUrl', returnUrl);
 
   return `/app/onboarding/terms?${params.toString()}`;
 }
 
-export function getOnboardingFormPath(role: MemberRole, forceOnboarding = false) {
+export function getOnboardingFormPath(
+  role: MemberRole,
+  forceOnboarding = false,
+  returnUrl?: string,
+) {
   const path = role === 'CUSTOMER' ? '/app/onboarding' : '/app/onboarding/artist';
+  const params = new URLSearchParams();
+  if (forceOnboarding) params.set('forceOnboarding', '1');
+  if (returnUrl) params.set('returnUrl', returnUrl);
+  const query = params.toString();
 
-  return forceOnboarding ? `${path}?forceOnboarding=1` : path;
+  return query ? `${path}?${query}` : path;
 }

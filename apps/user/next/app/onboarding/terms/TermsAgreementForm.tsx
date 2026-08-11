@@ -10,9 +10,11 @@ import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
 
 export function TermsAgreementForm({
   forceOnboarding,
+  returnUrl,
   role,
 }: {
   forceOnboarding: boolean;
+  returnUrl?: string;
   role: MemberRole;
 }) {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
@@ -106,7 +108,9 @@ export function TermsAgreementForm({
       <BottomButton
         color="black"
         disabled={!allAgreed}
-        onClick={() => window.location.assign(getOnboardingFormPath(role, forceOnboarding))}
+        onClick={() =>
+          window.location.assign(getOnboardingFormPath(role, forceOnboarding, returnUrl))
+        }
       >
         동의하고 계속하기
       </BottomButton>
