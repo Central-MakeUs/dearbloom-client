@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Selecto from 'react-selecto';
+import { useRef, useState } from 'react';
 import { Check, Plus, School, X } from 'lucide-react';
 import { Button, Input, cn } from '@dearbloom/ui';
 import type { University } from '@dearbloom/shared';
@@ -28,23 +27,25 @@ export function photoFromUrl(fileUrl: string, universityId: number | null, uniNa
 }
 
 /** 작품 등록·수정 공용: 사진 추가/삭제, 사진별 학교 지정(개별 또는 다중선택 일괄).
- *  다중선택은 그리드 위를 손가락으로 드래그(터치)해 좌라락 선택 + 개별 탭 병행. */
+ *
+ *  다중선택은 사진을 탭해서 켜고 끈다. 예전에는 그리드를 드래그해 훑는 방식이었는데,
+ *  터치에서 드래그가 페이지 스크롤과 같이 먹혀 선택이 마음대로 되지 않았다(QA). */
 export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChange: (photos: PhotoItem[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const selectoRef = useRef<Selecto>(null);
-  const [mounted, setMounted] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [assignTarget, setAssignTarget] = useState<string[] | null>(null);
   const [uniQuery, setUniQuery] = useState('');
   const [uniResults, setUniResults] = useState<University[]>([]);
 
-  useEffect(() => setMounted(true), []);
+  const clearSelection = () => setSelected(new Set());
 
-  const clearSelection = () => {
-    setSelected(new Set());
-    selectoRef.current?.setSelectedTargets([]);
-  };
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const add = (files: File[]) => onChange([...value, ...files.map(photoFromFile)]);
   const remove = (id: string) => {
@@ -87,22 +88,32 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
   const clearUni = (id: string) => onChange(value.map((p) => (p.id === id ? { ...p, universityId: null, uniName: null } : p)));
 
   const grid = value.length > 0 && (
-    <div ref={gridRef} className="photo-grid mt-2 grid select-none grid-cols-3 gap-2">
+    <div className="mt-2 grid select-none grid-cols-3 gap-2">
       {value.map((p) => {
         const on = selected.has(p.id);
         return (
           <div key={p.id} className="relative">
-            <div
-              className={cn('photo-cell relative overflow-hidden rounded-md border', on ? 'border-primary ring-2 ring-primary/40' : 'border-neutral-200')}
-              data-id={p.id}
-            >
-              <img src={p.previewUrl} alt="첨부 사진" className="pointer-events-none aspect-square w-full object-cover" />
-              {on && (
-                <span className="absolute left-1 top-1 grid size-5 place-items-center rounded-full bg-primary text-neutral-0">
-                  <Check className="size-3.5" strokeWidth={3} />
-                </span>
+            <button
+              type="button"
+              onClick={() => toggle(p.id)}
+              aria-pressed={on}
+              aria-label={`첨부 사진 ${on ? '선택 해제' : '선택'}`}
+              className={cn(
+                'relative block w-full overflow-hidden rounded-md border',
+                on ? 'border-primary ring-2 ring-primary/40' : 'border-neutral-200',
               )}
-            </div>
+            >
+              <img src={p.previewUrl} alt="" className="pointer-events-none aspect-square w-full object-cover" />
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute left-1 top-1 grid size-5 place-items-center rounded-full border',
+                  on ? 'border-primary bg-primary text-neutral-0' : 'border-neutral-0/80 bg-neutral-900/30 text-transparent',
+                )}
+              >
+                <Check className="size-3.5" strokeWidth={3} />
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => remove(p.id)}
@@ -166,7 +177,7 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
         <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
           <Plus className="size-4" /> 사진 추가
         </Button>
-        {value.length > 0 && <span className="text-caption-2 text-neutral-400">드래그로 여러 장 선택</span>}
+        {value.length > 0 && <span className="text-caption-2 text-neutral-400">사진을 탭해 여러 장 선택</span>}
       </div>
       <input
         ref={inputRef}
@@ -194,32 +205,6 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
         </div>
       )}
       {assignPanel}
-      {mounted && value.length > 0 && (
-        <Selecto
-          ref={selectoRef}
-          container={gridRef.current ?? undefined}
-          dragContainer={gridRef.current ?? undefined}
-          selectableTargets={['.photo-cell']}
-          selectByClick
-          selectFromInside
-          hitRate={20}
-          ratio={0}
-          onSelect={(e) => {
-            setSelected((prev) => {
-              const n = new Set(prev);
-              e.added.forEach((el) => {
-                const id = el.getAttribute('data-id');
-                if (id) n.add(id);
-              });
-              e.removed.forEach((el) => {
-                const id = el.getAttribute('data-id');
-                if (id) n.delete(id);
-              });
-              return n;
-            });
-          }}
-        />
-      )}
     </div>
   );
 }
