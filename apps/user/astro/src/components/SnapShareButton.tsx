@@ -20,9 +20,10 @@ export function SnapShareButton() {
       type="button"
       onClick={share}
       aria-label="공유"
-      className="flex h-11 w-11 items-center justify-center text-neutral-950"
+      className="flex h-11 w-11 items-center justify-center text-neutral-800"
     >
-      <Share size={22} strokeWidth={1.8} aria-hidden />
+      {/* Figma icons/44/Share — 44 컨테이너 안 24px, neutral/n800 */}
+      <Share size={24} strokeWidth={1.8} aria-hidden />
     </button>
   );
 }
