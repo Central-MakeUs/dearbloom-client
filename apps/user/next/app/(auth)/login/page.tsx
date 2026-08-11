@@ -32,7 +32,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     const h = await headers();
     const host = h.get('x-forwarded-host') ?? h.get('host') ?? '';
     const proto = h.get('x-forwarded-proto') ?? 'https';
-    const destination = getMemberHome(cookieStore.get('activeRole')?.value, member);
+    // 보던 화면이 있으면 그리로 되돌린다. 역할 홈으로 보내면 작가 계정이 탐색에서 저장을 눌렀을 때
+    // 엉뚱하게 작가 대시보드로 튄다(hasArtist && !hasCustomer 는 항상 작가 홈이라서).
+    const destination = returnUrl ?? getMemberHome(cookieStore.get('activeRole')?.value, member);
     redirect(`${proto}://${host}${destination}`);
   }
 
