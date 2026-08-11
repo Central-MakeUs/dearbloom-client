@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { getChatRooms, type ChatRoomSummary } from '@dearbloom/shared';
-import { ChatRoomList } from '@dearbloom/features-chat';
+import { ChatListEditButton, ChatRoomList } from '@dearbloom/features-chat';
 import { Button, Header } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
@@ -28,7 +28,7 @@ export default async function ArtistChatsPage() {
 
   return (
     <div className="mx-auto max-w-md">
-      <Header showBack={false} title="채팅 목록" />
+      <Header showBack={false} title="채팅 목록" right={<ChatListEditButton />} />
       <ChatRoomList rooms={rooms} roomHref={(roomId) => `/app/artist/chats/${roomId}`} />
     </div>
   );

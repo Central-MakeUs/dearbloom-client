@@ -26,12 +26,13 @@ export function compactDateLabel(dateOrIso: string): string {
   return `${yy}.${mm}.${dd}`;
 }
 
-/** '2026.06.11(화)' — 채팅 문의 카드 */
-export function fullDateLabel(date: string): string {
+/** '26.06.11(화)' — 채팅 문의 카드. 괄호 앞 공백이 없어 `shortDateLabel` 과 다르다. */
+export function chatCardDateLabel(date: string): string {
   const d = toLocalDate(date);
+  const yy = String(d.getFullYear()).slice(2);
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}.${mm}.${dd}(${DAY_OF_WEEK_KR[d.getDay()]})`;
+  return `${yy}.${mm}.${dd}(${DAY_OF_WEEK_KR[d.getDay()]})`;
 }
 
 /** '오전 10:00' — 'HH:MM' / 'HH:MM:SS' 모두 허용 */
