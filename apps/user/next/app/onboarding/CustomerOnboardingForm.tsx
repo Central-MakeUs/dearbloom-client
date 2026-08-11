@@ -214,11 +214,12 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     const regionOptions = ARTIST_REGION_OPTIONS.map((option) => (
       <button
         aria-pressed={region === option.value}
+        // 선택 상태에 테두리가 없어 배경만으로는 구분이 잘 안 됐다(QA). 필터 설정 칩과 같은 규칙으로 맞춘다.
         className={cn(
-          'rounded-full px-3 py-2 text-caption-1 transition-colors',
+          'rounded-full border-[1.2px] px-3 py-2 text-caption-1 transition-colors',
           region === option.value
-            ? 'bg-primary-100 text-primary'
-            : 'bg-neutral-200 text-neutral-700',
+            ? 'border-primary bg-primary-200 font-semibold text-primary'
+            : 'border-transparent bg-neutral-200 text-neutral-700',
         )}
         key={option.value}
         onClick={() => setRegion(region === option.value ? undefined : option.value)}

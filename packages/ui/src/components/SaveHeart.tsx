@@ -2,6 +2,16 @@
 
 import { useState, type MouseEvent } from 'react';
 import { Heart } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog';
 
 interface SaveHeartProps {
   artworkId: number;
@@ -42,6 +52,13 @@ export function SaveHeart({
 }: SaveHeartProps) {
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
+  // 비로그인으로 저장을 누른 상태. 바로 로그인 화면으로 튕기지 않고 물어본 뒤 보낸다.
+  const [loginAsked, setLoginAsked] = useState(false);
+
+  function goLogin() {
+    const returnUrl = window.location.pathname + window.location.search;
+    window.location.href = `${loginHref}?returnUrl=${encodeURIComponent(returnUrl)}`;
+  }
 
   async function toggle(e: MouseEvent) {
     e.preventDefault();
@@ -61,8 +78,7 @@ export function SaveHeart({
       if (res.status === 401) {
         setSaved(!next);
         onChange?.(!next);
-        const returnUrl = window.location.pathname + window.location.search;
-        window.location.href = `${loginHref}?returnUrl=${encodeURIComponent(returnUrl)}`;
+        setLoginAsked(true);
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -74,15 +90,36 @@ export function SaveHeart({
     }
   }
 
+  // 카드가 통째로 상세 링크인 자리에 놓이므로, 모달 안에서의 클릭이 링크로 새지 않게 막는다.
+  const loginModal = (
+    <AlertDialog open={loginAsked} onOpenChange={setLoginAsked}>
+      <AlertDialogContent className="max-w-xs" onClick={(e) => e.stopPropagation()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-center">로그인이 필요합니다</AlertDialogTitle>
+          <AlertDialogDescription className="text-center">로그인 하시겠습니까?</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-row gap-2">
+          <AlertDialogCancel className="flex-1">취소</AlertDialogCancel>
+          <AlertDialogAction className="flex-1" onClick={goLogin}>
+            확인
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={saved}
-      aria-label={saved ? '저장 취소' : '저장'}
-      className={className ?? 'shrink-0 text-neutral-800 transition-transform active:scale-90'}
-    >
-      <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={saved}
+        aria-label={saved ? '저장 취소' : '저장'}
+        className={className ?? 'shrink-0 text-neutral-800 transition-transform active:scale-90'}
+      >
+        <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
+      </button>
+      {loginModal}
+    </>
   );
 }
