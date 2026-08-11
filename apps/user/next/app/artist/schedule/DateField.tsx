@@ -1,7 +1,9 @@
 'use client';
 
-import { Calendar } from 'lucide-react';
-import { DeleteButton, buttonVariants, cn } from '@dearbloom/ui';
+import { useState } from 'react';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { BottomSheet, DeleteButton, buttonVariants, cn } from '@dearbloom/ui';
+import { Calendar } from '@/src/components/common/Calendar';
 
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -17,13 +19,8 @@ export function formatKoreanDate(iso: string, { withWeekday = false } = {}): str
 }
 
 /**
- * 네이티브 date input(mm/dd/yyyy)의 브라우저 로케일 의존 표기 대신
- * 한국어(YYYY년 M월 D일)로 표시하는 날짜 선택 필드.
- *
- * 실제 컨트롤은 투명하게 겹쳐둔 네이티브 date input 이고, 그 아래에 한국어 표기를 그립니다.
- * (숨긴 input + showPicker() 방식은 showPicker 미지원 환경 — iOS WebView 등 — 에서
- *  달력이 아예 열리지 않으므로 사용하지 않습니다.)
- * input 이 투명해 포커스가 보이지 않으므로 표기 쪽에 peer 로 포커스 링을 그립니다.
+ * 날짜 선택 필드 — 누르면 바텀시트로 공통 캘린더를 띄웁니다.
+ * (네이티브 date input 은 브라우저마다 모양이 제각각이고 디자인 토큰도 못 입혀서 쓰지 않습니다)
  */
 export function DateField({
   value,
@@ -43,43 +40,21 @@ export function DateField({
   disabled?: boolean;
   className?: string;
 }) {
-  const input = (
-    <input
-      type="date"
-      value={value}
-      min={min || undefined}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}
-      onClick={(e) => {
-        const el = e.currentTarget;
-        // 데스크톱 크롬에서는 아이콘 영역이 보이지 않으므로 어디를 눌러도 열리게 한다.
-        // 이미 피커가 떠 있는 브라우저에서 다시 호출하면 예외가 나므로 무시한다.
-        try {
-          el.showPicker?.();
-        } catch {
-          /* 네이티브 동작에 맡김 */
-        }
-      }}
-      aria-label={ariaLabel ?? '날짜 선택'}
-      className="peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-    />
-  );
+  const [open, setOpen] = useState(false);
 
-  const display = (
-    <span
-      aria-hidden
-      className={cn(
-        buttonVariants({ variant: 'outline' }),
-        'pointer-events-none w-full justify-start',
-        'peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40',
-        disabled && 'opacity-50',
-      )}
+  const trigger = (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => setOpen(true)}
+      aria-label={ariaLabel ?? '날짜 선택'}
+      className={cn(buttonVariants({ variant: 'outline' }), 'w-full justify-start', value && 'pr-11')}
     >
-      <Calendar className="text-neutral-400" aria-hidden />
+      <CalendarIcon className="text-neutral-400" aria-hidden />
       <span className={cn(value ? 'text-neutral-950' : 'text-neutral-400')}>
         {value ? formatKoreanDate(value) : placeholder}
       </span>
-    </span>
+    </button>
   );
 
   const clearButton =
@@ -87,15 +62,39 @@ export function DateField({
       <DeleteButton
         aria-label="날짜 지우기"
         onClick={() => onChange('')}
-        className="absolute right-3 top-1/2 z-20 -translate-y-1/2"
+        className="absolute right-3 top-1/2 -translate-y-1/2"
       />
     ) : null;
 
+  // 값이 없으면 min(대개 오늘)의 달부터 보여준다.
+  const defaultMonth = (value || min || '').slice(0, 7);
+
+  const sheet = (
+    <BottomSheet open={open} onOpenChange={setOpen} title={ariaLabel ?? '날짜 선택'}>
+      <div className="px-4 pt-2">
+        <h2 className="text-body-3 text-neutral-950">날짜를 선택해 주세요.</h2>
+        {defaultMonth && (
+          <Calendar
+            value={value}
+            onChange={(d) => {
+              onChange(d);
+              setOpen(false);
+            }}
+            defaultMonth={defaultMonth}
+            minMonth={min ? min.slice(0, 7) : undefined}
+            isSelectable={min ? (d) => d >= min : undefined}
+            className="pb-2"
+          />
+        )}
+      </div>
+    </BottomSheet>
+  );
+
   return (
     <div className={cn('relative', className)}>
-      {input}
-      {display}
+      {trigger}
       {clearButton}
+      {sheet}
     </div>
   );
 }

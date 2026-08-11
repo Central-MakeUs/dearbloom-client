@@ -1,15 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
+import { useMemo } from 'react';
+import { Minus, Plus } from 'lucide-react';
 import { cn, BottomButton } from '@dearbloom/ui';
 import type { InquiryPreparation } from '@dearbloom/shared';
+import { Calendar } from '@/src/components/common/Calendar';
 import { buildSlotGrid, isSelectableStart, toAvailableSet } from './slots';
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const;
-
-const toDateKey = (year: number, month: number, day: number) =>
-  `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
 interface DateTimeStepProps {
   preparation: InquiryPreparation;
@@ -44,22 +40,8 @@ export function DateTimeStep({ preparation, value, onChange, onNext }: DateTimeS
     return dates;
   }, [availableByDate, slotGrid, required, step]);
 
-  const months = useMemo(() => {
-    const unique = [...new Set(availability.map((d) => d.date.slice(0, 7)))].sort();
-    return unique.length > 0 ? unique : [new Date().toISOString().slice(0, 7)];
-  }, [availability]);
-
-  const [monthIndex, setMonthIndex] = useState(() => {
-    const selected = value.shootDate.slice(0, 7);
-    const found = months.indexOf(selected);
-    return found >= 0 ? found : 0;
-  });
-
-  const currentMonth = months[monthIndex] ?? months[0]!;
-  const [year, month] = currentMonth.split('-').map(Number) as [number, number];
-  const monthStart = new Date(year, month - 1, 1);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const leadingBlanks = monthStart.getDay();
+  /** 예약 가능 데이터가 있는 달 범위 — 이 범위 밖으로는 이동시키지 않는다. */
+  const months = useMemo(() => [...new Set(availability.map((d) => d.date.slice(0, 7)))].sort(), [availability]);
 
   const availableTimesForDate = availableByDate.get(value.shootDate) ?? new Set<string>();
   const canGoNext = !!value.shootDate && !!value.startTime;
@@ -69,67 +51,15 @@ export function DateTimeStep({ preparation, value, onChange, onNext }: DateTimeS
     onChange({ ...value, shootDate: date, startTime: '' });
   }
 
-  const monthNav = (
-    <div className="flex items-center justify-between">
-      <span className="text-body-2 font-semibold text-neutral-950">
-        {year}년 {month}월
-      </span>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label="이전 달"
-          disabled={monthIndex === 0}
-          onClick={() => setMonthIndex((i) => i - 1)}
-          className="flex h-9 w-9 items-center justify-center text-neutral-950 disabled:text-neutral-300"
-        >
-          <ChevronLeft size={24} strokeWidth={2} aria-hidden />
-        </button>
-        <button
-          type="button"
-          aria-label="다음 달"
-          disabled={monthIndex >= months.length - 1}
-          onClick={() => setMonthIndex((i) => i + 1)}
-          className="flex h-9 w-9 items-center justify-center text-neutral-950 disabled:text-neutral-300"
-        >
-          <ChevronRight size={24} strokeWidth={2} aria-hidden />
-        </button>
-      </div>
-    </div>
-  );
-
-  const calendarGrid = (
-    <div className="mt-4 grid grid-cols-7 gap-y-2">
-      {WEEKDAYS.map((w) => (
-        <span key={w} className="py-2 text-center text-body-5 text-neutral-700">
-          {w}
-        </span>
-      ))}
-      {Array.from({ length: leadingBlanks }, (_, i) => (
-        <span key={`blank-${i}`} aria-hidden />
-      ))}
-      {Array.from({ length: daysInMonth }, (_, i) => {
-        const day = i + 1;
-        const date = toDateKey(year, month - 1, day);
-        const selectable = selectableDates.has(date);
-        const selected = value.shootDate === date;
-
-        return (
-          <button
-            key={date}
-            type="button"
-            disabled={!selectable}
-            onClick={() => selectDate(date)}
-            className={cn(
-              'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-body-3',
-              selectable ? 'text-neutral-950' : 'text-neutral-300',
-              selected && 'bg-primary text-neutral-0',
-            )}
-          >
-            {day}
-          </button>
-        );
-      })}
-    </div>
+  const calendar = months.length > 0 && (
+    <Calendar
+      value={value.shootDate}
+      onChange={selectDate}
+      defaultMonth={months[0]!}
+      minMonth={months[0]}
+      maxMonth={months.at(-1)}
+      isSelectable={(date) => selectableDates.has(date)}
+    />
   );
 
   const timeGrid = (
@@ -196,8 +126,7 @@ export function DateTimeStep({ preparation, value, onChange, onNext }: DateTimeS
       <div className="flex flex-col gap-8 px-4 pb-28 pt-4">
         <section>
           <h2 className="mb-3 text-body-3 text-neutral-950">촬영 날짜를 선택해 주세요.</h2>
-          {monthNav}
-          {calendarGrid}
+          {calendar}
         </section>
 
         <section>
