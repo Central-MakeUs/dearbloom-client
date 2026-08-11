@@ -28,6 +28,8 @@ interface SaveHeartProps {
    * 목록에서 누른 하트를 작품 상세로 되돌리고 싶을 때처럼 다른 곳을 지정할 수 있습니다.
    */
   loginRedirectUri?: string;
+  /** 고객 프로필을 만들러 보낼 경로(작가 전용 계정이 저장을 눌렀을 때). */
+  customerOnboardingHref?: string;
 }
 
 /**
@@ -45,11 +47,12 @@ export function SaveHeart({
   endpoint = '/api/saved',
   loginHref = '/app/login',
   loginRedirectUri,
+  customerOnboardingHref = '/app/onboarding',
 }: SaveHeartProps) {
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
-  // 비로그인으로 저장을 누른 상태. 바로 로그인 화면으로 튕기지 않고 물어본 뒤 보낸다.
-  const [loginAsked, setLoginAsked] = useState(false);
+  // 저장이 막힌 이유. login = 아직 로그인 안 함, customer = 로그인은 했지만 고객 프로필이 없음.
+  const [blockedBy, setBlockedBy] = useState<'login' | 'customer' | null>(null);
 
   async function toggle(e: MouseEvent) {
     e.preventDefault();
@@ -66,10 +69,12 @@ export function SaveHeart({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ artworkId }),
       });
-      if (res.status === 401) {
+      // 401 은 비로그인, 403 은 로그인은 했지만 고객 프로필이 없는 경우다.
+      // 후자에 로그인 모달을 띄우면 "이미 로그인했는데 또 로그인하라" 는 화면이 된다.
+      if (res.status === 401 || res.status === 403) {
         setSaved(!next);
         onChange?.(!next);
-        setLoginAsked(true);
+        setBlockedBy(res.status === 401 ? 'login' : 'customer');
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -93,10 +98,18 @@ export function SaveHeart({
         <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
       </button>
       <LoginRequiredDialog
-        open={loginAsked}
-        onOpenChange={setLoginAsked}
+        open={blockedBy === 'login'}
+        onOpenChange={(open) => !open && setBlockedBy(null)}
         redirectUri={loginRedirectUri}
         loginHref={loginHref}
+      />
+      <LoginRequiredDialog
+        open={blockedBy === 'customer'}
+        onOpenChange={(open) => !open && setBlockedBy(null)}
+        redirectUri={loginRedirectUri}
+        loginHref={customerOnboardingHref}
+        title="고객 프로필이 필요합니다"
+        description="프로필을 만들면 작품을 저장할 수 있어요."
       />
     </>
   );
