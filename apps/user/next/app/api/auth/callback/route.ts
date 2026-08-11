@@ -141,17 +141,11 @@ function redirectAfterLogin(
     return redirectLoginError(request, 'missing_onboarding_state', role);
   }
 
-  // 온보딩이 필요하면 온보딩이 우선(returnUrl 무시). 아니면 returnUrl(찜 등에서 보던 곳)로 복귀.
-  const returnUrl = needsOnboarding
-    ? undefined
-    : safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
-  const destination =
-    returnUrl ??
-    (needsOnboarding
-      ? getOnboardingTermsPath(role, forceOnboarding)
-      : role === 'CUSTOMER'
-        ? '/snaps'
-        : '/app/artist/dashboard');
+  // 온보딩이 필요하면 복귀 경로를 보존해 온보딩 완료 뒤 원래 화면으로 돌아간다.
+  const returnUrl = safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
+  const destination = needsOnboarding
+    ? getOnboardingTermsPath(role, forceOnboarding, returnUrl)
+    : returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
   const url = new URL(destination, getPublicOrigin(request));
 
   return clearOAuthCookies(NextResponse.redirect(url));

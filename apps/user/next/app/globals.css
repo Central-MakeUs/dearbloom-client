@@ -1,6 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html:has(body > main.bg-primary-50),
+body:has(> main.bg-primary-50) {
+  background-color: theme('colors.primary.50');
+}
+
+html:has(body > main.bg-primary-100),
+body:has(> main.bg-primary-100) {
+  background-color: theme('colors.primary.100');
+}
+
+html:has(body > .board-detail-background),
+body:has(> .board-detail-background) {
+  background-color: theme('colors.neutral.100');
+}
+
 /* Sonner custom 후보 toast: animation transform은 유지하고 item box만 모바일 콘텐츠 중앙에 정렬. */
 .candidate-toast {
   left: 0 !important;
