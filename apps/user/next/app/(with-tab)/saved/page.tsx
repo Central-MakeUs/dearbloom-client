@@ -1,5 +1,10 @@
 import { cookies } from 'next/headers';
-import { getSavedArtworks, type ArtworkListItem } from '@dearbloom/shared';
+import {
+  getSavedArtworks,
+  getSharedBoards,
+  type ArtworkListItem,
+  type SharedBoardSummary,
+} from '@dearbloom/shared';
 import { SavedView } from './SavedView';
 import { LOGIN_HREF } from '@/src/lib/env';
 
@@ -27,7 +32,16 @@ export default async function SavedPage({
     );
   }
 
-  const items: ArtworkListItem[] = await getSavedArtworks({ token }).catch(() => []);
+  const [items, boards]: [ArtworkListItem[], SharedBoardSummary[]] = await Promise.all([
+    getSavedArtworks({ token }).catch(() => []),
+    getSharedBoards({ token }).catch(() => []),
+  ]);
 
-  return <SavedView initialItems={items} initialTab={tab === 'board' ? 'board' : 'saved'} />;
+  return (
+    <SavedView
+      initialItems={items}
+      initialBoards={boards}
+      initialTab={tab === 'board' ? 'board' : 'saved'}
+    />
+  );
 }
