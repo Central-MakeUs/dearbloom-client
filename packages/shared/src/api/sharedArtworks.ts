@@ -4,6 +4,11 @@ import type { ArtworkListItem } from './artworks';
 export interface SharedSavedArtwork {
   artworkSummaryResponse: ArtworkListItem;
   isShared: boolean;
+  sharedBy: {
+    customerId: number;
+    sharedMemberName: string;
+    profileColor: string;
+  } | null;
 }
 
 export interface SharedArtworkUpdateResult {

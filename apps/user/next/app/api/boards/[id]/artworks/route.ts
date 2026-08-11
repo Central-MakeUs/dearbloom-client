@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { ApiError, updateSharedBoardArtworks } from '@dearbloom/shared';
+import { parseSharedBoardId } from '@/src/lib/sharedBoardId';
 
 export async function PUT(
   request: NextRequest,
@@ -8,7 +9,8 @@ export async function PUT(
   const token = request.cookies.get('accessToken')?.value;
   if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 
-  const { id } = await params;
+  const id = parseSharedBoardId((await params).id);
+  if (!id) return NextResponse.json({ error: 'invalid board id' }, { status: 400 });
   const body = (await request.json().catch(() => ({}))) as { artworkIdList?: unknown };
   const artworkIdList = Array.isArray(body.artworkIdList)
     ? body.artworkIdList.map(Number).filter(Number.isFinite)

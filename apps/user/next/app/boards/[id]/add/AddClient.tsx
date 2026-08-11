@@ -2,37 +2,29 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtworkCard, BottomButton, Header } from '@dearbloom/ui';
+import { Info } from 'lucide-react';
 import {
-  artistRegionLabel,
-  type ArtworkListItem,
-  type SharedSavedArtwork,
-} from '@dearbloom/shared';
-import { useBoardStore, type BoardArtwork } from '@/src/stores/boardStore';
+  ArtworkCard,
+  BottomButton,
+  Button,
+  Header,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@dearbloom/ui';
+import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
 import { showCandidateToast } from '../CandidateToast';
-
-const toBoardArtwork = (a: ArtworkListItem): BoardArtwork => ({
-  artworkId: a.artworkId,
-  title: a.title,
-  artistNickname: a.artistNickname,
-  price: a.lowestPrice,
-  thumbnailUrl: a.thumbnailUrl,
-  regions: a.artistRegionList?.map(artistRegionLabel) ?? [],
-});
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
   left.size === right.size && [...left].every((id) => right.has(id));
 
 export function AddClient({ boardId, items }: { boardId: string; items: SharedSavedArtwork[] }) {
   const router = useRouter();
-  const board = useBoardStore((s) => s.boards.find((item) => item.id === boardId));
-  const setArtworks = useBoardStore((s) => s.setArtworks);
   const [selected, setSelected] = useState<Set<number>>();
   const [submitting, setSubmitting] = useState(false);
 
   const initialSelected = new Set([
     ...items.filter((item) => item.isShared).map((item) => item.artworkSummaryResponse.artworkId),
-    ...(board?.artworks.map((item) => item.artworkId) ?? []),
   ]);
   const selectedIds = selected ?? initialSelected;
   const orderedItems = [...items].sort(
@@ -41,6 +33,29 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       Number(initialSelected.has(a.artworkSummaryResponse.artworkId)),
   );
   const hasChanges = !sameIds(selectedIds, initialSelected);
+
+  const infoButton = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 text-neutral-700"
+          aria-label="작품 목록 안내"
+        >
+          <Info className="size-5" strokeWidth={1.5} />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        sideOffset={0}
+        className="mr-4 w-auto max-w-[310px] text-body-5 text-neutral-800"
+      >
+        다른 멤버가 이미 공유한 작품은 중복 방지를 위해 목록에서 제외돼요.
+      </PopoverContent>
+    </Popover>
+  );
 
   const toggle = (id: number) => {
     const next = new Set(selectedIds);
@@ -56,20 +71,12 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
     setSubmitting(true);
     try {
       const artworkIdList = [...selectedIds];
-      const chosen = orderedItems
-        .map((item) => item.artworkSummaryResponse)
-        .filter((item) => selectedIds.has(item.artworkId))
-        .map(toBoardArtwork);
-
-      if (board) setArtworks(boardId, chosen);
-      if (Number.isFinite(Number(boardId))) {
-        const response = await fetch(`/app/api/boards/${boardId}/artworks`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ artworkIdList }),
-        });
-        if (!response.ok) throw new Error('공동보드 저장 실패');
-      }
+      const response = await fetch(`/app/api/boards/${boardId}/artworks`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artworkIdList }),
+      });
+      if (!response.ok) throw new Error('공동보드 저장 실패');
 
       router.replace(`/boards/${boardId}?candidateUpdated=1`);
     } catch {
@@ -81,7 +88,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
   const body =
     items.length === 0 ? (
       <div className="flex flex-col items-center gap-3 px-6 py-24 text-center">
-        <p className="text-body-4 text-neutral-500">내 저장에 담긴 작품이 없어요.</p>
+        <p className="text-body-4 text-neutral-500">추가할 수 있는 저장 작품이 없어요.</p>
         <a href="/snaps" className="rounded-md bg-primary px-5 py-2.5 text-body-4 text-neutral-0">
           작품 탐색하기
         </a>
@@ -107,14 +114,10 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-neutral-100">
-      <Header showBack onBack={() => router.back()} title="내 후보 추가하기" />
+      <Header showBack onBack={() => router.back()} title="내 후보 추가하기" right={infoButton} />
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
-        <BottomButton
-          type="button"
-          onClick={submit}
-          disabled={!hasChanges || submitting}
-        >
+        <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>
           보드에 추가하기 {selectedIds.size}/3
         </BottomButton>
       </div>
