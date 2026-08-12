@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { MoreHorizontal, MoreVertical, UserRound } from 'lucide-react';
+import { MoreHorizontal, UserRound } from 'lucide-react';
 import {
   Header,
   Button,
@@ -205,12 +205,8 @@ export default function BoardDetailPage() {
       }
       className="relative h-11 w-11 text-neutral-800"
     >
-      <span aria-hidden className="relative size-6 overflow-hidden">
-        <img
-          src="/app/images/shared-comment.svg"
-          alt=""
-          className="absolute left-[2.1px] top-[2.1px] h-[19.8px] w-[19.8px]"
-        />
+      <span aria-hidden className="relative size-6 -translate-y-0.5 overflow-hidden">
+        <img src="/app/images/shared-comment.png" alt="" className="size-6 max-w-none" />
       </span>
       {board.unreadCommentCount > 0 && (
         <span className="absolute left-[25px] top-2 flex h-3 min-w-3 items-center justify-center rounded-full bg-danger px-0.5 text-[9px] font-medium leading-3 text-neutral-0">
@@ -341,15 +337,22 @@ export default function BoardDetailPage() {
         setCommentsOpen(open);
       }}
       title="댓글 목록"
-      className="h-[min(70vh,570px)] pb-[max(8px,env(safe-area-inset-bottom))]"
+      showHandle={false}
+      className="h-[min(71vh,576px)] rounded-t-md pb-[max(8px,env(safe-area-inset-bottom))] shadow-[0_-8px_8px_rgba(0,0,0,0.12)]"
     >
       <div className="flex min-h-0 flex-1 flex-col">
-        <h2 className="px-4 pb-2 pt-1 text-center text-head-3 text-neutral-950">댓글 목록</h2>
-        <ul className="min-h-0 flex-1 overflow-y-auto px-4">
+        <div
+          aria-hidden
+          className="mx-auto mb-[13.5px] mt-[6.5px] h-[3.7px] w-[45px] shrink-0 rounded-full bg-neutral-800"
+        />
+        <h2 className="px-4 pb-[2.5px] pt-[6.5px] text-center text-head-3 text-neutral-950">
+          댓글 목록
+        </h2>
+        <ul className="min-h-0 flex-1 overflow-y-auto px-2">
           {board.comments.length === 0 ? (
             <li className="flex h-full min-h-48 flex-col items-center justify-center gap-1 text-center">
               <p className="text-body-1 text-neutral-950">아직 댓글이 없어요</p>
-              <p className="w-[180px] text-body-6 text-neutral-800">
+              <p className="w-[154px] text-body-6 text-neutral-800">
                 추가한 후보에 대한 의견을 친구와 함께 나눠보세요.
               </p>
             </li>
@@ -357,9 +360,14 @@ export default function BoardDetailPage() {
             sortSharedCommentsNewestFirst(board.comments).map((comment) => (
               <li
                 key={comment.sharedCommentId}
-                className="border-b border-neutral-200 py-3 last:border-b-0"
+                className="border-b border-neutral-200 pt-4 first:pt-0 last:border-b-0"
               >
-                <div className="flex min-h-8 items-center justify-between gap-2">
+                <div
+                  className={cn(
+                    'ml-2 -mr-1 flex items-center justify-between gap-2',
+                    comment.isMine ? 'h-11' : 'h-[26px]',
+                  )}
+                >
                   <div className="flex min-w-0 items-center gap-2">
                     <Badge className="h-[26px] shrink-0 rounded-sm bg-primary-100 px-2 py-1.5 text-caption-1 text-neutral-800">
                       {comment.sharedMemberName}
@@ -376,12 +384,18 @@ export default function BoardDetailPage() {
                           className="flex size-11 shrink-0 items-center justify-center rounded-md text-neutral-800"
                           aria-label="댓글 메뉴"
                         >
-                          <MoreVertical className="size-5" aria-hidden />
+                          <img
+                            src="/app/images/shared-comment-menu.svg"
+                            alt=""
+                            aria-hidden
+                            className="h-[13.1667px] w-[3.16667px] max-w-none rotate-90"
+                          />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        sideOffset={-4}
+                        alignOffset={-6}
+                        sideOffset={-12}
                         className="z-[80] min-w-0 rounded-md border-0 p-0 shadow-elevation"
                       >
                         <DropdownMenuItem
@@ -394,7 +408,12 @@ export default function BoardDetailPage() {
                     </DropdownMenu>
                   )}
                 </div>
-                <p className="whitespace-pre-wrap break-words px-1 pt-1 text-body-2 text-neutral-950">
+                <p
+                  className={cn(
+                    'whitespace-pre-wrap break-words px-3 pb-4 text-body-2 text-neutral-950',
+                    comment.isMine ? '-mt-px' : 'mt-2',
+                  )}
+                >
                   {comment.content}
                 </p>
               </li>

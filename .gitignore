@@ -27,5 +27,6 @@ apps/user/*/public/images/kakao-talk.png
 apps/user/*/public/images/invite-login-complete.svg
 apps/user/*/public/images/shared-board-invite.svg
 apps/user/*/public/images/shared-like-*.svg
-apps/user/*/public/images/shared-comment.svg
 apps/user/*/public/images/shared-comment-send.svg
+apps/user/*/public/images/shared-comment.png
+apps/user/*/public/images/shared-comment-menu.svg
