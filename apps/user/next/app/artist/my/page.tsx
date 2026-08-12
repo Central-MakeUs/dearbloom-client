@@ -1,23 +1,20 @@
 import { cookies } from 'next/headers';
-import { ChevronRight } from 'lucide-react';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
-import { Badge, Button, Header } from '@dearbloom/ui';
+import { Button, Header } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
+import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
-import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
+import { MyMenuRow } from '@/src/components/common/MyMenuRow';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * 마이 메뉴. href 있는 항목은 이동, href 없는 항목은 '준비중' Badge로 노출.
- * 준비중(포인트·채팅 템플릿 관리·공지사항)은 출시 전 숨김 — 백엔드 준비 후 주석 해제로 복구.
+ * 마이 메뉴.
+ * 준비중(포인트·채팅 템플릿 관리·공지사항)은 출시 전 숨김 — 백엔드 준비 후 항목 추가로 복구.
  */
-const menu: { label: string; href?: string }[] = [
+const menu: { label: string; href: string }[] = [
   { label: '개인정보 처리방침', href: '/privacy-policy' },
-  // { label: '포인트' },
-  // { label: '채팅 템플릿 관리' },
-  // { label: '공지사항' },
 ];
 
 export default async function ArtistMyPage() {
@@ -46,46 +43,43 @@ export default async function ArtistMyPage() {
 
   const displayName = artist.nickname;
 
+  const profile = (
+    <section className="flex items-center justify-between px-4 pt-5">
+      <div className="flex min-w-0 items-center gap-3">
+        {artist.imageUrl ? (
+          <img src={artist.imageUrl} alt="" className="size-12 shrink-0 rounded-full object-cover" />
+        ) : (
+          <DefaultAvatar />
+        )}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="truncate text-head-2 text-neutral-950">{displayName}</span>
+          <span className="truncate text-caption-1 text-neutral-600">{me.email}</span>
+        </div>
+      </div>
+      <a
+        href="/app/artist/profile"
+        className="shrink-0 rounded-md border border-neutral-300 bg-neutral-100 px-3 py-1 text-body-1 text-neutral-950"
+      >
+        수정
+      </a>
+    </section>
+  );
+
+  const nav = (
+    <nav className="mt-5 flex flex-col gap-1 px-5">
+      {menu.map((m) => (
+        <MyMenuRow key={m.label} label={m.label} href={m.href} />
+      ))}
+      <MemberLogoutButton />
+      <MyMenuRow label="탈퇴하기" href="/app/my/withdraw?from=artist" />
+    </nav>
+  );
+
   return (
     <div className="mx-auto max-w-md">
       <Header showBack={false} title="마이페이지" />
-
-      {/* 프로필 */}
-      <section className="flex items-center justify-between px-4 py-3">
-        <div className="flex min-w-0 items-center gap-3">
-          {artist.imageUrl ? (
-            <img src={artist.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-          ) : (
-            <div className="h-12 w-12 shrink-0 rounded-full bg-neutral-300" />
-          )}
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-head-2 text-neutral-950">{displayName}</span>
-            <span className="truncate text-caption-1 text-neutral-600">{me.email}</span>
-          </div>
-        </div>
-        <Button asChild variant="outline" size="sm" className="shrink-0">
-          <a href="/app/artist/profile">수정</a>
-        </Button>
-      </section>
-
-      {/* 메뉴 */}
-      <nav className="mt-2 flex flex-col gap-1 px-5">
-        {menu.map((m) =>
-          m.href ? (
-            <a key={m.label} href={m.href} className="flex h-11 items-center justify-between transition-colors hover:opacity-70">
-              <span className="text-body-1 text-neutral-950">{m.label}</span>
-              <ChevronRight className="size-6 text-neutral-400" aria-hidden />
-            </a>
-          ) : (
-            <div key={m.label} className="flex h-11 items-center justify-between" aria-disabled>
-              <span className="text-body-1 text-neutral-400">{m.label}</span>
-              <Badge variant="muted">준비중</Badge>
-            </div>
-          ),
-        )}
-        <MemberLogoutButton />
-        <MemberWithdrawalButton />
-      </nav>
+      {profile}
+      {nav}
     </div>
   );
 }

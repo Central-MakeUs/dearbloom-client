@@ -1,26 +1,13 @@
-import { ChevronRight } from 'lucide-react';
-import { Card } from '@dearbloom/ui';
-
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
-import { MemberWithdrawalButton } from '@/src/components/common/MemberWithdrawalButton';
-
-const rowClass = 'flex h-11 items-center justify-between transition-colors hover:opacity-70';
+import { MyMenuRow } from '@/src/components/common/MyMenuRow';
 
 export function MyMenu() {
   return (
-    <Card className="mt-2 overflow-hidden">
-      <nav className="flex flex-col px-5">
-        <a href="/app/my/reservations" className={rowClass}>
-          <span className="text-body-1 text-neutral-950">문의 내역</span>
-          <ChevronRight className="size-6 text-neutral-400" aria-hidden />
-        </a>
-        <a href="/privacy-policy" className={rowClass}>
-          <span className="text-body-1 text-neutral-950">개인정보 처리방침</span>
-          <ChevronRight className="size-6 text-neutral-400" aria-hidden />
-        </a>
-        <MemberLogoutButton />
-        <MemberWithdrawalButton />
-      </nav>
-    </Card>
+    <nav className="mt-5 flex flex-col gap-1 px-5">
+      <MyMenuRow label="문의 내역" href="/app/my/reservations" />
+      <MyMenuRow label="개인정보 처리방침" href="/privacy-policy" />
+      <MemberLogoutButton />
+      <MyMenuRow label="탈퇴하기" href="/app/my/withdraw" />
+    </nav>
   );
 }

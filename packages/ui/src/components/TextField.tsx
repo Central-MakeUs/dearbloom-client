@@ -9,6 +9,8 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'si
   label?: ReactNode;
   /** 필드 아래 안내/에러 문구. */
   helper?: ReactNode;
+  /** 필드 아래 우측 글자수 카운터(예: `3/5`). */
+  counter?: ReactNode;
   /** 에러 상태 — 테두리 danger. */
   error?: boolean;
   /** 좌측 아이콘 슬롯. */
@@ -25,7 +27,7 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'si
  * 값이 있고 onClear 가 있으면 우측에 {@link DeleteButton} 을 표시합니다.
  */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, helper, error = false, leading, trailing, onClear, className, disabled, value, id, ...rest },
+  { label, helper, counter, error = false, leading, trailing, onClear, className, disabled, value, id, ...rest },
   ref,
 ) {
   const hasValue = value != null && value !== '';
@@ -65,15 +67,24 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     </div>
   );
 
-  const helperNode = helper ? (
-    <p className={cn('text-caption-2', error ? 'text-danger' : 'text-neutral-500')}>{helper}</p>
-  ) : null;
+  // Figma textfield: 라벨↔필드 8px, 필드↔가이드 6px. 가이드는 좌측 안내문 + 우측 카운터.
+  const guideNode =
+    helper || counter ? (
+      <div className="flex items-start gap-4">
+        {helper ? (
+          <p className={cn('text-caption-2', error ? 'text-danger' : 'text-neutral-500')}>{helper}</p>
+        ) : null}
+        {counter ? <span className="ml-auto shrink-0 text-caption-2 text-neutral-500">{counter}</span> : null}
+      </div>
+    ) : null;
 
   return (
-    <div className={cn('flex w-full flex-col gap-2', className)}>
-      {labelNode}
-      {field}
-      {helperNode}
+    <div className={cn('flex w-full flex-col gap-1.5', className)}>
+      <div className="flex flex-col gap-2">
+        {labelNode}
+        {field}
+      </div>
+      {guideNode}
     </div>
   );
 });

@@ -30,7 +30,7 @@ export default async function ProfileEditPage() {
   return (
     <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
       <Header />
-      <EditForm initialName={me?.name ?? ''} initialRegion={me?.region ?? ''} />
+      <EditForm initialName={me?.name ?? ''} />
     </div>
   );
 }

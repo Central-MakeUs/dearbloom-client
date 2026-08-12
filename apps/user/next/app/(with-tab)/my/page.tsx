@@ -1,13 +1,20 @@
 import { cookies } from 'next/headers';
 import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
+import { ProfileUpdatedToast } from './ProfileUpdatedToast';
 import { Header } from '@dearbloom/ui';
+import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
 
 export const dynamic = 'force-dynamic';
 
-export default async function MyPage() {
+export default async function MyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ updated?: string }>;
+}) {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
+  const { updated } = await searchParams;
 
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
@@ -33,10 +40,10 @@ export default async function MyPage() {
     <div className="mx-auto max-w-md">
       <Header showBack={false} title="마이페이지" />
 
-      {/* 프로필 */}
-      <section className="flex items-center justify-between px-4 py-3">
+      {/* 프로필 — Figma 실측: 헤더 아래 20px, 좌우 16px, 아바타 48 + gap 12 */}
+      <section className="flex items-center justify-between px-4 pt-5">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="h-12 w-12 shrink-0 rounded-full bg-neutral-300" />
+          <DefaultAvatar />
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="truncate text-head-2 text-neutral-950">{customer.name}</span>
             <span className="truncate text-caption-1 text-neutral-600">{member.email}</span>
@@ -44,14 +51,16 @@ export default async function MyPage() {
         </div>
         <a
           href="/app/profile/edit"
-          className="shrink-0 rounded-md border border-neutral-300 px-3 py-1 text-body-1 text-neutral-950"
+          className="shrink-0 rounded-md border border-neutral-300 bg-neutral-100 px-3 py-1 text-body-1 text-neutral-950"
         >
           수정
         </a>
       </section>
 
-      {/* 메뉴 + 로그아웃/탈퇴 모달 */}
+      {/* 메뉴 + 로그아웃 모달 */}
       <MyMenu />
+
+      {updated === '1' ? <ProfileUpdatedToast /> : null}
     </div>
   );
 }
