@@ -33,6 +33,11 @@ export interface ChatMessage {
   imageUrl: string | null;
   inquiryCard: InquiryCard | null;
   createdAt: string;
+  /**
+   * 상대가 이 메시지를 읽었는지. **내가 보낸 메시지에서만 의미가 있다** —
+   * 상대가 보낸 메시지의 값은 무시하세요(방 진입 시 내가 읽으므로 항상 참에 수렴).
+   */
+  read: boolean;
   /** 고객이 조회할 때만 내려옴(말풍선 옆 상대 프로필용) */
   artistNickname?: string;
   artistImageUrl?: string | null;
@@ -131,3 +136,22 @@ export const CHAT_WS_URL = `${API_BASE_URL.replace(/^http/, 'ws')}/ws`;
 
 /** 방 브로드캐스트 토픽. */
 export const chatRoomTopic = (roomId: number | string) => `/topic/rooms/${roomId}`;
+
+/**
+ * 읽음 브로드캐스트 토픽. 상대가 방을 읽으면 `readAt` 이하로 보낸 내 메시지가 읽힌 것이다.
+ * 방 전체에 나가므로 `readerRole` 이 내 역할과 같은 프레임은 내가 읽은 것이라 버려야 한다.
+ */
+export const chatRoomReadTopic = (roomId: number | string) => `/topic/rooms/${roomId}/read`;
+
+export interface ChatReadEvent {
+  readerRole: ChatRole;
+  readAt: string;
+}
+
+/**
+ * `readAt` 시점까지 읽힌 것으로 볼 메시지인지. 초 미만 자리는 응답마다 유무가 달라
+ * 비교에서 빼고 'YYYY-MM-DDTHH:MM:SS' 고정폭으로 견준다(같은 초면 읽힌 쪽으로).
+ */
+export function isReadBy(createdAt: string, readAt: string): boolean {
+  return createdAt.slice(0, 19) <= readAt.slice(0, 19);
+}

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Header } from '@dearbloom/ui';
-import type { ChatMessage, ChatRole } from '@dearbloom/shared';
+import { isReadBy, type ChatMessage, type ChatReadEvent, type ChatRole } from '@dearbloom/shared';
 import { ChatComposer } from './ChatComposer';
 import { ChatRoomMenu } from './ChatRoomMenu';
 import { ChatToast } from './ChatToast';
@@ -54,19 +54,45 @@ export function ChatRoomView({
   /** 토스트 자동 닫기 타이머가 리렌더마다 다시 걸리지 않도록 참조를 고정한다. */
   const dismissToast = useCallback(() => setToast(null), []);
 
-  /** STOMP 와 전송 응답이 같은 메시지를 두 번 넣지 않도록 messageId 로 정리한다. */
-  const append = useCallback((incoming: ChatMessage) => {
-    setMessages((prev) =>
-      prev.some((m) => m.messageId === incoming.messageId) ? prev : [...prev, incoming],
-    );
-  }, []);
-
-  useLiveMessages(roomId, append);
-
-  // 방에 들어오면 읽음 처리(내 쪽 안읽음 0).
-  useEffect(() => {
+  /** 읽음 처리 — 방에 들어올 때와, 방을 보고 있는 중에 상대 메시지를 받을 때. */
+  const markRead = useCallback(() => {
     void fetch(`${roomPath}/read`, { method: 'POST' }).catch(() => {});
   }, [roomPath]);
+
+  /** STOMP 와 전송 응답이 같은 메시지를 두 번 넣지 않도록 messageId 로 정리한다. */
+  const append = useCallback(
+    (incoming: ChatMessage) => {
+      setMessages((prev) =>
+        prev.some((m) => m.messageId === incoming.messageId) ? prev : [...prev, incoming],
+      );
+      // 방을 열어둔 채로 받은 상대 메시지도 읽은 것으로 처리해야 목록의 안읽음 수가 안 쌓인다.
+      if (incoming.senderRole !== myRole) markRead();
+    },
+    [markRead, myRole],
+  );
+
+  /**
+   * 상대가 방을 읽었다는 브로드캐스트. `readAt` 이하로 내가 보낸 메시지를 읽음으로 바꾼다.
+   * 토픽이 방 전체에 나가므로 내가 읽은 이벤트(readerRole === myRole)는 버린다.
+   */
+  const applyRead = useCallback(
+    ({ readerRole, readAt }: ChatReadEvent) => {
+      if (readerRole === myRole) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.senderRole === myRole && !m.read && isReadBy(m.createdAt, readAt)
+            ? { ...m, read: true }
+            : m,
+        ),
+      );
+    },
+    [myRole],
+  );
+
+  useLiveMessages(roomId, append, applyRead);
+
+  // 방에 들어오면 읽음 처리(내 쪽 안읽음 0).
+  useEffect(markRead, [markRead]);
 
   // 새 메시지가 붙으면 맨 아래로. 과거 페이지를 붙인 경우엔 보던 위치를 유지한다.
   useLayoutEffect(() => {
