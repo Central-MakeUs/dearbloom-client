@@ -286,9 +286,18 @@ export function ScheduleManager({
     </li>
   );
 
-  /** 카드 안 '추가' 폼의 CTA — 좁은 폭에서 버튼만 밀리지 않도록 항상 전체 폭 한 줄. */
-  const addButton = (onClick: () => void, label: string, busy: boolean) => (
-    <Button type="button" variant="primary" onClick={onClick} disabled={disabled} className="w-full">
+  /**
+   * 카드 하단 CTA — 세 카드('저장'/'추가'×2)가 같은 위치·모양이 되도록 맞춘다(QA).
+   * 좁은 폭에서 버튼만 다음 줄로 밀리지 않게 항상 전체 폭 한 줄.
+   */
+  const cardCta = (onClick: () => void, label: string, busy: boolean, extraDisabled = false) => (
+    <Button
+      type="button"
+      variant="primary"
+      onClick={onClick}
+      disabled={disabled || extraDisabled}
+      className="w-full"
+    >
       {busy ? spinner : null}
       {label}
     </Button>
@@ -302,19 +311,7 @@ export function ScheduleManager({
 
   const weeklySection = (
     <section>
-      <div className="flex items-center justify-between px-4">
-        <h2 className="text-head-3 text-neutral-950">기본 촬영 가능 일정</h2>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={saveWeekly}
-          disabled={disabled || loadFailed || !dirty}
-        >
-          {pending === 'weekly' ? spinner : null}
-          저장
-        </Button>
-      </div>
+      <h2 className="px-4 text-head-3 text-neutral-950">기본 촬영 가능 일정</h2>
       <Card className="mx-4 mt-2 flex flex-col divide-y divide-neutral-200">
         {DAYS.map((d) => {
           const s = days[d.key];
@@ -350,6 +347,9 @@ export function ScheduleManager({
             </div>
           );
         })}
+        <div className="p-4">
+          {cardCta(saveWeekly, '저장', pending === 'weekly', loadFailed || !dirty)}
+        </div>
       </Card>
     </section>
   );
@@ -394,7 +394,7 @@ export function ScheduleManager({
               ariaLabel="반복 종료 시간"
             />
           </div>
-          {addButton(addRecurring, '추가', pending === 'recurring')}
+          {cardCta(addRecurring, '추가', pending === 'recurring')}
         </div>
       </Card>
     </section>
@@ -430,7 +430,7 @@ export function ScheduleManager({
               ariaLabel="개인 예약불가 종료 시간"
             />
           </div>
-          {addButton(addDate, '추가', pending === 'date')}
+          {cardCta(addDate, '추가', pending === 'date')}
         </div>
       </Card>
     </section>
