@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Share, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
@@ -284,22 +284,25 @@ export default function App() {
     return () => subscription.remove();
   }, [initialWebViewUrl]);
 
-  // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다. 서버는 data.deepLink 에 내부 절대경로만 담는다.
-  useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-
-    const openFromNotification = (remoteMessage: { data?: Record<string, unknown> } | null) => {
-      const pushWebViewUrl = getPushDeepLinkWebViewUrl(
-        remoteMessage?.data?.deepLink,
-        initialWebViewUrl,
-      );
+  // 서버는 data.deepLink 에 내부 절대경로만 담는다. 알림 탭과 인앱 배너 탭이 함께 쓴다.
+  const openPushDeepLink = useCallback(
+    (deepLink: unknown) => {
+      const pushWebViewUrl = getPushDeepLinkWebViewUrl(deepLink, initialWebViewUrl);
       if (!pushWebViewUrl) return;
 
       sessionBootstrapState.current = 'ready';
       setIsSessionReady(true);
       setWebViewUrl(pushWebViewUrl);
-    };
+    },
+    [initialWebViewUrl],
+  );
 
+  // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+
+    const openFromNotification = (remoteMessage: { data?: Record<string, unknown> } | null) =>
+      openPushDeepLink(remoteMessage?.data?.deepLink);
     const messaging = getMessaging();
 
     // 앱이 종료된 상태에서 알림으로 실행된 경우.
@@ -307,7 +310,7 @@ export default function App() {
 
     // 백그라운드에 있다가 알림 탭으로 돌아온 경우.
     return onNotificationOpenedApp(messaging, openFromNotification);
-  }, [initialWebViewUrl]);
+  }, [openPushDeepLink]);
 
   // 토큰은 재설치·복원 등으로 갱신된다. 갱신되면 웹에 알려 서버 등록을 최신으로 유지한다.
   useEffect(() => {
