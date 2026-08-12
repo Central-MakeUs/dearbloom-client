@@ -12,6 +12,8 @@ export * from './api/chat';
 export * from './api/report';
 export * from './api/customer';
 export * from './api/member';
+export * from './api/notification';
+export * from './nativePushBridge';
 export * from './validation';
 export * from './date';
 export * from './webShare';
