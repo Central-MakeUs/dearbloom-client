@@ -26,7 +26,7 @@ interface ChatRoomViewProps {
 }
 
 /**
- * 채팅방 — 히스토리(위로 무한 스크롤) + 실시간 수신 + 텍스트 전송.
+ * 채팅방 — 히스토리(위로 무한 스크롤) + 실시간 수신 + 텍스트·사진 전송.
  *
  * ⋯ 메뉴(알림 끄기/신고하기/나가기)는 Figma 대로 렌더하되 백엔드 API 가 없어
  * 선택하면 '준비 중' 토스트로 수렴한다.
@@ -144,6 +144,40 @@ export function ChatRoomView({
     }
   }
 
+  /** 사진 한 장 — presigned 로 S3 에 직접 올린 뒤 그 CDN URL 로 메시지를 만든다. */
+  async function sendImage(file: File) {
+    setError(null);
+    try {
+      const presign = await fetch(`${apiBase}/presigned`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prefix: 'CHAT_IMAGE', fileName: file.name }),
+      });
+      if (!presign.ok) throw new Error('presigned');
+
+      const { presignedUrl, fileUrl } = (await presign.json()) as {
+        presignedUrl: string;
+        fileUrl: string;
+      };
+      const put = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+      if (!put.ok) throw new Error('s3');
+
+      const res = await fetch(`${roomPath}/images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl: fileUrl }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      append((await res.json()) as ChatMessage);
+    } catch {
+      setError('사진을 보내지 못했어요.');
+    }
+  }
+
   // 말풍선은 왼쪽 8 / 오른쪽 16 에서 시작한다(Figma 234:6470 — 수신 x=8, 발신 오른쪽 끝 x=359).
   const list = (
     <div
@@ -182,7 +216,7 @@ export function ChatRoomView({
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
       <Header title={peerName} onBack={() => (window.location.href = backHref)} right={menuButton} />
       {list}
-      <ChatComposer onSendText={sendText} />
+      <ChatComposer onSendText={sendText} onSendImage={sendImage} />
       <ChatRoomMenu
         open={menuOpen}
         onOpenChange={setMenuOpen}
