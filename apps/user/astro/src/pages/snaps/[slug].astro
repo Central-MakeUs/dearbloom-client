@@ -6,7 +6,7 @@ import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
 import { SchoolChipsExpander } from '@/components/SchoolChipsExpander';
-import { SnapReportButton } from '@/components/SnapReportButton';
+import { SnapMoreMenu } from '@/components/SnapMoreMenu';
 import { SmartInquiryCta } from '@/components/SmartInquiryCta';
 import { getArtworkBackHref } from '@/lib/artworkReturnPath';
 import {
@@ -75,7 +75,7 @@ if (artwork && token) {
       ) : (
         <>
           {/* Header */}
-          {/* Figma header_title/Variant3 — 375x52, 좌우 여백 4, 뒤로가기 44x44(아이콘 28) + 우측 아이콘 2개 */}
+          {/* Figma header_title/Variant3 — 375x52, 좌우 여백 4, 뒤로가기 44x44(아이콘 28) + 우측 아이콘 3개(하트·공유·더보기) */}
           <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-1">
             <a href={backHref} aria-label="뒤로가기" class="flex h-11 w-11 items-center justify-center text-neutral-800">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
@@ -92,6 +92,7 @@ if (artwork && token) {
                 client:load
               />
               <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:load />
+              <SnapMoreMenu artworkId={artwork.artworkId} initialReported={reported} client:load />
             </div>
           </header>
 
@@ -123,14 +124,9 @@ if (artwork && token) {
                 )}
               </div>
               <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
-              {artwork.artistEmail && (
-                <a href={`mailto:${artwork.artistEmail}`} class="mt-1 inline-block text-body-6 text-primary underline">
-                  {artwork.artistEmail}
-                </a>
-              )}
             </div>
 
-            {/* 인페이지 탭 — 상세정보 (리뷰는 준비중이라 임시 숨김) */}
+            {/* 인페이지 탭 — 상세정보 활성 / 후기는 API 대기라 disabled */}
             <SnapDetailTabs client:load />
           </div>
 
@@ -216,9 +212,6 @@ if (artwork && token) {
                 </div>
               </section>
             )}
-
-            {/* 작품 신고 — 상세 하단 텍스트 링크 */}
-            <SnapReportButton artworkId={artwork.artworkId} initialReported={reported} client:load />
           </div>
 
           {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입 */}

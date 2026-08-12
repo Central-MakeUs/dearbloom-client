@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from '@dearbloom/ui';
 
 /**
  * 작품 상세 인페이지 탭 — 상세정보만 활성.
- * 리뷰 탭은 백엔드 리뷰 API 준비 전이라 잠시 숨김.
+ * 후기 탭은 백엔드 리뷰 API 준비 전이라 disabled 로 '준비중' 안내만 노출한다.
  * 컨텐츠는 SEO 위해 .astro 에서 SSR 되므로 여기선 탭 바만 담당.
  */
 export function SnapDetailTabs() {
@@ -10,6 +10,9 @@ export function SnapDetailTabs() {
     <Tabs defaultValue="info" className="mt-3">
       <TabsList>
         <TabsTrigger value="info">상세정보</TabsTrigger>
+        <TabsTrigger value="review" disabled>
+          후기 준비중
+        </TabsTrigger>
       </TabsList>
     </Tabs>
   );
