@@ -121,8 +121,8 @@ export function ScheduleManager({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<Pending>(null);
-  const [refreshing, startRefresh] = useTransition();
-  const disabled = pending !== null || refreshing;
+  // 목록 갱신 중에도 다른 카드는 계속 쓸 수 있어야 하므로 pending 표시에는 넣지 않는다.
+  const [, startRefresh] = useTransition();
 
   // 서버/클라이언트 시각 차이로 인한 hydration 불일치를 피하려고 마운트 후에 채운다.
   const [today, setToday] = useState('');
@@ -278,7 +278,7 @@ export function ScheduleManager({
         size="icon"
         aria-label={`${label} 삭제`}
         onClick={() => setDeleteTarget({ kind, id: r.scheduleRuleId, label })}
-        disabled={disabled}
+        disabled={pending === 'delete'}
         className="h-8 w-8 text-neutral-500 hover:text-danger"
       >
         <Trash2 aria-hidden />
@@ -289,16 +289,19 @@ export function ScheduleManager({
   /**
    * 카드 하단 CTA — 세 카드('저장'/'추가'×2)가 같은 위치·모양이 되도록 맞춘다(QA).
    * 좁은 폭에서 버튼만 다음 줄로 밀리지 않게 항상 전체 폭 한 줄.
+   *
+   * 잠금은 자기 요청에만 건다 — 서로 다른 리소스라 하나가 도는 동안
+   * 나머지까지 흐려질 이유가 없다(QA).
    */
-  const cardCta = (onClick: () => void, label: string, busy: boolean, extraDisabled = false) => (
+  const cardCta = (onClick: () => void, label: string, kind: Pending, extraDisabled = false) => (
     <Button
       type="button"
       variant="primary"
       onClick={onClick}
-      disabled={disabled || extraDisabled}
+      disabled={pending === kind || extraDisabled}
       className="w-full"
     >
-      {busy ? spinner : null}
+      {pending === kind ? spinner : null}
       {label}
     </Button>
   );
@@ -348,7 +351,7 @@ export function ScheduleManager({
           );
         })}
         <div className="p-4">
-          {cardCta(saveWeekly, '저장', pending === 'weekly', loadFailed || !dirty)}
+          {cardCta(saveWeekly, '저장', 'weekly', loadFailed || !dirty)}
         </div>
       </Card>
     </section>
@@ -394,7 +397,7 @@ export function ScheduleManager({
               ariaLabel="반복 종료 시간"
             />
           </div>
-          {cardCta(addRecurring, '추가', pending === 'recurring')}
+          {cardCta(addRecurring, '추가', 'recurring')}
         </div>
       </Card>
     </section>
@@ -430,7 +433,7 @@ export function ScheduleManager({
               ariaLabel="개인 예약불가 종료 시간"
             />
           </div>
-          {cardCta(addDate, '추가', pending === 'date')}
+          {cardCta(addDate, '추가', 'date')}
         </div>
       </Card>
     </section>
