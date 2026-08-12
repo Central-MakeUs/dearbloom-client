@@ -58,7 +58,13 @@ function StepHeader({
   );
 }
 
-export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: boolean }) {
+export function CustomerOnboardingForm({
+  forceOnboarding,
+  returnUrl,
+}: {
+  forceOnboarding: boolean;
+  returnUrl?: string;
+}) {
   const router = useRouter();
   const [step, setStep] = useState<OnboardingStep>('school');
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
@@ -248,13 +254,13 @@ export function CustomerOnboardingForm({ forceOnboarding }: { forceOnboarding: b
     );
   }
 
-  const goToSnaps = () => window.location.replace('/snaps');
+  const finishOnboarding = () => window.location.replace(returnUrl ?? '/snaps');
   const completeActions = (
     <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-      {/* 기능이 준비되면 복원: <BottomButton onClick={goToSnaps}>기능 둘러보기</BottomButton> */}
+      {/* 기능이 준비되면 복원: <BottomButton onClick={finishOnboarding}>기능 둘러보기</BottomButton> */}
       <button
         className="mt-3 h-10 w-full text-body-5 text-neutral-700"
-        onClick={goToSnaps}
+        onClick={finishOnboarding}
         type="button"
       >
         바로 시작하기

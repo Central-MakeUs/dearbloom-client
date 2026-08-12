@@ -63,22 +63,25 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   ) : null;
 
   return (
-    <main className="min-h-dvh bg-primary-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
-        <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
-        <div className="absolute inset-x-2 bottom-[88px]">
-          {error}
-          <SocialLoginButtons forceOnboarding={forceOnboarding} returnUrl={returnUrl} />
-          {DEV_LOGIN_ENABLED && (
-            <a
-              href="/app/dev/login"
-              className="mt-3 block text-center text-caption-1 text-neutral-500 underline"
-            >
-              개발용 로그인
-            </a>
-          )}
+    <>
+      <meta content="rgb(229 235 232)" name="theme-color" />
+      <main className="min-h-dvh bg-primary-100">
+        <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+          <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
+          <div className="absolute inset-x-2 bottom-[88px]">
+            {error}
+            <SocialLoginButtons forceOnboarding={forceOnboarding} returnUrl={returnUrl} />
+            {DEV_LOGIN_ENABLED && (
+              <a
+                href="/app/dev/login"
+                className="mt-3 block text-center text-caption-1 text-neutral-500 underline"
+              >
+                개발용 로그인
+              </a>
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
