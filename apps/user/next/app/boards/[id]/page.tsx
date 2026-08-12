@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Heart, MessageCircleMore, MoreHorizontal, UserRound } from 'lucide-react';
+import { MoreHorizontal, MoreVertical, UserRound } from 'lucide-react';
 import {
   Header,
   Button,
@@ -10,7 +10,6 @@ import {
   BottomButton,
   BottomButtonBar,
   ShareButton,
-  Input,
   BottomSheet,
   AlertDialog,
   AlertDialogContent,
@@ -20,7 +19,12 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   RegionTag,
+  cn,
 } from '@dearbloom/ui';
 import type {
   SharedArtwork,
@@ -30,15 +34,22 @@ import type {
 } from '@dearbloom/shared';
 import { artistRegionLabel } from '@dearbloom/shared';
 import { useHydrated } from '@/src/lib/useHydrated';
+import { getNextSharedArtworkLike } from '@/src/lib/sharedArtworkLike';
+import { formatSharedCommentTime, sortSharedCommentsNewestFirst } from '@/src/lib/sharedComments';
 import { showCandidateToast } from './CandidateToast';
 import { ShareBoardSheet } from './ShareBoardSheet';
+import { SharedLikeIcon } from './SharedLikeIcon';
 
 const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()}만원`;
 const artworkHref = (artworkId: number, boardId: number) =>
   `/snaps/${artworkId}?returnTo=${encodeURIComponent(`/app/boards/${boardId}`)}`;
 
 type BoardDetail = SharedBoardSummary &
-  SharedBoardPage & { comments: SharedComment[]; hasMySharedArtworks: boolean; isOwner: boolean };
+  SharedBoardPage & {
+    comments: SharedComment[];
+    hasMySharedArtworks: boolean;
+    isOwner: boolean;
+  };
 
 export default function BoardDetailPage() {
   const router = useRouter();
@@ -57,6 +68,10 @@ export default function BoardDetailPage() {
   const [shareOpen, setShareOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState<number>();
+  const [commentDeleting, setCommentDeleting] = useState(false);
+  const likingArtworkIds = useRef(new Set<number>());
 
   useEffect(() => {
     let active = true;
@@ -108,16 +123,100 @@ export default function BoardDetailPage() {
     );
   }
 
+  const openComments = async () => {
+    setCommentsOpen(true);
+    setBoard((current) => (current ? { ...current, unreadCommentCount: 0 } : current));
+    const [commentsResponse] = await Promise.all([
+      fetch(`/app/api/boards/${board.sharedBoardId}/comments`),
+      fetch(`/app/api/boards/${board.sharedBoardId}/comments/read`, { method: 'POST' }),
+    ]);
+    if (commentsResponse.ok) {
+      const comments = (await commentsResponse.json()) as BoardDetail['comments'];
+      setBoard((current) => (current ? { ...current, comments } : current));
+    }
+  };
+
+  const submitComment = async () => {
+    const content = commentText.trim();
+    if (!content || commentSubmitting) return;
+
+    setCommentSubmitting(true);
+    try {
+      const response = await fetch(`/app/api/boards/${board.sharedBoardId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (response.ok) {
+        const comments = (await response.json()) as BoardDetail['comments'];
+        setBoard((current) => (current ? { ...current, comments } : current));
+        setCommentText('');
+      }
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  const toggleArtworkLike = async (artwork: SharedArtwork) => {
+    if (likingArtworkIds.current.has(artwork.sharedArtworkId)) return;
+    likingArtworkIds.current.add(artwork.sharedArtworkId);
+
+    const currentLikeCount = artwork.likeCount;
+    const { isLiked: nextIsLiked, likeCount: nextLikeCount } = getNextSharedArtworkLike(
+      artwork.isLiked,
+      currentLikeCount,
+    );
+    const updateArtwork = (isLiked: boolean, likeCount: number) =>
+      setBoard((current) =>
+        current
+          ? {
+              ...current,
+              sharedArtworkList: current.sharedArtworkList.map((item) =>
+                item.sharedArtworkId === artwork.sharedArtworkId
+                  ? { ...item, isLiked, likeCount }
+                  : item,
+              ),
+            }
+          : current,
+      );
+
+    updateArtwork(nextIsLiked, nextLikeCount);
+    try {
+      const response = await fetch(
+        `/app/api/boards/${board.sharedBoardId}/artworks/${artwork.sharedArtworkId}/likes`,
+        { method: nextIsLiked ? 'POST' : 'DELETE' },
+      );
+      if (!response.ok) updateArtwork(artwork.isLiked, currentLikeCount);
+    } catch {
+      updateArtwork(artwork.isLiked, currentLikeCount);
+    } finally {
+      likingArtworkIds.current.delete(artwork.sharedArtworkId);
+    }
+  };
+
   const messageButton = (
     <Button
       type="button"
       variant="ghost"
       size="icon"
-      onClick={() => setCommentsOpen(true)}
-      aria-label="댓글"
-      className="h-11 w-11 text-neutral-800"
+      onClick={openComments}
+      aria-label={
+        board.unreadCommentCount > 0 ? `댓글, 읽지 않은 댓글 ${board.unreadCommentCount}개` : '댓글'
+      }
+      className="relative h-11 w-11 text-neutral-800"
     >
-      <MessageCircleMore className="size-6" strokeWidth={1.5} />
+      <span aria-hidden className="relative size-6 overflow-hidden">
+        <img
+          src="/app/images/shared-comment.svg"
+          alt=""
+          className="absolute left-[2.1px] top-[2.1px] h-[19.8px] w-[19.8px]"
+        />
+      </span>
+      {board.unreadCommentCount > 0 && (
+        <span className="absolute left-[25px] top-2 flex h-3 min-w-3 items-center justify-center rounded-full bg-danger px-0.5 text-[9px] font-medium leading-3 text-neutral-0">
+          {board.unreadCommentCount > 99 ? '99+' : board.unreadCommentCount}
+        </span>
+      )}
     </Button>
   );
 
@@ -190,16 +289,19 @@ export default function BoardDetailPage() {
                 <div className="h-full w-full bg-gradient-to-br from-primary-100 to-primary-300" />
               )}
             </a>
-            <span
-              aria-hidden
-              className="absolute bottom-[9px] right-[9px] flex size-9 items-center justify-center rounded-full bg-neutral-950/30 text-neutral-0"
+            <button
+              type="button"
+              aria-label={artwork.isLiked ? '좋아요 취소' : '좋아요'}
+              aria-pressed={artwork.isLiked}
+              className={cn(
+                'absolute bottom-[9px] right-[9px] flex h-9 min-w-9 items-center justify-center gap-1 rounded-full bg-neutral-950/30 text-neutral-0',
+                artwork.likeCount > 0 ? 'px-2.5' : 'w-9 px-1.5',
+              )}
+              onClick={() => void toggleArtworkLike(artwork)}
             >
-              <Heart
-                className="size-6"
-                fill={artwork.isLiked ? 'currentColor' : 'none'}
-                strokeWidth={1.5}
-              />
-            </span>
+              <SharedLikeIcon active={artwork.isLiked} />
+              {artwork.likeCount > 0 && <span className="text-body-5">{artwork.likeCount}</span>}
+            </button>
           </div>
           <a href={artworkHref(artwork.artworkId, board.sharedBoardId)} className="block">
             <div className="truncate text-body-3 text-neutral-900">{artwork.title}</div>
@@ -232,49 +334,160 @@ export default function BoardDetailPage() {
   );
 
   const commentSheet = (
-    <BottomSheet open={commentsOpen} onOpenChange={setCommentsOpen} title="댓글 목록">
-      <div className="flex max-h-[70vh] flex-col px-5 pb-2 pt-1">
-        <p className="mb-3 text-body-2 text-neutral-950">댓글 목록</p>
-        <ul className="flex-1 space-y-4 overflow-y-auto">
+    <BottomSheet
+      open={commentsOpen}
+      onOpenChange={(open) => {
+        if (!open && deleteCommentId !== undefined) return;
+        setCommentsOpen(open);
+      }}
+      title="댓글 목록"
+      className="h-[min(70vh,570px)] pb-[max(8px,env(safe-area-inset-bottom))]"
+    >
+      <div className="flex min-h-0 flex-1 flex-col">
+        <h2 className="px-4 pb-2 pt-1 text-center text-head-3 text-neutral-950">댓글 목록</h2>
+        <ul className="min-h-0 flex-1 overflow-y-auto px-4">
           {board.comments.length === 0 ? (
-            <li className="py-10 text-center text-body-4 text-neutral-400">아직 댓글이 없어요.</li>
+            <li className="flex h-full min-h-48 flex-col items-center justify-center gap-1 text-center">
+              <p className="text-body-1 text-neutral-950">아직 댓글이 없어요</p>
+              <p className="w-[180px] text-body-6 text-neutral-800">
+                추가한 후보에 대한 의견을 친구와 함께 나눠보세요.
+              </p>
+            </li>
           ) : (
-            board.comments.map((comment) => (
-              <li key={comment.sharedCommentId}>
-                <Badge className="mb-1">{comment.sharedMemberName}</Badge>
-                <p className="text-body-4 text-neutral-950">{comment.content}</p>
+            sortSharedCommentsNewestFirst(board.comments).map((comment) => (
+              <li
+                key={comment.sharedCommentId}
+                className="border-b border-neutral-200 py-3 last:border-b-0"
+              >
+                <div className="flex min-h-8 items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Badge className="h-[26px] shrink-0 rounded-sm bg-primary-100 px-2 py-1.5 text-caption-1 text-neutral-800">
+                      {comment.sharedMemberName}
+                    </Badge>
+                    <span className="shrink-0 text-caption-1 text-neutral-600">
+                      {formatSharedCommentTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  {comment.isMine && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex size-11 shrink-0 items-center justify-center rounded-md text-neutral-800"
+                          aria-label="댓글 메뉴"
+                        >
+                          <MoreVertical className="size-5" aria-hidden />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        sideOffset={-4}
+                        className="z-[80] min-w-0 rounded-md border-0 p-0 shadow-elevation"
+                      >
+                        <DropdownMenuItem
+                          className="px-4 py-2 text-body-1 text-neutral-800"
+                          onSelect={() => setDeleteCommentId(comment.sharedCommentId)}
+                        >
+                          삭제
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+                <p className="whitespace-pre-wrap break-words px-1 pt-1 text-body-2 text-neutral-950">
+                  {comment.content}
+                </p>
               </li>
             ))
           )}
         </ul>
-        <div className="mt-3 flex items-center gap-2">
-          <Input
+        <form
+          className="relative bg-neutral-0 p-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submitComment();
+          }}
+        >
+          <input
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="댓글을 남겨보세요"
-            className="flex-1 rounded-full"
+            placeholder="댓글을 남겨보세요."
+            maxLength={500}
+            className="h-11 w-full rounded-md bg-neutral-100 pl-[9.5px] pr-[45px] text-body-2 text-neutral-950 outline-none placeholder:text-neutral-500"
           />
           <Button
-            type="button"
-            disabled={!commentText.trim()}
-            onClick={async () => {
-              const response = await fetch(`/app/api/boards/${board.sharedBoardId}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: commentText }),
-              });
-              if (!response.ok) return;
-              const comments = (await response.json()) as SharedComment[];
-              setBoard((current) => (current ? { ...current, comments } : current));
-              setCommentText('');
-            }}
-            className="shrink-0 rounded-full"
+            type="submit"
+            size="icon"
+            disabled={!commentText.trim() || commentSubmitting}
+            aria-label="댓글 작성"
+            className="absolute right-[14px] top-[13px] size-[34px] rounded-[6px] disabled:bg-neutral-300 disabled:opacity-100"
           >
-            작성
+            <img
+              src="/app/images/shared-comment-send.svg"
+              alt=""
+              aria-hidden
+              className="h-[15.8px] w-[13.8px] max-w-none"
+            />
           </Button>
-        </div>
+        </form>
       </div>
     </BottomSheet>
+  );
+
+  const deleteCommentModal = (
+    <AlertDialog
+      open={deleteCommentId !== undefined}
+      onOpenChange={(open) => {
+        if (open || commentDeleting) return;
+        setDeleteCommentId(undefined);
+      }}
+    >
+      <AlertDialogContent
+        overlayClassName="z-[80]"
+        className="z-[90] w-[303px] max-w-[calc(100%-2.5rem)] gap-0 rounded-md border-0 p-4"
+      >
+        <AlertDialogHeader className="pb-6 pt-3 text-center sm:text-center">
+          <AlertDialogTitle>댓글을 삭제하시겠어요?</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-row justify-center gap-2 sm:justify-center">
+          <AlertDialogCancel className="h-12 w-[130px] flex-none rounded-[6px] border-0 bg-neutral-200 text-body-1 text-neutral-800 hover:bg-neutral-300">
+            취소
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="h-12 w-[130px] flex-none rounded-[6px] text-body-1"
+            disabled={commentDeleting}
+            onClick={async (event) => {
+              event.preventDefault();
+              if (deleteCommentId === undefined) return;
+              setCommentDeleting(true);
+              try {
+                const response = await fetch(
+                  `/app/api/boards/${board.sharedBoardId}/comments/${deleteCommentId}`,
+                  { method: 'DELETE' },
+                );
+                if (response.ok) {
+                  setBoard((current) =>
+                    current
+                      ? {
+                          ...current,
+                          comments: current.comments.filter(
+                            (comment) => comment.sharedCommentId !== deleteCommentId,
+                          ),
+                        }
+                      : current,
+                  );
+                  setDeleteCommentId(undefined);
+                }
+              } finally {
+                setCommentDeleting(false);
+              }
+            }}
+          >
+            확인
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 
   const managementSheet = (
@@ -414,6 +627,7 @@ export default function BoardDetailPage() {
       {board.sharedArtworkCount === 0 ? emptyBody : grid}
       {addBar}
       {commentSheet}
+      {deleteCommentModal}
       {managementSheet}
       {deleteModal}
       {leaveModal}

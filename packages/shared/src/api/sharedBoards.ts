@@ -31,6 +31,7 @@ export interface SharedArtwork {
   artistRegionList: ArtistRegionCode[];
   thumbnailUrl: string;
   isLiked: boolean;
+  likeCount: number;
 }
 
 export interface SharedBoardPage {
@@ -38,6 +39,7 @@ export interface SharedBoardPage {
   sharedMemberList: SharedMember[];
   sharedArtworkList: SharedArtwork[];
   sharedArtworkCount: number;
+  unreadCommentCount: number;
 }
 
 export interface SharedBoardInvite {
@@ -64,6 +66,7 @@ export interface SharedComment {
   sharedMemberName: string;
   content: string;
   createdAt: string;
+  isMine: boolean;
 }
 
 export const getSharedBoards = (opts: RequestOptions) =>
@@ -108,3 +111,15 @@ export const createSharedComment = (
   content: string,
   opts: RequestOptions,
 ) => apiPost<string>(`/api/shared-boards/${sharedBoardId}/comments`, { content }, opts);
+
+export const markSharedCommentsRead = (sharedBoardId: number | string, opts: RequestOptions) =>
+  apiPost<void>(`/api/shared-boards/${sharedBoardId}/comments/read`, undefined, opts);
+
+export const deleteSharedComment = (sharedCommentId: number | string, opts: RequestOptions) =>
+  apiDelete<void>(`/api/shared-boards/comments/${sharedCommentId}`, undefined, opts);
+
+export const likeSharedArtwork = (sharedArtworkId: number | string, opts: RequestOptions) =>
+  apiPost<void>(`/api/shared-boards/artworks/${sharedArtworkId}/likes`, undefined, opts);
+
+export const unlikeSharedArtwork = (sharedArtworkId: number | string, opts: RequestOptions) =>
+  apiDelete<void>(`/api/shared-boards/artworks/${sharedArtworkId}/likes`, undefined, opts);
