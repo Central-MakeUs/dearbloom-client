@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MoreVertical } from 'lucide-react';
 import {
   BottomButton,
   BottomSheet,
@@ -26,7 +27,7 @@ function buildContent(reason: string, detail: string): string {
   return trimmed ? `사유: ${reason}\n상세: ${trimmed}` : `사유: ${reason}`;
 }
 
-interface SnapReportButtonProps {
+interface SnapMoreMenuProps {
   artworkId: number;
   /** 서버 렌더 시점의 신고 여부. 비로그인이면 false. */
   initialReported?: boolean;
@@ -37,18 +38,20 @@ interface SnapReportButtonProps {
 }
 
 /**
- * 작품 상세 하단의 '이 작품 신고하기' — 클라이언트 island.
- * 같은 도메인 프록시로 요청(쿠키 자동 전송) → 서버가 Bearer 로 백엔드 호출.
- * 신고는 취소가 없어서 한 번 접수되면 진입점이 안내 문구로 고정된다.
+ * 작품 상세 헤더의 더보기(⋮) — 클라이언트 island.
+ * 시트 하나를 메뉴/신고 두 뷰로 전환한다(시트를 겹쳐 띄우지 않기 위해).
+ * 신고는 같은 도메인 프록시로 요청(쿠키 자동 전송) → 서버가 Bearer 로 백엔드 호출.
+ * 신고는 취소가 없어서 한 번 접수되면 메뉴 항목이 안내 문구로 고정된다.
  */
-export function SnapReportButton({
+export function SnapMoreMenu({
   artworkId,
   initialReported = false,
   endpoint = '/api/artwork-report',
   loginHref = '/app/login',
-}: SnapReportButtonProps) {
+}: SnapMoreMenuProps) {
   const [reported, setReported] = useState(initialReported);
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<'menu' | 'report'>('menu');
   const [reason, setReason] = useState<string>('');
   const [detail, setDetail] = useState('');
   const [busy, setBusy] = useState(false);
@@ -60,6 +63,7 @@ export function SnapReportButton({
   function close(next: boolean) {
     setOpen(next);
     if (!next) {
+      setView('menu');
       setReason('');
       setDetail('');
       setError(null);
@@ -100,16 +104,34 @@ export function SnapReportButton({
     }
   }
 
-  const trigger = reported ? (
-    <p className="py-4 text-center text-caption-1 text-neutral-400">신고가 접수된 작품이에요</p>
-  ) : (
+  const trigger = (
     <button
       type="button"
-      onClick={() => setOpen(true)}
-      className="mx-auto block py-4 text-caption-1 text-neutral-500 underline underline-offset-2 transition-colors hover:text-neutral-700"
+      onClick={() => {
+        setView('menu');
+        setOpen(true);
+      }}
+      aria-label="더보기"
+      className="flex h-11 w-11 items-center justify-center text-neutral-950"
     >
-      이 작품 신고하기
+      <MoreVertical size={22} strokeWidth={1.8} aria-hidden />
     </button>
+  );
+
+  const menuView = (
+    <div className="flex flex-col px-4 pb-2">
+      {reported ? (
+        <p className="py-4 text-body-5 text-neutral-400">신고가 접수된 작품이에요</p>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setView('report')}
+          className="w-full py-4 text-left text-body-5 text-neutral-950"
+        >
+          이 작품 신고하기
+        </button>
+      )}
+    </div>
   );
 
   const reasonList = (
@@ -145,33 +167,35 @@ export function SnapReportButton({
     </div>
   );
 
-  const errorNote = error ? <p className="text-caption-2 text-danger">{error}</p> : null;
-
-  const sheet = (
-    <BottomSheet open={open} onOpenChange={close} title="작품 신고하기">
-      <div className="flex flex-col gap-3 px-4 pb-2">
-        <h2 className="text-head-3 text-neutral-950">작품 신고하기</h2>
-        <p className="text-caption-1 text-neutral-500">
-          신고는 취소할 수 없어요. 확인 후 운영팀이 조치할게요.
-        </p>
-        {reasonList}
-        {detailField}
-        {errorNote}
-        <BottomButton
-          onClick={submit}
-          disabled={!canSubmit || busy}
-          className={cn('mt-1', busy && 'opacity-70')}
-        >
-          {busy ? '접수 중…' : '신고하기'}
-        </BottomButton>
-      </div>
-    </BottomSheet>
+  const reportView = (
+    <div className="flex flex-col gap-3 px-4 pb-2">
+      <h2 className="text-head-3 text-neutral-950">작품 신고하기</h2>
+      <p className="text-caption-1 text-neutral-500">
+        신고는 취소할 수 없어요. 확인 후 운영팀이 조치할게요.
+      </p>
+      {reasonList}
+      {detailField}
+      {error && <p className="text-caption-2 text-danger">{error}</p>}
+      <BottomButton
+        onClick={submit}
+        disabled={!canSubmit || busy}
+        className={cn('mt-1', busy && 'opacity-70')}
+      >
+        {busy ? '접수 중…' : '신고하기'}
+      </BottomButton>
+    </div>
   );
 
   return (
     <>
       {trigger}
-      {sheet}
+      <BottomSheet
+        open={open}
+        onOpenChange={close}
+        title={view === 'report' ? '작품 신고하기' : '더보기'}
+      >
+        {view === 'menu' ? menuView : reportView}
+      </BottomSheet>
     </>
   );
 }
