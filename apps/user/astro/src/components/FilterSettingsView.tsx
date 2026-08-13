@@ -52,42 +52,35 @@ export function FilterSettingsView({ initial }: Props) {
   });
   const [activeTab, setActiveTab] = useState<TabKey>('date');
 
-  // 스크롤에 따라 탭이 따라오게 — 화면 상단에 걸린 섹션을 활성으로 봅니다.
-  // 섹션은 마운트 시점에 셋 다 그려져 있고 사라지지 않으므로 id 로 찾아 한 번만 붙입니다.
+  /**
+   * 스크롤에 따라 탭이 따라오게 — 판정선(상단 100px, 헤더+탭바에 가리는 높이)을 지난
+   * 마지막 섹션을 활성으로 봅니다.
+   *
+   * 교차 관찰 대신 스크롤 위치에서 매번 계산합니다. 마지막 섹션(인원)은 짧아서 판정선까지
+   * 올라오지 못하는데(QA), 그렇다고 바닥에서만 예외 처리하면 위로 되돌아올 때
+   * 교차 상태가 안 바뀌어 마지막 탭에 고착됩니다.
+   */
   useEffect(() => {
-    /**
-     * 마지막 섹션(인원)은 짧아서 판정선까지 올라오지 못해 관찰만으로는 영영 활성이 되지 않습니다(QA).
-     * 더 스크롤할 곳이 없으면 마지막 섹션을 보고 있는 것으로 봅니다.
-     */
-    const atBottom = () => window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
-    const lastTab = TABS[TABS.length - 1]!.key;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (atBottom()) {
-          setActiveTab(lastTab);
-          return;
-        }
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) setActiveTab(visible[0]!.target.id as TabKey);
-      },
-      // 상단 100px(헤더+탭바)은 가려진 영역이라 판정에서 뺍니다.
-      { rootMargin: '-100px 0px -60% 0px' },
-    );
-    for (const tab of TABS) {
-      const el = document.getElementById(tab.key);
-      if (el) observer.observe(el);
-    }
-
-    // 바닥 근처에서는 교차 상태가 더 바뀌지 않아 관찰 콜백이 안 돌 수 있으므로 스크롤로도 확인합니다.
-    const onScroll = () => {
-      if (atBottom()) setActiveTab(lastTab);
+    const sync = () => {
+      // 더 스크롤할 곳이 없으면 마지막 섹션을 보고 있는 것으로 봅니다.
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        setActiveTab(TABS[TABS.length - 1]!.key);
+        return;
+      }
+      let current: TabKey = TABS[0]!.key;
+      for (const tab of TABS) {
+        const el = document.getElementById(tab.key);
+        if (el && el.getBoundingClientRect().top <= 100) current = tab.key;
+      }
+      setActiveTab(current);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
 
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
     return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', sync);
+      window.removeEventListener('resize', sync);
     };
   }, []);
 
