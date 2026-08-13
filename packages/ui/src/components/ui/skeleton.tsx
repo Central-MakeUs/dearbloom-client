@@ -1,6 +1,13 @@
 'use client';
 
-import { useState, type HTMLAttributes, type ImgHTMLAttributes, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type ImgHTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { cn } from '../../lib/cn';
 
 /**
@@ -35,17 +42,25 @@ export function SkeletonImage({
   ...rest
 }: SkeletonImageProps) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  /**
+   * SSR 로 내려간 img 가 hydration 전에 이미 로드를 끝내면(대개 캐시) load 이벤트가
+   * React 가 리스너를 붙이기 전에 지나가버려 onLoad 가 오지 않는다.
+   * 마운트 후 한 번 `complete` 를 직접 확인해 그 경합을 닫는다.
+   * 깨진 이미지도 complete 가 true 라, 영원히 깜빡이는 상태로 남지 않는다.
+   */
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, [src]);
 
   return (
     <div className={cn('relative overflow-hidden bg-neutral-200', className)}>
       {src && (
         <img
+          ref={imgRef}
           src={src}
           {...rest}
-          // 캐시된 이미지는 hydration 전에 로드가 끝나 onLoad 가 오지 않는다 — ref 에서 complete 를 확인.
-          ref={(el) => {
-            if (el?.complete) setLoaded(true);
-          }}
           onLoad={(e) => {
             setLoaded(true);
             onLoad?.(e);
