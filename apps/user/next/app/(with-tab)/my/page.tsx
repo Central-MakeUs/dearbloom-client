@@ -2,9 +2,8 @@ import { cookies } from 'next/headers';
 import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
 import { ProfileUpdatedToast } from './ProfileUpdatedToast';
-import { Header } from '@dearbloom/ui';
+import { CustomerProfileAvatar, Header } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
-import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
 import { LoginSheet } from '../../(auth)/LoginSheet';
 
 export const dynamic = 'force-dynamic';
@@ -44,7 +43,7 @@ export default async function MyPage({
       {/* 프로필 — Figma 실측: 헤더 아래 20px, 좌우 16px, 아바타 48 + gap 12 */}
       <section className="flex items-center justify-between px-4 pt-5">
         <div className="flex min-w-0 items-center gap-3">
-          <DefaultAvatar />
+          <CustomerProfileAvatar color={customer.profileColor} />
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="truncate text-head-2 text-neutral-950">{customer.name}</span>
             <span className="truncate text-caption-1 text-neutral-600">{member.email}</span>
