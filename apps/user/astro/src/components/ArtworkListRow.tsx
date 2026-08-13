@@ -57,7 +57,7 @@ export function ArtworkListRow({ artwork }: Props) {
         initialSaved={!!artwork.isSaved}
         size={24}
         strokeWidth={1.8}
-        className="flex h-12 w-12 shrink-0 items-center justify-center text-neutral-800 transition-transform active:scale-90"
+        className="flex h-12 w-12 shrink-0 items-center justify-center text-error transition-transform active:scale-90"
       />
     </div>
   );

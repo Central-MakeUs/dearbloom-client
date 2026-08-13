@@ -56,7 +56,7 @@ export function SmartInquiryCta({
               artworkId={artworkId}
               initialSaved={initialSaved}
               size={24}
-              className={bottomIconButtonClass}
+              className={cn(bottomIconButtonClass, 'text-error')}
             />
           }
         >

@@ -132,7 +132,7 @@ export function ArtworkCard({
           strokeWidth={1.5}
           endpoint={saveEndpoint}
           onChange={onSavedChange}
-          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-neutral-0 transition-transform active:scale-90"
+          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center text-error transition-transform active:scale-90"
         />
       </div>
       <a href={detailHref} className="block">

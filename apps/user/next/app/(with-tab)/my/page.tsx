@@ -4,6 +4,7 @@ import { MyMenu } from './MyMenu';
 import { ProfileUpdatedToast } from './ProfileUpdatedToast';
 import { Header } from '@dearbloom/ui';
 import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
+import { LoginSheet } from '../../(auth)/LoginSheet';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,14 +17,13 @@ export default async function MyPage({
   const token = cookieStore.get('accessToken')?.value;
   const { updated } = await searchParams;
 
+  // 탭을 누른 시점에 로그인 필요가 확정이라, 안내만 남기고 로그인 시트를 바로 올린다(QA).
   const login = (message: string) => (
     <div className="mx-auto max-w-md">
       <Header showBack={false} title="마이페이지" />
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <p className="text-body-5 text-neutral-500">{message}</p>
-        <a href="/app/login" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
-          로그인
-        </a>
+        <LoginSheet returnUrl="/app/my" />
       </div>
     </div>
   );
