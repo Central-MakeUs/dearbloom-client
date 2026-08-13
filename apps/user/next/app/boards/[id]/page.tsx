@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   RegionTag,
+  SkeletonImage,
   cn,
 } from '@dearbloom/ui';
 import type {
@@ -275,11 +276,11 @@ export default function BoardDetailPage() {
               className="block h-full w-full"
             >
               {artwork.thumbnailUrl ? (
-                <img
+                <SkeletonImage
                   src={artwork.thumbnailUrl}
                   alt={artwork.title}
                   loading="lazy"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full"
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-primary-100 to-primary-300" />

@@ -1,4 +1,4 @@
-import { cn } from '@dearbloom/ui';
+import { cn, SkeletonImage } from '@dearbloom/ui';
 
 interface CollageArtwork {
   thumbnailUrl?: string | null;
@@ -8,12 +8,10 @@ interface CollageArtwork {
 export function BoardCollage({ artworks, className }: { artworks: CollageArtwork[]; className?: string }) {
   const cells = artworks.slice(0, 4);
 
-  const tile = (a: CollageArtwork | undefined, i: number) =>
-    a?.thumbnailUrl ? (
-      <img key={i} src={a.thumbnailUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
-    ) : (
-      <div key={i} className="h-full w-full bg-neutral-200" />
-    );
+  // 빈 칸(4개를 못 채운 보드)은 src 가 없어 회색 타일로만 남는다.
+  const tile = (a: CollageArtwork | undefined, i: number) => (
+    <SkeletonImage key={i} src={a?.thumbnailUrl ?? undefined} alt="" loading="lazy" className="h-full w-full" />
+  );
 
   return (
     <div className={cn('grid aspect-square grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-lg bg-neutral-0', className)}>

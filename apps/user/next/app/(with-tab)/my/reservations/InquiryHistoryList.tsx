@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { cn } from '@dearbloom/ui';
+import { cn, SkeletonImage } from '@dearbloom/ui';
 import {
   ampmTimeLabel,
   compactDateLabel,
@@ -128,10 +128,10 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
                 <ChevronRight size={20} strokeWidth={2} className="ml-auto text-neutral-400" aria-hidden />
               </div>
               <div className="mt-3 flex gap-3">
-                <img
+                <SkeletonImage
                   src={it.artworkImageUrl}
                   alt=""
-                  className="h-[76px] w-[76px] shrink-0 rounded-md object-cover"
+                  className="h-[76px] w-[76px] shrink-0 rounded-md"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body-3 font-semibold text-neutral-950">{it.artworkName}</p>

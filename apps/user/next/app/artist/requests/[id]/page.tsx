@@ -7,7 +7,7 @@ import {
   shortDateLabel,
   type InquiryStatus,
 } from '@dearbloom/shared';
-import { Badge, Card, CardContent, Header as TitleHeader, cn, type BadgeProps } from '@dearbloom/ui';
+import { Badge, Card, CardContent, Header as TitleHeader, SkeletonImage, cn, type BadgeProps } from '@dearbloom/ui';
 import { durationLabel } from '@/src/lib/inquiry';
 import { InquiryActions } from './InquiryActions';
 import { ACTION_BAR_OFFSET, hasInquiryActions } from './actionBar';
@@ -79,7 +79,7 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
     <div className="px-4 py-3">
       <Card className="overflow-hidden">
         {/* 작품 이미지는 외부 URL 이라 next/image 의 remotePatterns 설정이 없다 — 앱 공통 규약대로 img 사용. */}
-        <img src={d.artworkImageUrl} alt={d.artworkName} className="aspect-[4/3] w-full object-cover" />
+        <SkeletonImage src={d.artworkImageUrl} alt={d.artworkName} className="aspect-[4/3] w-full" />
         <CardContent>
           <h2 className="text-head-3 text-neutral-950">{d.artworkName}</h2>
           <dl className="mt-2 border-t border-neutral-200 pt-2">

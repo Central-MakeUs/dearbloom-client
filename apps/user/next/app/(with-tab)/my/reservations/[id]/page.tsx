@@ -7,7 +7,7 @@ import {
   type InquiryStatus,
 } from '@dearbloom/shared';
 import { CancelInquiry } from './CancelInquiry';
-import { Header as TitleHeader } from '@dearbloom/ui';
+import { Header as TitleHeader, SkeletonImage } from '@dearbloom/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +57,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
 
   const summary = (
     <div className="flex gap-3">
-      <img src={d.artworkImageUrl} alt="" className="h-[100px] w-[76px] shrink-0 rounded-md object-cover" />
+      <SkeletonImage src={d.artworkImageUrl} alt="" className="h-[100px] w-[76px] shrink-0 rounded-md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className={`inline-block rounded-md px-2 py-1 text-caption-1 ${statusBadgeClass(d.status)}`}>

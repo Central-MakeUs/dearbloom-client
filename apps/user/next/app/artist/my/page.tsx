@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
-import { Button, Header } from '@dearbloom/ui';
+import { Button, Header, SkeletonImage } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
 import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
@@ -47,7 +47,7 @@ export default async function ArtistMyPage() {
     <section className="flex items-center justify-between px-4 pt-5">
       <div className="flex min-w-0 items-center gap-3">
         {artist.imageUrl ? (
-          <img src={artist.imageUrl} alt="" className="size-12 shrink-0 rounded-full object-cover" />
+          <SkeletonImage src={artist.imageUrl} alt="" className="size-12 shrink-0 rounded-full" />
         ) : (
           <DefaultAvatar />
         )}

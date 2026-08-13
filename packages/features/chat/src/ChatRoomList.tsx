@@ -1,3 +1,4 @@
+import { SkeletonImage } from '@dearbloom/ui';
 import { chatTimestampLabel, type ChatRoomSummary } from '@dearbloom/shared';
 
 interface ChatRoomListProps {
@@ -22,18 +23,12 @@ export function ChatRoomList({ rooms, roomHref }: ChatRoomListProps) {
       {rooms.map((room) => (
         <li key={room.roomId}>
           <a href={roomHref(room.roomId)} className="flex items-center gap-3">
-            {room.peerImageUrl ? (
-              <img
-                src={room.peerImageUrl}
-                alt=""
-                className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200 object-cover"
-              />
-            ) : (
-              <span
-                className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200 bg-neutral-200"
-                aria-hidden
-              />
-            )}
+            {/* 프로필이 없으면 SkeletonImage 가 회색 원만 남긴다 — 없는 이미지를 깜빡이게 두지 않는다. */}
+            <SkeletonImage
+              src={room.peerImageUrl ?? undefined}
+              alt=""
+              className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200"
+            />
 
             <div className="min-w-0 flex-1">
               {/* Head2_sb_16 — 크기·굵기는 head-3 와 같고 자간만 -1% 다르다. */}
