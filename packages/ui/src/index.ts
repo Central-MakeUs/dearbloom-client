@@ -33,6 +33,7 @@ export * from './components/SearchResultItem';
 export * from './components/TabButton';
 export * from './components/BottomTab';
 export * from './components/ScrollFade';
+export * from './components/Spinner';
 export * from './components/SaveHeart';
 export * from './components/LoginRequiredDialog';
 export * from './components/ArtworkCard';

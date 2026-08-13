@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArtworkCard } from '@dearbloom/ui';
+import { ArtworkCard, Spinner } from '@dearbloom/ui';
 import { ArtworkListRow } from './ArtworkListRow';
 import { optimizedImageUrl } from '@/lib/imageUrl';
 import {
@@ -112,8 +112,8 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
       </button>
     </div>
   ) : hasNext ? (
-    <div ref={sentinelRef} className="pb-8 text-center text-body-6 text-neutral-500">
-      불러오는 중…
+    <div ref={sentinelRef} className="flex justify-center pb-8">
+      <Spinner label="작품을 더 불러오는 중" />
     </div>
   ) : null;
 
