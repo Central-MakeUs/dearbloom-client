@@ -55,8 +55,19 @@ export function FilterSettingsView({ initial }: Props) {
   // 스크롤에 따라 탭이 따라오게 — 화면 상단에 걸린 섹션을 활성으로 봅니다.
   // 섹션은 마운트 시점에 셋 다 그려져 있고 사라지지 않으므로 id 로 찾아 한 번만 붙입니다.
   useEffect(() => {
+    /**
+     * 마지막 섹션(인원)은 짧아서 판정선까지 올라오지 못해 관찰만으로는 영영 활성이 되지 않습니다(QA).
+     * 더 스크롤할 곳이 없으면 마지막 섹션을 보고 있는 것으로 봅니다.
+     */
+    const atBottom = () => window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    const lastTab = TABS[TABS.length - 1]!.key;
+
     const observer = new IntersectionObserver(
       (entries) => {
+        if (atBottom()) {
+          setActiveTab(lastTab);
+          return;
+        }
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length > 0) setActiveTab(visible[0]!.target.id as TabKey);
       },
@@ -67,7 +78,17 @@ export function FilterSettingsView({ initial }: Props) {
       const el = document.getElementById(tab.key);
       if (el) observer.observe(el);
     }
-    return () => observer.disconnect();
+
+    // 바닥 근처에서는 교차 상태가 더 바뀌지 않아 관찰 콜백이 안 돌 수 있으므로 스크롤로도 확인합니다.
+    const onScroll = () => {
+      if (atBottom()) setActiveTab(lastTab);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   /**
@@ -244,7 +265,8 @@ export function FilterSettingsView({ initial }: Props) {
       {/*
         하단 여백은 고정 CTA(68px)에 마지막 칩이 가리지 않을 만큼만 둔다.
         마지막 섹션을 화면 높이만큼 늘리면 "인원" 탭이 탭바 바로 아래까지 올라오지만,
-        그 대가로 스크롤 끝에 빈 화면 한 판이 남는다 — 빈 화면 쪽이 더 어색하다.
+        그 대가로 스크롤 끝에 빈 화면 한 판이 남는다 — 대신 스크롤이 바닥에 닿으면
+        마지막 탭을 활성으로 잡는다(위 useEffect).
       */}
       <div className="flex flex-col gap-[60px] pb-24 pt-5">
         {dateSection}
