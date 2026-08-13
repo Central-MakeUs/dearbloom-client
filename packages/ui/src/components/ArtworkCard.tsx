@@ -3,6 +3,7 @@
 import { cn } from '../lib/cn';
 import { SaveHeart } from './SaveHeart';
 import { RegionTag } from './ui/region-tag';
+import { SkeletonImage } from './ui/skeleton';
 
 export interface ArtworkCardProps {
   artworkId: number;
@@ -55,11 +56,11 @@ export function ArtworkCard({
   const detailHref = href ?? `/snaps/${artworkId}`;
 
   const image = (
-    <img
+    <SkeletonImage
       src={thumbnailUrl ?? undefined}
       alt={title}
       loading="lazy"
-      className="h-full w-full object-cover"
+      className="aspect-[4/5] rounded-lg"
     />
   );
 
@@ -108,7 +109,7 @@ export function ArtworkCard({
 
     return (
       <button type="button" onClick={onSelect} aria-pressed={selected} className={cn('flex flex-col text-left', className)}>
-        <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <div className="relative mb-2">
           {image}
           {checkCircle}
         </div>
@@ -121,7 +122,7 @@ export function ArtworkCard({
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="relative mb-2">
-        <a href={detailHref} className="block aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <a href={detailHref} className="block">
           {image}
         </a>
         <SaveHeart
