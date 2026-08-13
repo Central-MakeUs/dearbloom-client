@@ -57,7 +57,8 @@ const CHIP_CLASS =
 ---
 
 <AppShellLayout title="작품 탐색" navVariant="light">
-  <AppHeader logoHref="/snaps" searchHref="/search" />
+  {/* 검색은 아직 안 쓰므로 헤더 우측 아이콘을 뺀다. 되살릴 땐 searchHref="/search" 를 다시 준다. */}
+  <AppHeader logoHref="/snaps" />
 
   <div class="mx-auto max-w-md">
     {/*

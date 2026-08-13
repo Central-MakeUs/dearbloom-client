@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { MoreHorizontal } from 'lucide-react';
+// ⋯ 메뉴를 되살릴 때 함께 푼다.
+// import { MoreHorizontal } from 'lucide-react';
 import { Header } from '@dearbloom/ui';
 import { isReadBy, type ChatMessage, type ChatReadEvent, type ChatRole } from '@dearbloom/shared';
 import { ChatComposer } from './ChatComposer';
-import { ChatRoomMenu } from './ChatRoomMenu';
-import { ChatToast } from './ChatToast';
+// import { ChatRoomMenu } from './ChatRoomMenu';
+// import { ChatToast } from './ChatToast';
 import { MessageRow } from './MessageRow';
 import { useLiveMessages } from './useLiveMessages';
 
@@ -28,8 +29,8 @@ interface ChatRoomViewProps {
 /**
  * 채팅방 — 히스토리(위로 무한 스크롤) + 실시간 수신 + 텍스트·사진 전송.
  *
- * ⋯ 메뉴(알림 끄기/신고하기/나가기)는 Figma 대로 렌더하되 백엔드 API 가 없어
- * 선택하면 '준비 중' 토스트로 수렴한다.
+ * ⋯ 메뉴(알림 끄기/신고하기/나가기) 바텀시트는 아직 안 쓰기로 해서 주석으로 남겨뒀다.
+ * 되살릴 땐 이 파일의 주석 블록(임포트·state·menuButton·시트/토스트)을 함께 푼다.
  */
 export function ChatRoomView({
   roomId,
@@ -43,8 +44,8 @@ export function ChatRoomView({
   const [hasMore, setHasMore] = useState(initialMessages.length >= PAGE_SIZE);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  // const [menuOpen, setMenuOpen] = useState(false);
+  // const [toast, setToast] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   /** 과거 페이지를 붙이기 직전의 스크롤 높이 — 붙인 뒤 보던 위치를 유지하는 데 쓴다. */
@@ -52,7 +53,7 @@ export function ChatRoomView({
   const roomPath = `${apiBase}/chat/rooms/${roomId}`;
 
   /** 토스트 자동 닫기 타이머가 리렌더마다 다시 걸리지 않도록 참조를 고정한다. */
-  const dismissToast = useCallback(() => setToast(null), []);
+  // const dismissToast = useCallback(() => setToast(null), []);
 
   /** 읽음 처리 — 방에 들어올 때와, 방을 보고 있는 중에 상대 메시지를 받을 때. */
   const markRead = useCallback(() => {
@@ -199,33 +200,37 @@ export function ChatRoomView({
     </div>
   );
 
-  const menuButton = (
-    <button
-      type="button"
-      aria-label="채팅방 메뉴"
-      onClick={() => setMenuOpen(true)}
-      className="flex h-11 w-11 items-center justify-center text-neutral-800"
-    >
-      <MoreHorizontal size={24} strokeWidth={2} aria-hidden />
-    </button>
-  );
+  // ⋯ 메뉴 버튼 — 시트를 다시 켤 때 함께 되살린다.
+  // const menuButton = (
+  //   <button
+  //     type="button"
+  //     aria-label="채팅방 메뉴"
+  //     onClick={() => setMenuOpen(true)}
+  //     className="flex h-11 w-11 items-center justify-center text-neutral-800"
+  //   >
+  //     <MoreHorizontal size={24} strokeWidth={2} aria-hidden />
+  //   </button>
+  // );
 
   // 채팅방은 (with-tab) 레이아웃 밖이라 배경을 직접 준다.
   // 이게 없으면 페이지가 흰 바탕이 되어 수신 말풍선(neutral-0)이 배경에 묻힌다.
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-      <Header title={peerName} onBack={() => (window.location.href = backHref)} right={menuButton} />
+      <Header title={peerName} onBack={() => (window.location.href = backHref)} />
       {list}
       <ChatComposer onSendText={sendText} onSendImage={sendImage} />
-      <ChatRoomMenu
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
-        onSelect={() => {
-          setMenuOpen(false);
-          setToast('아직 준비 중인 기능이에요.');
-        }}
-      />
-      <ChatToast message={toast} onDismiss={dismissToast} />
+      {/*
+        ⋯ 메뉴 바텀시트 + '준비 중' 토스트 — 아직 안 쓰므로 숨긴다.
+        <ChatRoomMenu
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          onSelect={() => {
+            setMenuOpen(false);
+            setToast('아직 준비 중인 기능이에요.');
+          }}
+        />
+        <ChatToast message={toast} onDismiss={dismissToast} />
+      */}
     </div>
   );
 }
