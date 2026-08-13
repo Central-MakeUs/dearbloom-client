@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Check, ChevronDown, X } from 'lucide-react';
-import { BottomButton, BottomSheet, cn } from '@dearbloom/ui';
+import {
+  BottomButton,
+  BottomButtonBar,
+  BottomSheet,
+  SaveHeart,
+  bottomIconButtonClass,
+  cn,
+} from '@dearbloom/ui';
 
 interface PackageOption {
   artworkPackageId: number;
@@ -9,6 +16,9 @@ interface PackageOption {
 
 interface SmartInquiryCtaProps {
   packages: PackageOption[];
+  /** 저장(하트) — 헤더 버튼이 많아져 CTA 좌측으로 내려왔다. */
+  artworkId: number;
+  initialSaved?: boolean;
   /** 스마트 문의 플로우 진입 경로. 선택한 패키지 ID 를 쿼리로 붙인다. */
   inquiryHref?: string;
 }
@@ -17,7 +27,12 @@ interface SmartInquiryCtaProps {
  * 작품 상세 하단 sticky CTA — '스마트 문의하기'(island).
  * 패키지를 하나 고른 뒤 next 앱의 문의 플로우로 넘긴다. 로그인 여부는 이동한 페이지에서 판정한다.
  */
-export function SmartInquiryCta({ packages, inquiryHref = '/app/inquiries/new' }: SmartInquiryCtaProps) {
+export function SmartInquiryCta({
+  packages,
+  artworkId,
+  initialSaved = false,
+  inquiryHref = '/app/inquiries/new',
+}: SmartInquiryCtaProps) {
   const [open, setOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [packageId, setPackageId] = useState('');
@@ -30,12 +45,25 @@ export function SmartInquiryCta({ packages, inquiryHref = '/app/inquiries/new' }
     window.location.href = `${inquiryHref}?artworkPackageId=${packageId}`;
   }
 
+  // 높이 = border 1 + padding 16 + 버튼 52 + padding 16 = 85(+safe-area).
+  // ScrollFade offset(85) 이 이 값에 맞물려 있으니 함께 바꿔야 한다. → [slug].astro
   const trigger = (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-md">
-        <BottomButton onClick={() => setOpen(true)} disabled={!hasPackages}>
-          스마트 문의하기
-        </BottomButton>
+        <BottomButtonBar
+          leading={
+            <SaveHeart
+              artworkId={artworkId}
+              initialSaved={initialSaved}
+              size={24}
+              className={bottomIconButtonClass}
+            />
+          }
+        >
+          <BottomButton onClick={() => setOpen(true)} disabled={!hasPackages}>
+            스마트 문의하기
+          </BottomButton>
+        </BottomButtonBar>
       </div>
     </div>
   );

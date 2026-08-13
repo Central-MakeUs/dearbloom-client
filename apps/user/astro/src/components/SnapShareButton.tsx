@@ -84,7 +84,7 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
     }, '공유 기능을 실행하지 못했어요');
 
   const toast = feedback ? (
-    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[80] flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(97px+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4">
       <div
         role="status"
         className="flex items-center gap-1 rounded-full bg-neutral-800 px-4 py-2 text-body-6 text-neutral-0 shadow-elevation"

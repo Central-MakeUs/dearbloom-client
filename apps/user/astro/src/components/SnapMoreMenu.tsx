@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreVertical } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import {
   BottomButton,
   BottomSheet,
@@ -114,7 +114,7 @@ export function SnapMoreMenu({
       aria-label="더보기"
       className="flex h-11 w-11 items-center justify-center text-neutral-950"
     >
-      <MoreVertical size={22} strokeWidth={1.8} aria-hidden />
+      <MoreHorizontal size={22} strokeWidth={1.8} aria-hidden />
     </button>
   );
 

@@ -60,6 +60,16 @@ export function BottomButtonBar({ leading, className, children }: BottomButtonBa
   );
 }
 
+/**
+ * btn_bottom_share 정사각 아이콘 버튼 스타일.
+ * 공유 외에 저장(하트) 등 다른 아이콘을 같은 자리에 놓을 때 재사용하세요.
+ */
+export const bottomIconButtonClass =
+  'flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md ' +
+  'border-[1.5px] border-neutral-400 bg-neutral-100 text-neutral-800 transition-colors ' +
+  'hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ' +
+  'disabled:opacity-40 disabled:pointer-events-none';
+
 type ShareButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 /**
@@ -89,13 +99,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(funct
       type="button"
       aria-label={ariaLabel}
       {...rest}
-      className={cn(
-        'flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md',
-        'border-[1.5px] border-neutral-400 bg-neutral-100 text-neutral-800 transition-colors',
-        'hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
-        'disabled:opacity-40 disabled:pointer-events-none',
-        className,
-      )}
+      className={cn(bottomIconButtonClass, className)}
     >
       {icon}
     </button>
