@@ -8,6 +8,9 @@ interface Props {
 
 const formatPrice = (won: number) => `${Math.round(won / 10000).toLocaleString()}만원`;
 
+/** 지역 칩은 줄지 않는(shrink-0) 요소라 개수만큼 작가명 폭을 깎는다. 앞 2개만 두고 나머지는 `+N` 으로 접는다. */
+const MAX_REGION_TAGS = 2;
+
 /**
  * 리스트뷰 한 줄 — Figma 1060:16189 실측.
  * 사진 120x150 을 가로로 죽 늘어놓고(스크롤), 그 아래 `제목 │ 가격` / `작가명 + 지역` 을 붙인다.
@@ -17,6 +20,10 @@ export function ArtworkListRow({ artwork }: Props) {
   const href = `/snaps/${artwork.artworkId}`;
   // photoList 가 아직 없는 응답(구버전 백엔드)이면 대표 이미지 한 장으로라도 채운다.
   const photos = artwork.photoList?.length ? artwork.photoList : [artwork.thumbnailUrl];
+
+  const regions = artwork.artistRegionList ?? [];
+  const shownRegions = regions.slice(0, MAX_REGION_TAGS);
+  const hiddenRegionCount = regions.length - shownRegions.length;
 
   const photoStrip = (
     // 가로 스크롤이 화면 끝까지 이어지도록 좌우 패딩을 음수 마진으로 되돌린 뒤 안쪽에서 다시 준다.
@@ -44,11 +51,14 @@ export function ArtworkListRow({ artwork }: Props) {
         </span>
         <span className="flex items-center gap-2">
           <span className="truncate text-body-6 text-neutral-900">{artwork.artistNickname}</span>
-          {!!artwork.artistRegionList?.length && (
+          {shownRegions.length > 0 && (
             <span className="flex shrink-0 items-center gap-1">
-              {artwork.artistRegionList.map((r) => (
+              {shownRegions.map((r) => (
                 <RegionTag key={r}>{artistRegionLabel(r)}</RegionTag>
               ))}
+              {hiddenRegionCount > 0 && (
+                <span className="text-body-5 text-neutral-600">+{hiddenRegionCount}</span>
+              )}
             </span>
           )}
         </span>
