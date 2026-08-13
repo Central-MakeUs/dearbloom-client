@@ -1,29 +1,18 @@
 'use client';
 
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
-import {
-  Field,
-  Input,
-  Button,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@dearbloom/ui';
-import { customerNameSchema, ARTIST_REGION_OPTIONS, type ArtistRegionCode } from '@dearbloom/shared';
+import { BottomButton, Spinner, TextField } from '@dearbloom/ui';
+import { customerNameSchema, CUSTOMER_NAME_MAX_LENGTH } from '@dearbloom/shared';
 
-const schema = z.object({ name: customerNameSchema, region: z.string() });
+const schema = z.object({ name: customerNameSchema });
 type FormValues = z.infer<typeof schema>;
 
-export function EditForm({ initialName, initialRegion }: { initialName: string; initialRegion: string }) {
+export function EditForm({ initialName }: { initialName: string }) {
   const {
     register,
-    control,
     handleSubmit,
     watch,
     setValue,
@@ -31,102 +20,59 @@ export function EditForm({ initialName, initialRegion }: { initialName: string; 
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: 'onChange',
-    defaultValues: { name: initialName, region: initialRegion },
+    defaultValues: { name: initialName },
   });
   const name = watch('name');
 
   const onValid = async (values: FormValues) => {
-    // region은 항상 명시적으로 전송한다. 값이 없으면 null을 보내 서버에서 "미설정"으로 초기화.
-    // (백엔드 규약상 필드를 생략하면 미변경이므로, 지역 해제를 반영하려면 null이 필요하다.)
-    const body: { name: string; region: ArtistRegionCode | null } = {
-      name: values.name,
-      region: values.region ? (values.region as ArtistRegionCode) : null,
-    };
+    // 이름만 전송한다 — 백엔드 규약상 생략한 필드는 미변경이라 기존 지역 값은 그대로 유지된다.
     const res = await fetch('/app/api/customer/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ name: values.name }),
     });
-    if (res.ok) {
-      toast.success('저장되었습니다.');
-      window.location.href = '/app/my';
-    } else {
-      const b = (await res.json().catch(() => ({}))) as { error?: string };
-      toast.error(b.error || '저장에 실패했어요.');
+
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      toast.error(body.error || '저장에 실패했어요.');
+      return;
     }
+
+    // 완료 토스트는 이동한 마이페이지에서 띄운다(이 화면에서 띄우면 화면 전환에 묻힌다).
+    window.location.href = '/app/my?updated=1';
   };
+
+  const field = (
+    <div className="px-4 pt-5">
+      <TextField
+        id="username"
+        label="사용자 이름"
+        {...register('name')}
+        value={name}
+        maxLength={CUSTOMER_NAME_MAX_LENGTH}
+        placeholder="사용자 이름을 입력해주세요"
+        aria-invalid={!!errors.name}
+        error={!!errors.name}
+        helper={errors.name?.message}
+        counter={`${name.length}/${CUSTOMER_NAME_MAX_LENGTH}`}
+        onClear={() => setValue('name', '', { shouldValidate: true })}
+      />
+    </div>
+  );
+
+  const cta = (
+    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
+      <BottomButton color="black" type="submit" disabled={!isValid || isSubmitting}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
+        완료
+      </BottomButton>
+    </div>
+  );
 
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-1 flex-col" noValidate>
-      <div className="px-4 pt-4">
-        <Field
-          label="사용자 이름"
-          htmlFor="username"
-          error={errors.name?.message}
-          helper="이름은 2~12글자 한글 또는 영문만 허용하며, 공백이나 숫자는 입력할 수 없습니다"
-        >
-          <div className="relative">
-            <Input
-              id="username"
-              {...register('name')}
-              aria-invalid={!!errors.name}
-              placeholder="사용자 이름을 입력해주세요"
-              className="pr-10"
-            />
-            {name && (
-              <button
-                type="button"
-                aria-label="지우기"
-                onClick={() => setValue('name', '', { shouldValidate: true })}
-                className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-300 text-neutral-0"
-              >
-                <X className="size-3" />
-              </button>
-            )}
-          </div>
-        </Field>
-      </div>
-
-      <div className="px-4 pt-5">
-        <Field label="지역" optional htmlFor="region">
-          <Controller
-            control={control}
-            name="region"
-            render={({ field }) => (
-              <div className="relative">
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="region" className={field.value ? 'pr-16' : undefined}>
-                    <SelectValue placeholder="지역 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ARTIST_REGION_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {field.value && (
-                  <button
-                    type="button"
-                    aria-label="지역 선택 안 함"
-                    onClick={() => field.onChange('')}
-                    className="absolute right-8 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-300 text-neutral-0"
-                  >
-                    <X className="size-3" />
-                  </button>
-                )}
-              </div>
-            )}
-          />
-        </Field>
-      </div>
-
-      <div className="mt-auto px-4 py-2">
-        <Button type="submit" size="lg" disabled={!isValid || isSubmitting} className="w-full">
-          완료
-        </Button>
-      </div>
+      {field}
+      {cta}
     </form>
   );
 }

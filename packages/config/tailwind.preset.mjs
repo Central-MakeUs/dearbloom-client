@@ -40,6 +40,13 @@ const semantic = {
   success: '#0CC76C',
 };
 
+const profile = {
+  green: primary[200],
+  grey: '#C9CFCF',
+  brown: '#D2CFCF',
+  blue: '#C9D1DD',
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [],
@@ -48,17 +55,25 @@ export default {
       colors: {
         primary,
         neutral,
+        profile,
         ...semantic,
       },
       fontFamily: {
-        sans: ['Pretendard', 'Pretendard Variable', 'system-ui', 'Apple SD Gothic Neo', 'sans-serif'],
+        sans: [
+          'Pretendard',
+          'Pretendard Variable',
+          'system-ui',
+          'Apple SD Gothic Neo',
+          'sans-serif',
+        ],
       },
       // Figma 최종 폰트 시스템(Pretendard). 볼드 2종(head-1, body-3) 추가 + 자간 조정.
       fontSize: {
         // Head — 140% line-height
         'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '700' }], // Head1_b_20
         'head-2': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '600' }], // Head2_sb_20
-        'head-3': ['16px', { lineHeight: '1.5em', letterSpacing: '-0.01em', fontWeight: '600' }], // Head3_sb_16
+        // Head3_sb_16 — Figma 에 자간 값이 없어 0. (Head1/Head2 만 자간을 가진다)
+        'head-3': ['16px', { lineHeight: '1.5em', fontWeight: '600' }],
         // Body — 150%
         'body-1': ['16px', { lineHeight: '1.5em', fontWeight: '500' }], // Body1_m_16
         'body-2': ['16px', { lineHeight: '1.5em', fontWeight: '400' }], // Body2_r_16

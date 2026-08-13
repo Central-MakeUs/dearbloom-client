@@ -60,6 +60,36 @@ export default async function DevLoginPage({
     </div>
   );
 
+  /**
+   * 역할을 가진 계정은 그 역할로 바로 로그인시킨다.
+   * 역할 없이 로그인하면 `/app/role` 로 가는데, 그 화면은 소셜 로그인 provider 가 있어야 동작해서
+   * dev 로그인에서는 막다른 길이 된다.
+   */
+  const loginButtons = (a: DevAccount) => {
+    const roles = [
+      a.hasArtist ? { value: 'ARTIST', label: '작가로 로그인' } : null,
+      a.hasCustomer ? { value: 'CUSTOMER', label: '고객으로 로그인' } : null,
+    ].filter((r) => r !== null);
+    const targets = roles.length > 0 ? roles : [{ value: '', label: '로그인' }];
+
+    return (
+      <div className="flex shrink-0 flex-col gap-1">
+        {targets.map((t) => (
+          <form key={t.label} action="/app/api/dev/login" method="post">
+            <input type="hidden" name="memberId" value={a.memberId} />
+            {t.value && <input type="hidden" name="role" value={t.value} />}
+            <button
+              type="submit"
+              className="w-full rounded-md bg-primary px-4 py-2 text-caption-1 font-medium text-neutral-0"
+            >
+              {t.label}
+            </button>
+          </form>
+        ))}
+      </div>
+    );
+  };
+
   const list = (
     <ul className="flex flex-col gap-2">
       {accounts.map((a) => (
@@ -80,15 +110,7 @@ export default async function DevLoginPage({
               {a.email} · id {a.memberId}
             </div>
           </div>
-          <form action="/app/api/dev/login" method="post" className="shrink-0">
-            <input type="hidden" name="memberId" value={a.memberId} />
-            <button
-              type="submit"
-              className="rounded-md bg-primary px-4 py-2 text-caption-1 font-medium text-neutral-0"
-            >
-              로그인
-            </button>
-          </form>
+          {loginButtons(a)}
         </li>
       ))}
     </ul>

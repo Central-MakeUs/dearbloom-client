@@ -28,12 +28,16 @@ export interface ArtworkPhotoInput {
   universityId: number | null;
 }
 
-/** 작품 등록 시 넘기는 촬영 패키지 1건 */
+/** 작품 등록·패키지 교체 시 넘기는 촬영 패키지 1건. 필수는 packageName·price 뿐, 나머지는 미정이면 null. */
 export interface ArtworkPackageInput {
   packageName: string;
   price: number;
-  durationMinutes: number;
-  finalPhotoCount: number;
+  /** 촬영 시간(분). 미정이면 null. */
+  durationMinutes: number | null;
+  /** 보정본 수. 미정이면 null. */
+  finalPhotoCount: number | null;
+  /** 추가 정보(자유 텍스트). 없으면 null. */
+  extraInfo: string | null;
 }
 
 export interface CreateArtworkPayload {
@@ -128,6 +132,21 @@ export function updateArtwork(
 
 export function deleteArtwork(artworkId: number | string, opts: RequestOptions): Promise<void> {
   return apiDelete<void>(`/api/artworks/${artworkId}`, undefined, opts);
+}
+
+/**
+ * 작품 패키지 전체 교체. PUT /api/artworks/{id}/packages
+ *
+ * 부분 수정이 아니라 **전체 교체**입니다. 유지할 패키지도 함께 보내야 하며, 1개 이상 필수입니다.
+ * 리스트 화면의 최저가는 이 목록 기준으로 자동 갱신됩니다.
+ * 이미 들어온 문의·예약은 문의 시점의 패키지 스냅샷을 쓰므로 영향을 받지 않습니다.
+ */
+export function updateArtworkPackages(
+  artworkId: number | string,
+  packageList: ArtworkPackageInput[],
+  opts: RequestOptions,
+): Promise<void> {
+  return apiPut<void>(`/api/artworks/${artworkId}/packages`, { packageList }, opts);
 }
 
 /** 작품 사진 전체 교체 */

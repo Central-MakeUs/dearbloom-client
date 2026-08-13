@@ -2,67 +2,143 @@
 export const prerender = false; // 서버 렌더 (작품 목록을 요청 시 API 로 가져옴)
 
 import AppShellLayout from '@/layouts/AppShellLayout.astro';
-import { ArtworkCard } from '@dearbloom/ui';
-import { getArtworks, fetchPublicWithAuthFallback, artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { AppHeader } from '@dearbloom/ui';
+import { ArtworkFeed } from '@/components/ArtworkFeed';
+import { ArtworkSortSheet } from '@/components/ArtworkSortSheet';
+import ViewToggleIcon from '@/components/ViewToggleIcon.astro';
+import {
+  getArtworkPage,
+  fetchPublicWithAuthFallback,
+  ARTWORK_PAGE_SIZE,
+  type ArtworkPage,
+} from '@dearbloom/shared';
+import {
+  filterChipLabels,
+  hasActiveFilter,
+  parseFilterParams,
+  parseView,
+  toQueryString,
+  toSearchParams,
+} from '@/lib/artworkFilter';
 
-const token = Astro.cookies.has('onboardingPending')
-  ? undefined
-  : Astro.cookies.get('accessToken')?.value;
-// 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지). 비로그인은 캐시 가능(SEO).
-if (token) Astro.response.headers.set('Cache-Control', 'private, no-store');
+const token = Astro.cookies.get('accessToken')?.value;
+if (token) {
+  // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지).
+  Astro.response.headers.set('Cache-Control', 'private, no-store');
+} else {
+  // 익명 렌더에는 개인 상태가 없다(isSaved 는 null) → CDN 에 짧게 올려 SEO·재방문 트래픽을 함수 없이 받는다.
+  // Vary: Cookie 로 accessToken 을 든 요청이 이 익명 응답을 받지 않게 한다.
+  Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+  Astro.response.headers.set('Vary', 'Cookie');
+}
 
-let artworks: ArtworkListItem[] = [];
+const filter = parseFilterParams(Astro.url);
+const view = parseView(Astro.url);
+
+// 첫 페이지만 SSR 로 그린다(SEO·첫 렌더). 이어지는 페이지는 ArtworkFeed 가 nextCursor 로 받아온다.
+let page: ArtworkPage = { artworkList: [], totalCount: 0, nextCursor: null, hasNext: false };
 let loadFailed = false;
 try {
   // 만료 토큰(401)이면 익명으로 재시도 → public 목록은 항상 노출(만료 쿠키 하나로 에러 방지).
-  const { data, tokenExpired } = await fetchPublicWithAuthFallback((o) => getArtworks(o), token);
-  artworks = data;
+  const { data, tokenExpired } = await fetchPublicWithAuthFallback(
+    (o) => getArtworkPage({ ...filter, size: ARTWORK_PAGE_SIZE.DEFAULT }, o),
+    token,
+  );
+  page = data;
   if (tokenExpired) Astro.cookies.delete('accessToken', { path: '/' });
 } catch (e) {
   // SSR 실패 원인은 서버 로그(Vercel Runtime Logs)에서 확인.
-  console.error('[snaps] getArtworks 실패', e);
+  console.error('[snaps] getArtworkPage 실패', e);
   loadFailed = true;
 }
+
+const chips = filterChipLabels(filter);
+const hasFilter = hasActiveFilter(filter);
+const query = toQueryString(filter); // ArtworkFeed 가 다음 페이지 요청에 싣는다(view 는 조회 조건이 아니라 제외)
+const filterHref = `/snaps/filter${toQueryString(filter, view)}`;
+// 정렬 시트는 정렬만 갈아끼우므로, 정렬을 뺀 나머지(보기 방식 포함)를 넘긴다.
+const filterOnlyQuery = toSearchParams({ ...filter, sort: undefined }, view).toString();
+
+const CHIP_CLASS =
+  'flex h-8 shrink-0 items-center gap-0.5 rounded-[6px] border border-neutral-400 bg-neutral-100 py-1 pl-2 pr-0.5 text-body-5 text-neutral-800';
 ---
 
 <AppShellLayout title="작품 탐색" navVariant="light">
-  <div class="mx-auto max-w-md">
-    {/* 상단 앱바 */}
-    <header class="flex h-12 items-center justify-between px-4">
-      <span class="flex items-center gap-1 text-head-1 font-semibold text-primary">
-        DearBloom
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <circle cx="8.5" cy="8.5" r="3.8" /><circle cx="15.5" cy="8.5" r="3.8" /><circle cx="8.5" cy="15.5" r="3.8" /><circle cx="15.5" cy="15.5" r="3.8" /><path d="M12 12l-1.4 8h2.8z" />
-        </svg>
-      </span>
-    </header>
+  {/* 검색은 아직 안 쓰므로 헤더 우측 아이콘을 뺀다. 되살릴 땐 searchHref="/search" 를 다시 준다. */}
+  <AppHeader logoHref="/snaps" />
 
-    {!loadFailed && artworks.length > 0 && (
-      <div class="px-4 pb-3 pt-3">
-        <span class="text-caption-1 text-neutral-600">전체 {artworks.length}</span>
+  <div class="mx-auto max-w-md">
+    {/*
+      필터 칩바 — Figma 437:7705. 어느 칩을 눌러도 필터 설정으로 가고, 해시로 해당 섹션에 붙는다.
+      세로 위치는 실측(상태바 제외): 헤더 하단 44 → 칩바 52~84 → 정렬행 87~127 → 그리드 129.
+    */}
+    <div class="flex items-center gap-1 overflow-x-auto px-4 pt-2">
+      <a
+        href={filterHref}
+        aria-label="필터 설정"
+        class="flex h-8 w-[34px] shrink-0 items-center justify-center rounded-[6px] border border-neutral-400 bg-neutral-100"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" class="text-neutral-700" aria-hidden="true">
+          <path d="M3 6h11M18 6h3M3 12h3M10 12h11M3 18h11M18 18h3" />
+          <circle cx="16" cy="6" r="2" /><circle cx="8" cy="12" r="2" /><circle cx="16" cy="18" r="2" />
+        </svg>
+      </a>
+
+      {[
+        // 날짜는 첫 섹션이라 해시 없이 들어가면 그대로 맨 위 — 탭바 아래로 어중간하게 내려가지 않는다.
+        { href: filterHref, label: chips.date },
+        { href: `${filterHref}#region`, label: chips.region },
+        { href: `${filterHref}#headCount`, label: chips.headCount },
+      ].map((chip) => (
+        <a href={chip.href} class={CHIP_CLASS}>
+          {chip.label}
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" class="text-neutral-700" aria-hidden="true">
+            <path d="m8 10 4 4 4-4" />
+          </svg>
+        </a>
+      ))}
+    </div>
+
+    {/* 전체 개수 + 정렬 — Figma 1035:11052 / 443:9624. 좌 20 / 우 8 은 시안 실측값. */}
+    {!loadFailed && (
+      <div class="mb-0.5 mt-[3px] flex h-10 items-center justify-between pl-5 pr-2">
+        <span class="text-body-5 text-neutral-600">전체 {page.totalCount}</span>
+        <div class="flex items-center">
+          {/* 정렬은 보조 조작 — 첫 렌더를 막지 않고 유휴 시간에 붙인다. */}
+          <ArtworkSortSheet current={filter.sort ?? 'LATEST'} filterQuery={filterOnlyQuery} client:idle />
+          {/*
+            보기 전환 — Figma icons/40/3Grid. 그리드일 땐 점 3x3, 리스트일 땐 2x2(시안 1060:16189).
+            누르면 바뀔 상태가 아니라 "지금 무엇으로 갈 수 있는지"를 아이콘으로 보여준다.
+          */}
+          <a
+            href={`/snaps${toQueryString(filter, view === 'list' ? 'grid' : 'list')}`}
+            aria-label={view === 'list' ? '격자로 보기' : '리스트로 보기'}
+            class="flex h-10 w-10 items-center justify-center text-neutral-800"
+          >
+            <ViewToggleIcon view={view} />
+          </a>
+        </div>
       </div>
     )}
 
     {/* 작품 피드 */}
     {loadFailed ? (
       <p class="px-4 py-16 text-center text-body-4 text-neutral-500">작품을 불러오지 못했어요. 잠시 후 다시 시도해주세요.</p>
-    ) : artworks.length === 0 ? (
-      <p class="px-4 py-16 text-center text-body-4 text-neutral-500">아직 등록된 작품이 없어요.</p>
-    ) : (
-      <div class="grid grid-cols-2 gap-x-3 gap-y-5 px-4 pb-6">
-        {artworks.map((a) => (
-          <ArtworkCard
-            artworkId={a.artworkId}
-            title={a.title}
-            artistNickname={a.artistNickname}
-            price={a.lowestPrice}
-            thumbnailUrl={a.thumbnailUrl}
-            regions={a.artistRegionList?.map(artistRegionLabel)}
-            initialSaved={!!a.isSaved}
-            client:load
-          />
-        ))}
+    ) : page.artworkList.length === 0 ? (
+      <div class="px-4 py-16 text-center">
+        <p class="text-body-4 text-neutral-500">
+          {hasFilter ? '조건에 맞는 작품이 없어요.' : '아직 등록된 작품이 없어요.'}
+        </p>
+        {hasFilter && (
+          <a href={`/snaps${toQueryString({}, view)}`} class="mt-3 inline-block rounded-md border border-neutral-400 px-4 py-2 text-body-5 text-neutral-800">
+            필터 초기화
+          </a>
+        )}
       </div>
+    ) : (
+      <ArtworkFeed initialPage={page} query={query} view={view} client:load />
     )}
   </div>
 </AppShellLayout>

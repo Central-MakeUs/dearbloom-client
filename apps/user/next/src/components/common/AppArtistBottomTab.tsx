@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import { TabButton } from '@dearbloom/ui';
+import { isArtistTabHidden } from './artistTab';
+import { AppLink } from './AppLink';
 
 /**
  * 작가 전용 하단 탭. IA 도메인(대시보드/신청/작품/채팅/마이) 기준.
@@ -12,24 +14,16 @@ const TABS = [
   { key: 'home', label: '홈', href: '/app/artist/dashboard', match: (p: string) => p.startsWith('/artist/dashboard') || p.startsWith('/artist/schedule'), Icon: HomeIcon },
   { key: 'requests', label: '신청', href: '/app/artist/requests', match: (p: string) => p.startsWith('/artist/requests'), Icon: InboxIcon },
   { key: 'products', label: '작품', href: '/app/artist/products', match: (p: string) => p.startsWith('/artist/products'), Icon: GridIcon },
-  // 준비중(채팅·포인트) — 출시 전 숨김. 백엔드 준비 후 아래 두 탭 주석 해제로 복구.
-  // { key: 'chats', label: '채팅', href: '/app/artist/chats', match: (p: string) => p.startsWith('/artist/chats'), Icon: ChatIcon },
+  { key: 'chats', label: '채팅', href: '/app/artist/chats', match: (p: string) => p.startsWith('/artist/chats'), Icon: ChatIcon },
+  // 준비중(포인트) — 출시 전 숨김. 백엔드 준비 후 아래 탭 주석 해제로 복구.
   // { key: 'points', label: '포인트', href: '/app/artist/points', match: (p: string) => p.startsWith('/artist/points'), Icon: PointIcon },
   { key: 'my', label: '마이', href: '/app/artist/my', match: (p: string) => p.startsWith('/artist/my') || p.startsWith('/artist/profile'), Icon: UserIcon },
 ];
 
-/** 폼/상세 화면에서는 하단탭 숨김(자체 CTA/뒤로가기 사용). */
-function isHidden(p: string): boolean {
-  if (p.includes('/artist/products/new')) return true;
-  if (p.includes('/artist/products/') && p.endsWith('/edit')) return true;
-  if (p.startsWith('/artist/profile')) return true;
-  if (/^\/artist\/chats\/.+/.test(p)) return true;
-  return false;
-}
-
 export function AppArtistBottomTab() {
   const pathname = usePathname() ?? '/';
-  if (isHidden(pathname)) return null;
+  // 폼/상세 화면에서는 숨김(자체 CTA/뒤로가기 사용). 판정은 artistTab.ts 가 단독으로 갖는다.
+  if (isArtistTabHidden(pathname)) return null;
 
   return (
     <nav
@@ -40,6 +34,7 @@ export function AppArtistBottomTab() {
         <TabButton
           key={tab.key}
           href={tab.href}
+          linkComponent={AppLink}
           label={tab.label}
           active={tab.match(pathname)}
           icon={(active) => <tab.Icon active={active} />}
@@ -100,6 +95,8 @@ function ChatIcon({ active }: { active: boolean }) {
   );
 }
 
+// 위의 '포인트' 탭이 주석 해제될 때까지만 미사용 — 아이콘은 그대로 둔다.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PointIcon({ active }: { active: boolean }) {
   return (
     <svg {...svgProps(active)}>

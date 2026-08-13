@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Linking, Platform, Share, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
@@ -13,13 +13,31 @@ import {
 } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import CookieManager from '@preeternal/react-native-cookie-manager';
+import {
+  AuthorizationStatus,
+  getInitialNotification,
+  getMessaging,
+  getToken,
+  onNotificationOpenedApp,
+  onTokenRefresh,
+  requestPermission,
+} from '@react-native-firebase/messaging';
 
 import {
   defaultNativeSafeAreaColors,
   nativeSafeAreaSyncScript,
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
+import { getInviteWebViewUrl } from './nativeDeepLink';
 import { getSessionWebViewUrl } from './nativeSession';
+import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
+import {
+  createPushTokenResultScript,
+  getPushDeepLinkWebViewUrl,
+  isNativePushRegisterRequest,
+  NATIVE_PUSH_TOKEN_RESULT,
+  type NativePushTokenResult,
+} from './nativePush';
 
 const NATIVE_GOOGLE_LOGIN = 'NATIVE_GOOGLE_LOGIN';
 const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
@@ -199,6 +217,43 @@ async function signInWithApple(): Promise<NativeLoginResult> {
   }
 }
 
+/**
+ * 알림 권한을 요청하고 FCM 토큰을 얻는다. 요청 시점은 웹이 정한다(로그인 이후) —
+ * 첫 실행에 맥락 없이 OS 팝업을 띄우면 심사에서 지적받고, iOS 는 한 번 거부하면 다시 띄울 수 없다.
+ *
+ * 1차 범위가 iOS 뿐이라 Android 에서는 토큰을 아예 요청하지 않는다(Firebase 설정 파일도 넣지 않는다).
+ */
+async function requestPushToken(): Promise<NativePushTokenResult> {
+  if (Platform.OS !== 'ios') {
+    return { status: 'unsupported', type: NATIVE_PUSH_TOKEN_RESULT };
+  }
+
+  try {
+    const messaging = getMessaging();
+    const authorizationStatus = await requestPermission(messaging);
+    const isGranted =
+      authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+      authorizationStatus === AuthorizationStatus.PROVISIONAL;
+
+    if (!isGranted) {
+      return { status: 'denied', type: NATIVE_PUSH_TOKEN_RESULT };
+    }
+
+    return {
+      platform: 'IOS',
+      status: 'granted',
+      token: await getToken(messaging),
+      type: NATIVE_PUSH_TOKEN_RESULT,
+    };
+  } catch (error) {
+    return {
+      message: getErrorMessage(error),
+      status: 'error',
+      type: NATIVE_PUSH_TOKEN_RESULT,
+    };
+  }
+}
+
 export default function App() {
   const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
@@ -210,6 +265,68 @@ export default function App() {
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
+
+  useEffect(() => {
+    const openDeepLink = (url: string | null) => {
+      if (!url) return;
+
+      const inviteWebViewUrl = getInviteWebViewUrl(url, initialWebViewUrl);
+      if (!inviteWebViewUrl) return;
+
+      sessionBootstrapState.current = 'ready';
+      setIsSessionReady(true);
+      setWebViewUrl(inviteWebViewUrl);
+    };
+
+    void Linking.getInitialURL().then(openDeepLink);
+    const subscription = Linking.addEventListener('url', ({ url }) => openDeepLink(url));
+
+    return () => subscription.remove();
+  }, [initialWebViewUrl]);
+
+  // 서버는 data.deepLink 에 내부 절대경로만 담는다. 알림 탭과 인앱 배너 탭이 함께 쓴다.
+  const openPushDeepLink = useCallback(
+    (deepLink: unknown) => {
+      const pushWebViewUrl = getPushDeepLinkWebViewUrl(deepLink, initialWebViewUrl);
+      if (!pushWebViewUrl) return;
+
+      sessionBootstrapState.current = 'ready';
+      setIsSessionReady(true);
+      setWebViewUrl(pushWebViewUrl);
+    },
+    [initialWebViewUrl],
+  );
+
+  // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+
+    const openFromNotification = (remoteMessage: { data?: Record<string, unknown> } | null) =>
+      openPushDeepLink(remoteMessage?.data?.deepLink);
+    const messaging = getMessaging();
+
+    // 앱이 종료된 상태에서 알림으로 실행된 경우.
+    void getInitialNotification(messaging).then(openFromNotification);
+
+    // 백그라운드에 있다가 알림 탭으로 돌아온 경우.
+    return onNotificationOpenedApp(messaging, openFromNotification);
+  }, [openPushDeepLink]);
+
+  // 토큰은 재설치·복원 등으로 갱신된다. 갱신되면 웹에 알려 서버 등록을 최신으로 유지한다.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+
+    return onTokenRefresh(getMessaging(), (token: string) => {
+      webViewRef.current?.injectJavaScript(
+        createPushTokenResultScript({
+          platform: 'IOS',
+          status: 'granted',
+          token,
+          type: NATIVE_PUSH_TOKEN_RESULT,
+        }),
+      );
+    });
+  }, []);
 
   useEffect(() => {
     if (!googleWebClientId) {
@@ -268,6 +385,20 @@ export default function App() {
           ? currentColors
           : nextSafeAreaColors,
       );
+      return;
+    }
+
+    const shareRequest = parseNativeShareRequest(data, new URL(webViewUrl).origin);
+    if (shareRequest) {
+      await Share.share(
+        getNativeShareContent(shareRequest, Platform.OS === 'ios' ? 'ios' : 'android'),
+      );
+      return;
+    }
+
+    if (isNativePushRegisterRequest(data)) {
+      const pushResult = await requestPushToken();
+      webViewRef.current?.injectJavaScript(createPushTokenResultScript(pushResult));
       return;
     }
 

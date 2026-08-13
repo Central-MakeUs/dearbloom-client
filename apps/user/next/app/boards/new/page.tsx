@@ -1,73 +1,90 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header, BottomButton, Field, Input, Button } from '@dearbloom/ui';
-import { useBoardStore } from '@/src/stores/boardStore';
+import { Header, BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import {
+  BOARD_NAME_MAX_LENGTH,
+  getBoardNameError,
+  getBoardNameLength,
+  isValidBoardName,
+} from '@/src/lib/boardName';
 
 export default function NewBoardPage() {
   const router = useRouter();
-  const createBoard = useBoardStore((s) => s.createBoard);
   const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const error = getBoardNameError(name, touched);
+  const nameLength = getBoardNameLength(name);
+  const valid = isValidBoardName(name);
 
-  // 공유 코드는 클라이언트에서 생성(SSR 불일치 방지).
-  useEffect(() => setCode(`#${Math.floor(100000 + Math.random() * 900000)}`), []);
-
-  const shareUrl = `dearbloom.co.kr/boards/${code.replace('#', '')}`;
-
-  const copy = async () => {
+  const submit = async () => {
+    setTouched(true);
+    if (!valid || submitting) return;
+    setSubmitting(true);
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      const response = await fetch('/app/api/boards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sharedBoardName: name.trim() }),
+      });
+      if (response.status === 401) {
+        window.location.href = `/app/login?returnUrl=${encodeURIComponent('/app/boards/new')}`;
+        return;
+      }
+      if (!response.ok) throw new Error('공동보드 생성 실패');
+      const board = (await response.json()) as { sharedBoardId: number };
+      router.replace(`/boards/${board.sharedBoardId}`);
     } catch {
-      // 클립보드 미지원 환경은 무시.
+      setSubmitting(false);
     }
   };
 
-  const submit = () => {
-    const board = createBoard(name, code || undefined);
-    router.replace(`/boards/${board.id}`);
-  };
-
   const nameField = (
-    <div className="px-4 pt-4">
-      <Field label="보드 이름" htmlFor="board-name">
-        <Input
-          id="board-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="예: 우정스냅 보드"
-          maxLength={20}
-        />
-      </Field>
-    </div>
-  );
-
-  const urlField = (
-    <div className="px-4 pt-6">
-      <Field label="공동보드 URL">
-        <div className="flex items-center gap-2 rounded-md border border-neutral-200 bg-neutral-0 px-4 py-3">
-          <span className="min-w-0 flex-1 truncate text-body-3 text-neutral-950">{code || '#------'}</span>
-          <Button type="button" variant="secondary" size="sm" className="shrink-0 text-primary" onClick={copy}>
-            {copied ? '복사됨' : '복사'}
-          </Button>
-        </div>
-      </Field>
+    <div className="px-4 pt-5">
+      <TextField
+        id="board-name"
+        label="공동보드 이름"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        onBlur={() => setTouched(true)}
+        onClear={() => setName('')}
+        placeholder="공동보드 이름을 입력하세요"
+        error={!!error}
+        aria-invalid={!!error}
+      />
+      <div
+        className={cn(
+          'mt-1.5 flex justify-between text-caption-2',
+          error ? 'text-danger' : 'text-neutral-500',
+        )}
+      >
+        <span>{error ?? (name ? '' : `최대 ${BOARD_NAME_MAX_LENGTH}자까지 입력할 수 있어요`)}</span>
+        <span>
+          {nameLength}/{BOARD_NAME_MAX_LENGTH}
+        </span>
+      </div>
     </div>
   );
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
-      <Header showBack onBack={() => router.back()} title="공동보드 생성하기" />
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+      className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100"
+    >
+      <Header showBack onBack={() => router.back()} title="공동보드 만들기" />
       {nameField}
-      {urlField}
       <div className="flex-1" />
-      <div className="sticky bottom-0 flex gap-2 bg-neutral-100 px-4 pb-6 pt-3">
-        <BottomButton onClick={submit}>완료</BottomButton>
+      <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
+        <BottomButton type="submit" color="black" disabled={!valid || submitting}>
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
+          완료
+        </BottomButton>
       </div>
-    </div>
+    </form>
   );
 }

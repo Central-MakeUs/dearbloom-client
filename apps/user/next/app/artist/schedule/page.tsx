@@ -2,19 +2,11 @@ import { cookies } from 'next/headers';
 import { getWeeklyAvailability, getRecurringBlocks, getDateBlocks, type ScheduleRule } from '@dearbloom/shared';
 import { ScheduleManager } from './ScheduleManager';
 import { LOGIN_HREF } from '@/src/lib/env';
+import { Button, Header as TitleHeader } from '@dearbloom/ui';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => (
-  <header className="sticky top-0 z-10 flex h-[52px] items-center bg-neutral-100 px-2">
-    <a href="/app/artist/dashboard" aria-label="뒤로가기" className="flex h-11 w-11 items-center justify-center text-neutral-950">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="m15 18-6-6 6-6" />
-      </svg>
-    </a>
-    <h1 className="absolute left-1/2 -translate-x-1/2 text-head-3 text-neutral-950">일정 관리</h1>
-  </header>
-);
+const Header = () => <TitleHeader backHref="/app/artist/dashboard" title="일정 관리" />;
 
 export default async function ArtistSchedulePage() {
   const token = (await cookies()).get('accessToken')?.value;
@@ -25,22 +17,32 @@ export default async function ArtistSchedulePage() {
         <Header />
         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <p className="text-body-5 text-neutral-500">작가 계정으로 로그인해주세요.</p>
-          <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
+          <Button asChild size="sm">
+            <a href={LOGIN_HREF}>로그인</a>
+          </Button>
         </div>
       </div>
     );
   }
 
+  // 실패를 빈 배열로 삼키면 '조회 실패'와 '아직 설정 안 함'이 구분되지 않는다.
+  // (실패인데 기본값이 채워진 화면에서 저장하면 서버의 기존 일정을 덮어쓴다)
   const [weekly, recurring, dates] = await Promise.all([
-    getWeeklyAvailability({ token }).catch(() => [] as ScheduleRule[]),
-    getRecurringBlocks({ token }).catch(() => [] as ScheduleRule[]),
-    getDateBlocks({ token }).catch(() => [] as ScheduleRule[]),
+    getWeeklyAvailability({ token }).catch(() => null),
+    getRecurringBlocks({ token }).catch(() => null),
+    getDateBlocks({ token }).catch(() => null),
   ]);
+  const loadFailed = weekly === null || recurring === null || dates === null;
 
   return (
     <div className="mx-auto max-w-md">
       <Header />
-      <ScheduleManager weekly={weekly} recurring={recurring} dates={dates} />
+      <ScheduleManager
+        weekly={weekly ?? ([] as ScheduleRule[])}
+        recurring={recurring ?? ([] as ScheduleRule[])}
+        dates={dates ?? ([] as ScheduleRule[])}
+        loadFailed={loadFailed}
+      />
     </div>
   );
 }

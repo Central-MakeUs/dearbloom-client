@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react';
-import { Badge, Card } from '@dearbloom/ui';
+import { Badge, Card, Header } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 
 const items: { label: string; desc: string; href?: string }[] = [
   { label: '일정 관리', desc: '촬영 가능 일정 · 예약 불가 관리', href: '/app/artist/schedule' },
@@ -14,14 +15,12 @@ const items: { label: string; desc: string; href?: string }[] = [
 export default function ArtistDashboardPage() {
   return (
     <div className="mx-auto max-w-md">
-      <header className="flex h-[52px] items-center justify-center">
-        <h1 className="text-head-3 text-neutral-950">대시보드</h1>
-      </header>
+      <Header showBack={false} title="대시보드" />
 
       <div className="mt-2 flex flex-col gap-2 px-4">
         {items.map((it) =>
           it.href ? (
-            <a
+            <AppLink
               key={it.label}
               href={it.href}
               className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-0 px-4 py-4 transition-colors hover:bg-neutral-50"
@@ -37,7 +36,7 @@ export default function ArtistDashboardPage() {
                 )}
               </div>
               <ChevronRight className="size-6 shrink-0 text-neutral-400" aria-hidden />
-            </a>
+            </AppLink>
           ) : (
             <Card key={it.label} className="flex items-center justify-between px-4 py-4" aria-disabled>
               <div className="min-w-0">

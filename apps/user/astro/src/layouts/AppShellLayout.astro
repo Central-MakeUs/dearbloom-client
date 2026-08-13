@@ -1,5 +1,5 @@
 ---
-import { BottomTab } from '@dearbloom/ui';
+import { BottomTab, ScrollFade } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -14,10 +14,19 @@ const currentPath = Astro.url.pathname;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- font-sans(= Pretendard) 실체. dynamic subset 이라 실제 쓰인 글자만 내려받습니다. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
     <title>{title} · dearBloom</title>
   </head>
   <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
     <slot />
-    <BottomTab currentPath={currentPath} variant={navVariant} client:load />
+    {/* 하단탭(60px) 바로 위에 깔리는 스크롤 페이드 — 더 볼 게 남았을 때만 보입니다.
+        둘 다 client:idle: 페이드는 장식이고, 탭은 SSR 된 <a> 라 하이드레이션 전에도 이동이 됩니다. */}
+    <ScrollFade offset={60} client:idle />
+    <BottomTab currentPath={currentPath} variant={navVariant} client:idle />
   </body>
 </html>

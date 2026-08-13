@@ -13,3 +13,4 @@ export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN !== 'f
  * 앱은 basePath `/app` 하위로 서빙되므로 경로에 `/app` 접두어를 포함한다.
  */
 export const LOGIN_HREF = '/app/login';
+

@@ -1,0 +1,31 @@
+---
+export const prerender = false; // 진입 시 URL 의 현재 필터를 그대로 읽어 초기값으로 씁니다.
+
+import { Header } from '@dearbloom/ui';
+import { FilterSettingsView } from '@/components/FilterSettingsView';
+import { parseFilterParams, toQueryString } from '@/lib/artworkFilter';
+
+const params = parseFilterParams(Astro.url);
+// 뒤로가기는 고르던 걸 버리고 원래 목록으로 — 진입 시점의 필터를 그대로 유지합니다.
+const backHref = `/snaps${toQueryString(params)}`;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <title>필터 설정 · dearBloom</title>
+  </head>
+  <!-- 하단 탭 대신 적용/초기화 CTA 가 깔리는 화면이라 AppShellLayout 을 쓰지 않습니다. -->
+  <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
+    <Header title="필터 설정" backHref={backHref} client:load />
+    <FilterSettingsView initial={params} client:load />
+  </body>
+</html>

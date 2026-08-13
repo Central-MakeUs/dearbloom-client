@@ -1,11 +1,16 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import { SaveHeart, RegionTag } from '@dearbloom/ui';
+import { RegionTag, ScrollFade } from '@dearbloom/ui';
 import { SnapDetailTabs } from '@/components/SnapDetailTabs';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
-import { SnapReportButton } from '@/components/SnapReportButton';
+import { SchoolChipsExpander } from '@/components/SchoolChipsExpander';
+import { SnapMoreMenu } from '@/components/SnapMoreMenu';
+import { SnapBackButton } from '@/components/SnapBackButton';
+import { SmartInquiryCta } from '@/components/SmartInquiryCta';
+import { getArtworkBackHref } from '@/lib/artworkReturnPath';
+import { optimizedImageUrl } from '@/lib/imageUrl';
 import {
   getArtwork,
   getArtworkReported,
@@ -15,21 +20,26 @@ import {
 } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
-const token = Astro.cookies.has('onboardingPending')
-  ? undefined
-  : Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.get('accessToken')?.value;
+const backHref = getArtworkBackHref(Astro.url.searchParams.get('returnTo'));
+const returnQuery = backHref === '/snaps' ? '' : `?returnTo=${encodeURIComponent(backHref)}`;
 
-// 로그인별 isSaved 가 담기므로 CDN 공유 캐시 금지(익명 렌더가 로그인 사용자에게 새는 것 방지).
-Astro.response.headers.set('Cache-Control', 'private, no-store');
+if (token) {
+  // 로그인별 isSaved 가 담기므로 CDN 공유 캐시 금지(익명 렌더가 로그인 사용자에게 새는 것 방지).
+  Astro.response.headers.set('Cache-Control', 'private, no-store');
+} else {
+  // 익명 렌더에는 개인 상태가 없다(isSaved 는 null) → CDN 에 짧게 올려 SEO·재방문 트래픽을 함수 없이 받는다.
+  // Vary: Cookie 로 accessToken 을 든 요청이 이 익명 응답을 받지 않게 한다.
+  Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+  Astro.response.headers.set('Vary', 'Cookie');
+}
 
 let artwork: ArtworkDetail | null = null;
 try {
-  // 만료 토큰(401)이면 익명으로 재시도 → public 상세는 항상 노출(만료 쿠키 하나로 에러 방지).
   const { data, tokenExpired } = await fetchPublicWithAuthFallback((o) => getArtwork(slug!, o), token);
   artwork = data;
   if (tokenExpired) Astro.cookies.delete('accessToken', { path: '/' });
 } catch (e) {
-  // SSR 실패 원인은 서버 로그(Vercel Runtime Logs)에서 확인.
   console.error('[snaps/:id] getArtwork 실패', slug, e);
   artwork = null;
 }
@@ -37,11 +47,11 @@ try {
 const won = (n: number) => `${n.toLocaleString()}원`;
 const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.sortOrder) : [];
 
-// 촬영 경험 학교: schoolNameList 우선, 없으면 사진의 대학명에서 도출
+// 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
   ? artwork.schoolNameList?.length
     ? artwork.schoolNameList
-    : [...new Set(photos.map((p) => p.universityName).filter(Boolean))]
+    : ([...new Set(photos.map((p) => p.universityName).filter(Boolean))] as string[])
   : [];
 
 const packages = artwork?.packageList ?? [];
@@ -74,72 +84,79 @@ if (artwork && token) {
       ) : (
         <>
           {/* Header */}
-          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-0 px-2">
-            <a href="/snaps" aria-label="뒤로가기" class="flex h-11 w-11 items-center justify-center text-neutral-950">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
-            </a>
-            <h1 class="truncate text-head-3 text-neutral-950">작품 상세</h1>
+          {/* Figma header_title/Variant3 — 375x52, 좌우 여백 4, 뒤로가기 44x44(아이콘 28) + 우측 아이콘 2개(공유·더보기).
+              저장(하트)은 헤더가 빽빽해져 하단 CTA 좌측으로 내렸다(QA, 디자이너 확정). */}
+          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-1">
+            <SnapBackButton fallbackHref={backHref} client:idle />
+            {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
+            <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
             <div class="flex items-center">
-              <div class="flex h-11 w-11 items-center justify-center">
-                <SaveHeart artworkId={artwork.artworkId} initialSaved={!!artwork.isSaved} size={24} client:load />
-              </div>
-              <SnapShareButton client:load />
+              <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:idle />
+              <SnapMoreMenu artworkId={artwork.artworkId} initialReported={reported} client:idle />
             </div>
           </header>
 
-          {/* 상단 화이트 블록: 캐러셀 + 제목 + 탭 */}
-          <div class="bg-neutral-0">
+          {/* 상단 블록: 캐러셀 + 제목 + 탭 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
+          <div>
+            {/* scroll-pl-4: 스냅이 좌측 패딩을 건너뛰어 첫 장이 화면 끝에 붙는 것 방지 */}
+            {/* bg-neutral-200: 사진이 오기 전까지 빈칸 대신 회색 자리로 (아래 '다른 작품' 그리드와 같은 처리) */}
             {photos.length > 0 && (
-              <div class="flex snap-x gap-1 overflow-x-auto px-2 pb-2">
-                {photos.map((p) =>
+              <div class="flex snap-x scroll-pl-4 gap-1 overflow-x-auto px-4">
+                {photos.map((p, i) =>
                   p.fileType === 'VIDEO' ? (
-                    <video src={p.fileUrl} class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-sm object-cover" controls />
+                    // preload=metadata: 재생 전에 본문까지 받지 않게 — 캐러셀에 여러 장이 깔릴 수 있다.
+                    <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover" controls />
                   ) : (
-                    <img src={p.fileUrl} alt={artwork.title} loading="lazy" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-sm object-cover" />
+                    /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
+                    <img
+                      src={optimizedImageUrl(p.fileUrl, 190)}
+                      alt={artwork.title}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      fetchpriority={i === 0 ? 'high' : undefined}
+                      class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover"
+                    />
                   ),
                 )}
               </div>
             )}
 
-            {/* 제목 + 지역칩 + 작가 */}
-            <div class="px-4 pt-3">
-              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h2 class="text-head-3 text-neutral-950">{artwork.title}</h2>
-                {artwork.artist.regionList?.map((code) => (
-                  <RegionTag>{artistRegionLabel(code)}</RegionTag>
-                ))}
+            {/* 제목 + 지역칩 + 작가 — Figma: 제목↔칩그룹 12, 칩끼리 4 */}
+            <div class="px-4 pt-4">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
+                {artwork.artist.regionList?.length > 0 && (
+                  <div class="flex flex-wrap items-center gap-1">
+                    {artwork.artist.regionList.map((code) => (
+                      <RegionTag>{artistRegionLabel(code)}</RegionTag>
+                    ))}
+                  </div>
+                )}
               </div>
-              <p class="mt-1 text-body-6 text-neutral-800">{artwork.artist.nickname}</p>
-              {artwork.artistEmail && (
-                <a href={`mailto:${artwork.artistEmail}`} class="mt-1 inline-block text-body-6 text-primary underline">
-                  {artwork.artistEmail}
-                </a>
-              )}
+              <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
 
-            {/* 인페이지 탭 — 상세정보 / 리뷰 (리뷰는 백엔드 미준비) */}
-            <SnapDetailTabs client:load />
+            {/* 인페이지 탭 — 상세정보 활성 / 후기는 API 대기라 disabled */}
+            <SnapDetailTabs client:visible />
           </div>
 
           <div class="pb-28 pt-4">
-            {/* 상단 요약 카드 — 기본 가격 + 촬영 경험 학교 (Figma 최상단 카드) */}
+            {/* 작품 정보 — 기본 가격 + 촬영 경험 학교 (Figma) */}
             {(lowestPrice != null || shootPlaces.length > 0) && (
-              <section class="mb-3">
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <dl class="flex flex-col gap-3">
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">작품 정보</h3>
+                <div class="mx-4 rounded-md bg-neutral-0 p-5">
+                  <dl class="flex flex-col gap-4">
                     {lowestPrice != null && (
                       <div class="flex items-center justify-between gap-4">
-                        <dt class="text-body-6 text-neutral-600">기본 가격</dt>
-                        <dd class="text-body-3 font-semibold text-neutral-900">{won(lowestPrice)}</dd>
+                        <dt class="text-body-5 text-neutral-800">기본 가격</dt>
+                        <dd class="text-body-4 text-neutral-900">{won(lowestPrice)}</dd>
                       </div>
                     )}
                     {shootPlaces.length > 0 && (
                       <div class="flex items-start justify-between gap-4">
-                        <dt class="shrink-0 text-body-6 text-neutral-600">촬영 경험 학교</dt>
-                        <dd class="flex flex-wrap justify-end gap-1">
-                          {shootPlaces.map((s) => (
-                            <span class="inline-flex items-center rounded-sm bg-primary-100 px-2 py-0.5 text-body-5 text-neutral-800">{s}</span>
-                          ))}
+                        <dt class="shrink-0 text-body-5 text-neutral-800">촬영 경험 학교</dt>
+                        <dd class="min-w-0 flex-1">
+                          <SchoolChipsExpander schools={shootPlaces} client:visible />
                         </dd>
                       </div>
                     )}
@@ -148,86 +165,77 @@ if (artwork && token) {
               </section>
             )}
 
-            {/* 작품 설명 (백엔드 description) — Figma 프레임엔 명시 X 이지만 데이터 유용해 유지 */}
-            {artwork.description && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작품 설명</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.description}</p>
-                </div>
-              </section>
-            )}
-
-            {/* 작품 정보 헤딩 + 이 작가의 다른 작품 (Figma: 헤딩 아래 다른 작품 카드) */}
-            {artwork.otherArtworkList?.length > 0 && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">작품 정보</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="mb-3 text-body-4 text-neutral-950">이 작가의 다른 작품</p>
-                  <div class="grid grid-cols-3 gap-2">
-                    {artwork.otherArtworkList.map((o) => (
-                      <a href={`/snaps/${o.artworkId}`} class="block">
-                        <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
-                          <img src={o.imageUrl} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
-                        </div>
-                        {o.title && <p class="mt-1 truncate text-body-6 text-neutral-950">{o.title}</p>}
-                        {o.artistNickname && <p class="truncate text-caption-2 text-neutral-600">{o.artistNickname}</p>}
-                      </a>
-                    ))}
-                  </div>
-                </div>
+            {/* 패키지 구분 — 패키지 카드 리스트 + 더보기 토글 (Figma) */}
+            {packages.length > 0 && (
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">패키지 구분</h3>
+                <PackageList packages={packages} client:visible />
               </section>
             )}
 
             {/* 출장비 안내 */}
             {artwork.artist.travelFee && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">출장비 안내</h3>
-                <div class="mx-4 rounded-lg bg-neutral-0 p-4">
-                  <p class="whitespace-pre-line text-body-5 text-neutral-950">{artwork.artist.travelFee}</p>
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">출장비 안내</h3>
+                <div class="mx-4 rounded-md bg-neutral-0 p-5">
+                  <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.travelFee}</p>
                 </div>
               </section>
             )}
 
             {/* 이용 안내 — 작가 소개 + 작품 안내 통합 카드 (Figma) */}
             {(artwork.artist.intro || artwork.artist.etcInfo) && (
-              <section class="mb-3">
-                <h3 class="mb-2 px-4 text-head-3 text-neutral-800">이용 안내</h3>
-                <div class="mx-4 flex flex-col gap-4 rounded-lg bg-neutral-0 p-4">
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h3>
+                <div class="mx-4 flex flex-col gap-6 rounded-md bg-neutral-0 p-5">
                   {artwork.artist.intro && (
-                    <div>
-                      <p class="mb-1 text-body-4 font-semibold text-neutral-950">작가 소개</p>
-                      <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.intro}</p>
+                    <div class="flex flex-col gap-3">
+                      <p class="text-body-3 text-neutral-900">작가 소개</p>
+                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.intro}</p>
                     </div>
                   )}
                   {artwork.artist.etcInfo && (
-                    <div>
-                      <p class="mb-1 text-body-4 font-semibold text-neutral-950">작품 안내</p>
-                      <p class="whitespace-pre-line text-body-5 text-neutral-800">{artwork.artist.etcInfo}</p>
+                    <div class="flex flex-col gap-3">
+                      <p class="text-body-3 text-neutral-900">작품 안내</p>
+                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.etcInfo}</p>
                     </div>
                   )}
                 </div>
               </section>
             )}
 
-            {/* 패키지 리스트 (Figma: 처음 2개 노출 + '패키지 N개 더보기' 토글) */}
-            {packages.length > 0 && <PackageList packages={packages} client:load />}
-
-            {/* 작품 신고 — 피그마 헤더(♡/공유)를 건드리지 않도록 상세 하단 텍스트 링크로 배치 */}
-            <SnapReportButton artworkId={artwork.artworkId} initialReported={reported} client:load />
+            {/* 이 작가의 다른 작품 (Figma: 최하단, CTA 위) */}
+            {artwork.otherArtworkList?.length > 0 && (
+              <section class="mb-8">
+                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
+                <div class="grid grid-cols-3 gap-2 px-4">
+                  {artwork.otherArtworkList.map((o) => (
+                    <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block">
+                      <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
+                        {/* 3열 그리드 — 한 칸 폭 = (448 - 좌우 32 - 간격 16) / 3 ≈ 133 */}
+                        <img src={optimizedImageUrl(o.imageUrl, 133)} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
+                      </div>
+                      {o.title && <p class="mt-1 truncate text-body-4 text-neutral-900">{o.title}</p>}
+                      {o.artistNickname && <p class="truncate text-caption-1 text-neutral-700">{o.artistNickname}</p>}
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* 하단 sticky CTA — 스마트 문의하기 (백엔드 문의 API 미준비: 클릭 무효) */}
-          <div class="fixed inset-x-0 bottom-0 z-30 hidden border-t border-neutral-200 bg-neutral-0 p-4">
-            <button
-              type="button"
-              aria-disabled="true"
-              title="스마트 문의 기능은 준비 중입니다"
-              class="flex h-[52px] w-full items-center justify-center rounded-md bg-primary text-body-1 text-neutral-0"
-            >
-              스마트 문의하기
-            </button>
-          </div>
+          {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입.
+              offset 85 = CTA 실제 높이(border 1 + padding 16 + 버튼 52 + padding 16). ScrollFade 가
+              여기에 safe-area 를 더하므로 CTA 도 같은 만큼 padding 을 가져야 둘 사이가 벌어지지 않는다.
+              CTA 는 이 화면의 주 동작이라 client:load 를 유지한다 — client:idle 은 load 이벤트를
+              기다리므로 눌러도 시트가 안 열리는 구간이 생긴다. */}
+          <ScrollFade offset={85} client:idle />
+          <SmartInquiryCta
+            packages={packages}
+            artworkId={artwork.artworkId}
+            initialSaved={!!artwork.isSaved}
+            client:load
+          />
         </>
       )
     }

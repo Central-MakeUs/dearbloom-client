@@ -11,13 +11,21 @@ interface BottomSheetProps {
   title: string;
   children: ReactNode;
   className?: string;
+  showHandle?: boolean;
 }
 
 /**
  * 하단 바텀시트 — vaul(Drawer) 기반. 드래그 핸들 + 드래그로 닫기 + 스크림.
  * 화면 하단에 max-w-md 로 중앙 정렬되어 모바일 앱처럼 올라온다.
  */
-export function BottomSheet({ open, onOpenChange, title, children, className }: BottomSheetProps) {
+export function BottomSheet({
+  open,
+  onOpenChange,
+  title,
+  children,
+  className,
+  showHandle = true,
+}: BottomSheetProps) {
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
@@ -28,7 +36,10 @@ export function BottomSheet({ open, onOpenChange, title, children, className }: 
             className,
           )}
         >
-          <Drawer.Handle className="mx-auto mt-3 mb-2 h-1 w-10 shrink-0 rounded-full bg-neutral-300" />
+          {/* 크기·색은 vaul 기본 스타일이 클래스를 이기므로 ! 로 덮는다. Figma 실측 45x4 / neutral-500. */}
+          {showHandle && (
+            <Drawer.Handle className="mx-auto mt-3 mb-2 !h-1 !w-[45px] shrink-0 rounded-full !bg-neutral-500" />
+          )}
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
           {children}
         </Drawer.Content>

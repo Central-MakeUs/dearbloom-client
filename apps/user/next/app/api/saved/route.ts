@@ -22,10 +22,22 @@ function errorResponse(e: unknown) {
   return NextResponse.json({ error: e instanceof Error ? e.message : 'failed' }, { status });
 }
 
-async function isIncompleteCustomer(token: string, error: unknown) {
-  if (error instanceof ApiError && error.status === 401) return true;
+/**
+ * 저장 실패 원인 구분.
+ * - unauthorized: 토큰이 없거나 죽음 → 로그인부터 해야 한다.
+ * - customer_required: 로그인은 됐지만 고객 프로필이 없다(작가 전용 계정) → 로그인 모달을 띄우면 안 된다.
+ * 백엔드는 두 경우 모두 401 을 주므로 회원 정보를 한 번 더 확인해 갈라낸다.
+ */
+async function classifyFailure(token: string, error: unknown): Promise<'unauthorized' | 'customer_required' | null> {
+  const backendRejected = error instanceof ApiError && error.status === 401;
   const member = await getMemberMe({ token }).catch(() => undefined);
-  return member ? !member.hasCustomer : false;
+  if (!member) return backendRejected ? 'unauthorized' : null;
+  if (!member.hasCustomer) return 'customer_required';
+  return backendRejected ? 'unauthorized' : null;
+}
+
+function failureResponse(reason: 'unauthorized' | 'customer_required') {
+  return NextResponse.json({ error: reason }, { status: reason === 'unauthorized' ? 401 : 403 });
 }
 
 /** 작품 저장 */
@@ -43,9 +55,8 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     // 이미 저장됨(409)은 원하는 상태이므로 성공으로 처리(멱등).
     if (e instanceof ApiError && e.status === 409) return new NextResponse(null, { status: 204 });
-    if (await isIncompleteCustomer(token, e)) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
+    const reason = await classifyFailure(token, e);
+    if (reason) return failureResponse(reason);
     return errorResponse(e);
   }
 }
@@ -68,9 +79,8 @@ export async function DELETE(request: NextRequest) {
       await unsaveArtworks(ids, { token });
       return new NextResponse(null, { status: 204 });
     } catch (e) {
-      if (await isIncompleteCustomer(token, e)) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-      }
+      const reason = await classifyFailure(token, e);
+      if (reason) return failureResponse(reason);
       return errorResponse(e);
     }
   }
@@ -82,9 +92,8 @@ export async function DELETE(request: NextRequest) {
     await unsaveArtwork(id, { token });
     return new NextResponse(null, { status: 204 });
   } catch (e) {
-    if (await isIncompleteCustomer(token, e)) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
+    const reason = await classifyFailure(token, e);
+    if (reason) return failureResponse(reason);
     return errorResponse(e);
   }
 }

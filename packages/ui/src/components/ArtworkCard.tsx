@@ -1,9 +1,9 @@
 'use client';
 
-import { Check } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { SaveHeart } from './SaveHeart';
 import { RegionTag } from './ui/region-tag';
+import { SkeletonImage } from './ui/skeleton';
 
 export interface ArtworkCardProps {
   artworkId: number;
@@ -56,23 +56,30 @@ export function ArtworkCard({
   const detailHref = href ?? `/snaps/${artworkId}`;
 
   const image = (
-    <img
+    <SkeletonImage
       src={thumbnailUrl ?? undefined}
       alt={title}
       loading="lazy"
-      className="h-full w-full object-cover"
+      className="aspect-[4/5] rounded-lg"
     />
   );
 
+  // Figma 437:7469 실측 — 제목/작가 간격 0, 작가↔가격줄 4, 가격↔태그그룹 8, 태그끼리 4.
   const meta = (
     <div className="min-w-0">
-      <div className="truncate text-body-4 text-neutral-950">{title}</div>
-      <div className="mt-0.5 truncate text-body-6 text-neutral-600">{artistNickname}</div>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-        <span className="text-body-1 font-semibold text-primary">{formatPrice(price)}</span>
-        {regions?.map((r) => (
-          <RegionTag key={r}>{r}</RegionTag>
-        ))}
+      <div className="truncate text-body-3 text-neutral-900">{title}</div>
+      <div className="truncate text-body-6 text-neutral-900">{artistNickname}</div>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <span className="text-body-3 text-primary">{formatPrice(price)}</span>
+        {!!regions?.length && (
+          <div className="flex flex-wrap items-center gap-1">
+            {regions.map((r) => (
+              <RegionTag key={r} size="sm">
+                {r}
+              </RegionTag>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -80,20 +87,29 @@ export function ArtworkCard({
   // 편집(선택) 모드 — 우상단 체크 원, 카드 전체 토글
   if (selectable) {
     const checkCircle = (
-      <span
-        aria-hidden
-        className={cn(
-          'absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors',
-          selected ? 'border-neutral-950 bg-neutral-950 text-neutral-0' : 'border-neutral-0 bg-neutral-950/15',
+      <span aria-hidden className="absolute right-3 top-3 flex size-6 items-center justify-center">
+        <img
+          src={
+            selected
+              ? '/app/images/candidate-selected-circle.svg'
+              : '/app/images/candidate-unselected-circle.svg'
+          }
+          alt=""
+          className="absolute inset-0 size-6"
+        />
+        {selected && (
+          <img
+            src="/app/images/candidate-check.svg"
+            alt=""
+            className="relative h-[7.86px] w-[11.05px]"
+          />
         )}
-      >
-        {selected && <Check size={14} strokeWidth={3} aria-hidden />}
       </span>
     );
 
     return (
       <button type="button" onClick={onSelect} aria-pressed={selected} className={cn('flex flex-col text-left', className)}>
-        <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <div className="relative mb-2">
           {image}
           {checkCircle}
         </div>
@@ -106,16 +122,19 @@ export function ArtworkCard({
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="relative mb-2">
-        <a href={detailHref} className="block aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <a href={detailHref} className="block">
           {image}
         </a>
         <SaveHeart
           artworkId={artworkId}
           initialSaved={initialSaved}
-          size={20}
+          size={24}
+          strokeWidth={1.5}
           endpoint={saveEndpoint}
           onChange={onSavedChange}
-          className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-0/80 text-neutral-700 backdrop-blur transition-transform active:scale-90"
+          // Figma 437:7469 — 36x36 원(#1F1F1F 30%) 위에 하트. 사진 위라 원이 있어야 하트가 산다.
+          // 하트 색만 QA 지시대로 흰색 → 빨강(error).
+          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-error transition-transform active:scale-90"
         />
       </div>
       <a href={detailHref} className="block">

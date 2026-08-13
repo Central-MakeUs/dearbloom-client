@@ -2,7 +2,7 @@ import { apiPost, type RequestOptions } from './http';
 
 /** 파일 업로드 — presigned URL 발급 후 그 URL 로 직접 PUT. */
 
-export type FilePrefix = 'REVIEW' | 'PORTFOLIO' | 'ARTIST_IMAGE';
+export type FilePrefix = 'REVIEW' | 'PORTFOLIO' | 'ARTIST_IMAGE' | 'CHAT_IMAGE';
 
 export interface PresignedUrl {
   presignedUrl: string;
