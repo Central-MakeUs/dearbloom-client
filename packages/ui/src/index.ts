@@ -39,3 +39,4 @@ export * from './components/LoginRequiredDialog';
 export * from './components/ArtworkCard';
 export * from './components/BottomSheet';
 export * from './components/ShareBottomSheet';
+export * from './components/CustomerProfileAvatar';

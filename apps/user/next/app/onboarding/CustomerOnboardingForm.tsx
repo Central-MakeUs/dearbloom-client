@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Check, Search } from 'lucide-react';
+import Image, { type StaticImageData } from 'next/image';
+import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
@@ -10,8 +11,214 @@ import {
   getUniversityLabel,
   UniversitySearchScreen,
 } from '@/src/components/common/UniversitySearchScreen';
+import completeIcon from '../../public/images/onboarding-complete.svg';
+import boardTourImage from '../../public/images/onboarding-tour-board.png';
+import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
+import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
 
-type OnboardingStep = 'complete' | 'region' | 'school';
+type OnboardingStep = 'complete' | 'region' | 'school' | 'tour';
+
+const tourSlides: Array<{ description: string; image: StaticImageData; title: string }> = [
+  {
+    description: '취향에 맞는 졸업 스냅 작품을 쉽게 탐색할 수 있어요.',
+    image: exploreTourImage,
+    title: '졸업스냅 작품 탐색',
+  },
+  {
+    description: '번거로운 프로세스 대신 빠르고 간편한 문의가 가능해요.',
+    image: inquiryTourImage,
+    title: '쉽고 빠른 스마트문의',
+  },
+  {
+    description: '친구와 함께 작품 후보를 모으고 의견을 나눌 수 있어요.',
+    image: boardTourImage,
+    title: '친구들과 함께하는 공동보드',
+  },
+];
+
+function OnboardingComplete({
+  onExploreFeatures,
+  onFinish,
+}: {
+  onExploreFeatures: () => void;
+  onFinish: () => void;
+}) {
+  const actions = (
+    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
+      <BottomButton color="green" onClick={onFinish}>
+        디어블룸 시작하기
+      </BottomButton>
+      <button
+        className="h-10 text-body-1 text-neutral-800"
+        onClick={onExploreFeatures}
+        type="button"
+      >
+        기능 둘러보기
+      </button>
+    </div>
+  );
+
+  return (
+    <main className="min-h-dvh bg-primary-100">
+      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+        <section className="flex flex-col items-center px-4 pt-[160px] text-center">
+          <Image alt="" className="size-[72px]" priority src={completeIcon} />
+          <div className="mt-6 flex w-[185px] flex-col items-center gap-2">
+            <h1 className="text-head-1 text-neutral-900">로그인이 완료되었어요!</h1>
+            <p className="text-body-2 text-neutral-800">
+              취향에 맞는 작품을 탐색하고 작가님께 문의해 보세요.
+            </p>
+          </div>
+        </section>
+        {actions}
+      </div>
+    </main>
+  );
+}
+
+function OnboardingTour({ onFinish }: { onFinish: () => void }) {
+  const [slideIndex, setSlideIndex] = useState(0);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      setSlideIndex((current) =>
+        Math.max(
+          0,
+          Math.min(tourSlides.length - 1, current + (event.key === 'ArrowRight' ? 1 : -1)),
+        ),
+      );
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const moveTo = (index: number) => {
+    setSlideIndex(Math.max(0, Math.min(tourSlides.length - 1, index)));
+  };
+
+  const startSwipe = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (touch) swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const endSwipe = (event: TouchEvent) => {
+    const start = swipeStart.current;
+    const touch = event.changedTouches[0];
+    swipeStart.current = null;
+    if (!start || !touch) return;
+
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    moveTo(slideIndex + (deltaX < 0 ? 1 : -1));
+  };
+
+  const dots = tourSlides.map((slide, index) => (
+    <button
+      aria-label={`${index + 1}번째 기능: ${slide.title}`}
+      aria-pressed={slideIndex === index}
+      className={cn(
+        'size-1.5 rounded-full transition-colors',
+        slideIndex === index ? 'bg-primary' : 'bg-neutral-400',
+      )}
+      key={slide.title}
+      onClick={() => moveTo(index)}
+      type="button"
+    />
+  ));
+
+  const slides = tourSlides.map((slide, index) => (
+    <section
+      aria-hidden={slideIndex !== index}
+      className="relative w-1/3 shrink-0"
+      inert={slideIndex !== index}
+      key={slide.title}
+    >
+      <div className="relative z-10 flex flex-col items-center pt-[101px] text-center">
+        <div
+          className={cn(
+            'flex flex-col items-center gap-2',
+            index === 0 ? 'w-[185px]' : index === 1 ? 'w-[195px]' : 'w-[216px]',
+          )}
+        >
+          <h1 className="text-head-1 text-primary">{slide.title}</h1>
+          <p className={cn('text-body-1 text-neutral-700', index === 2 && 'w-[201px]')}>
+            {slide.description}
+          </p>
+        </div>
+      </div>
+      <Image
+        alt={`${slide.title} 화면 예시`}
+        className={cn(
+          'absolute left-1/2 top-[max(212px,calc(50%_-_202.5px))] h-[405px] -translate-x-1/2',
+          index === 2 ? 'w-[333px]' : 'w-[192px]',
+        )}
+        priority={index === 0}
+        src={slide.image}
+      />
+    </section>
+  ));
+
+  const desktopArrows = (
+    <>
+      <button
+        aria-label="이전 기능"
+        className="absolute left-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-0 text-neutral-800 shadow-elevation [@media(hover:hover)_and_(pointer:fine)]:flex disabled:pointer-events-none disabled:opacity-0"
+        disabled={slideIndex === 0}
+        onClick={() => moveTo(slideIndex - 1)}
+        type="button"
+      >
+        <ChevronLeft aria-hidden />
+      </button>
+      <button
+        aria-label="다음 기능"
+        className="absolute right-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-0 text-neutral-800 shadow-elevation [@media(hover:hover)_and_(pointer:fine)]:flex disabled:pointer-events-none disabled:opacity-0"
+        disabled={slideIndex === tourSlides.length - 1}
+        onClick={() => moveTo(slideIndex + 1)}
+        type="button"
+      >
+        <ChevronRight aria-hidden />
+      </button>
+    </>
+  );
+
+  return (
+    <main className="min-h-dvh bg-primary-100">
+      <div
+        aria-label="디어블룸 기능 둘러보기"
+        className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden touch-pan-y focus:outline-none"
+        onTouchCancel={() => {
+          swipeStart.current = null;
+        }}
+        onTouchEnd={endSwipe}
+        onTouchStart={startSwipe}
+        tabIndex={0}
+      >
+        <div className="absolute left-1/2 top-[67px] z-20 flex -translate-x-1/2 gap-1">{dots}</div>
+        <div
+          aria-live="polite"
+          className="flex min-h-dvh w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none"
+          style={{ transform: `translateX(-${slideIndex * (100 / 3)}%)` }}
+        >
+          {slides}
+        </div>
+        {desktopArrows}
+        <div className="fixed inset-x-0 bottom-0 z-20 bg-neutral-0">
+          <div className="mx-auto max-w-[375px] px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
+            <BottomButton color="green" onClick={onFinish}>
+              디어블룸 시작하기
+            </BottomButton>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
 
 const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) =>
   region.label
@@ -255,35 +462,10 @@ export function CustomerOnboardingForm({
   }
 
   const finishOnboarding = () => window.location.replace(returnUrl ?? '/snaps');
-  const completeActions = (
-    <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-      {/* 기능이 준비되면 복원: <BottomButton onClick={finishOnboarding}>기능 둘러보기</BottomButton> */}
-      <button
-        className="mt-3 h-10 w-full text-body-5 text-neutral-700"
-        onClick={finishOnboarding}
-        type="button"
-      >
-        바로 시작하기
-      </button>
-    </div>
-  );
+
+  if (step === 'tour') return <OnboardingTour onFinish={finishOnboarding} />;
 
   return (
-    <main className="min-h-dvh bg-primary-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
-        <section className="flex flex-col items-center px-4 pt-[18vh] text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-300 text-neutral-0">
-            <Check aria-hidden size={34} strokeWidth={2.5} />
-          </span>
-          <h1 className="mt-6 text-head-3 text-neutral-950">모델 설정이 완료 되었어요!</h1>
-          <p className="mt-2 text-body-6 text-neutral-700">
-            취향에 맞는 작품을 탐색하고
-            <br />
-            작가님께 문의해 보세요.
-          </p>
-        </section>
-        {completeActions}
-      </div>
-    </main>
+    <OnboardingComplete onExploreFeatures={() => setStep('tour')} onFinish={finishOnboarding} />
   );
 }

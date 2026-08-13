@@ -40,6 +40,13 @@ const semantic = {
   success: '#0CC76C',
 };
 
+const profile = {
+  green: primary[200],
+  grey: '#C9CFCF',
+  brown: '#D2CFCF',
+  blue: '#C9D1DD',
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [],
@@ -48,10 +55,17 @@ export default {
       colors: {
         primary,
         neutral,
+        profile,
         ...semantic,
       },
       fontFamily: {
-        sans: ['Pretendard', 'Pretendard Variable', 'system-ui', 'Apple SD Gothic Neo', 'sans-serif'],
+        sans: [
+          'Pretendard',
+          'Pretendard Variable',
+          'system-ui',
+          'Apple SD Gothic Neo',
+          'sans-serif',
+        ],
       },
       // Figma 최종 폰트 시스템(Pretendard). 볼드 2종(head-1, body-3) 추가 + 자간 조정.
       fontSize: {
