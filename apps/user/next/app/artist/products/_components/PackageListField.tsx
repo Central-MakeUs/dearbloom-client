@@ -137,33 +137,33 @@ export function PackageListField({
                 placeholder="패키지명 (예: 기본)"
                 aria-label="패키지명"
               />
-              <div className="flex gap-2">
-                <NumberField
-                  className="flex-1"
-                  value={p.price}
-                  onValueChange={(v) => patch(idx, { price: v })}
-                  min={0}
-                  step={10000}
-                  placeholder="가격"
-                  suffix="원"
-                  aria-label="가격"
-                />
-                <Select
-                  value={p.durationMinutes === '' ? undefined : String(p.durationMinutes)}
-                  onValueChange={(v) => patch(idx, { durationMinutes: Number(v) })}
-                >
-                  <SelectTrigger aria-label="촬영 시간" className="flex-1">
-                    <SelectValue placeholder="촬영 시간" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DURATION_OPTIONS.map((m) => (
-                      <SelectItem key={m} value={String(m)}>
-                        {fmtDuration(m)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* 한 줄에 하나씩 둔다. 반칸에 넣으면 스테퍼(40px×2)+단위에 밀려 입력 영역이
+                  46px 밖에 안 남아, 가격 6자리(140000)가 "14000" 으로 잘리고
+                  보정본 수는 placeholder("보정본 수")가 잘렸다. */}
+              <NumberField
+                value={p.price}
+                onValueChange={(v) => patch(idx, { price: v })}
+                min={0}
+                step={10000}
+                placeholder="가격"
+                suffix="원"
+                aria-label="가격"
+              />
+              <Select
+                value={p.durationMinutes === '' ? undefined : String(p.durationMinutes)}
+                onValueChange={(v) => patch(idx, { durationMinutes: Number(v) })}
+              >
+                <SelectTrigger aria-label="촬영 시간">
+                  <SelectValue placeholder="촬영 시간" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((m) => (
+                    <SelectItem key={m} value={String(m)}>
+                      {fmtDuration(m)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <NumberField
                 value={p.finalPhotoCount}
                 onValueChange={(v) => patch(idx, { finalPhotoCount: v })}
