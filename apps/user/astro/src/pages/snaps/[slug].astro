@@ -99,12 +99,13 @@ if (artwork && token) {
           {/* 상단 블록: 캐러셀 + 제목 + 탭 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
           <div>
             {/* scroll-pl-4: 스냅이 좌측 패딩을 건너뛰어 첫 장이 화면 끝에 붙는 것 방지 */}
+            {/* bg-neutral-200: 사진이 오기 전까지 빈칸 대신 회색 자리로 (아래 '다른 작품' 그리드와 같은 처리) */}
             {photos.length > 0 && (
               <div class="flex snap-x scroll-pl-4 gap-1 overflow-x-auto px-4">
                 {photos.map((p, i) =>
                   p.fileType === 'VIDEO' ? (
                     // preload=metadata: 재생 전에 본문까지 받지 않게 — 캐러셀에 여러 장이 깔릴 수 있다.
-                    <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg object-cover" controls />
+                    <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover" controls />
                   ) : (
                     /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
                     <img
@@ -112,7 +113,7 @@ if (artwork && token) {
                       alt={artwork.title}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       fetchpriority={i === 0 ? 'high' : undefined}
-                      class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg object-cover"
+                      class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover"
                     />
                   ),
                 )}
