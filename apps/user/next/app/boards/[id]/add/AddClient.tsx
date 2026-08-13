@@ -11,6 +11,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spinner,
 } from '@dearbloom/ui';
 import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
 import { showCandidateToast } from '../CandidateToast';
@@ -118,6 +119,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
         <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           보드에 추가하기 {selectedIds.size}/3
         </BottomButton>
       </div>

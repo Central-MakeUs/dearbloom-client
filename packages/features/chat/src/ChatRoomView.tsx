@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 // ⋯ 메뉴를 되살릴 때 함께 푼다.
 // import { MoreHorizontal } from 'lucide-react';
-import { Header } from '@dearbloom/ui';
+import { Header, Spinner } from '@dearbloom/ui';
 import { isReadBy, type ChatMessage, type ChatReadEvent, type ChatRole } from '@dearbloom/shared';
 import { ChatComposer } from './ChatComposer';
 // import { ChatRoomMenu } from './ChatRoomMenu';
@@ -189,7 +189,9 @@ export function ChatRoomView({
       className="h-[calc(100dvh-113px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto pb-4 pl-2 pr-4 pt-2"
     >
       {loadingOlder && (
-        <p className="pb-3 text-center text-caption-2 text-neutral-500">이전 대화를 불러오는 중…</p>
+        <div className="flex justify-center pb-3">
+          <Spinner className="size-5" label="이전 대화를 불러오는 중" />
+        </div>
       )}
       <div className="flex flex-col gap-5">
         {messages.map((message) => (

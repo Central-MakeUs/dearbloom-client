@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
+import { BottomButton, Card, cn, Header, Spinner } from '@dearbloom/ui';
 
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
@@ -210,6 +210,7 @@ export function RoleSelectionForm({
         </p>
       ) : null}
       <BottomButton color="black" disabled={!role || isSubmitting} onClick={submit}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         {isSubmitting ? '확인 중...' : '다음'}
       </BottomButton>
     </div>

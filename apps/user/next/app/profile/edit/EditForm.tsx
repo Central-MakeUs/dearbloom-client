@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { BottomButton, TextField } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField } from '@dearbloom/ui';
 import { customerNameSchema, CUSTOMER_NAME_MAX_LENGTH } from '@dearbloom/shared';
 
 const schema = z.object({ name: customerNameSchema });
@@ -63,6 +63,7 @@ export function EditForm({ initialName }: { initialName: string }) {
   const cta = (
     <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
       <BottomButton color="black" type="submit" disabled={!isValid || isSubmitting}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         완료
       </BottomButton>
     </div>

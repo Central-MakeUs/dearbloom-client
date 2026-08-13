@@ -1,6 +1,6 @@
 'use client';
 
-import { BottomButton, Textarea } from '@dearbloom/ui';
+import { BottomButton, Spinner, Textarea } from '@dearbloom/ui';
 import { ampmTimeLabel, shortDateLabel, type InquiryPreparation } from '@dearbloom/shared';
 
 interface NoteStepProps {
@@ -68,6 +68,7 @@ export function NoteStep({
       <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md bg-neutral-100 p-4">
         {errorNote}
         <BottomButton onClick={onSubmit} disabled={submitting}>
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           {submitting ? '보내는 중…' : '문의 보내기'}
         </BottomButton>
       </div>

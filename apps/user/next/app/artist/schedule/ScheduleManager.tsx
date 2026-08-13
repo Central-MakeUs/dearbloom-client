@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
 import {
   AlertDialog,
@@ -20,6 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Spinner,
   cn,
 } from '@dearbloom/ui';
 import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
@@ -266,7 +267,7 @@ export function ScheduleManager({
     (a, b) => (a.blockDate ?? '').localeCompare(b.blockDate ?? '') || a.startTime.localeCompare(b.startTime),
   );
 
-  const spinner = <Loader2 className="animate-spin" aria-hidden />;
+  const spinner = <Spinner className="text-current" label="" />;
   const emptyText = (text: string) => <p className="py-2 text-center text-caption-1 text-neutral-500">{text}</p>;
 
   const blockRow = (r: ScheduleRule, kind: BlockKind, label: string, past = false) => (

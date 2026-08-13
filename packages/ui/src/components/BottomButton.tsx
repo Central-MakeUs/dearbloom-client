@@ -15,7 +15,8 @@ const colorClass = {
 } as const satisfies Record<BottomButtonColor, string>;
 
 const bottomButtonBase =
-  'flex h-[52px] w-full items-center justify-center rounded-md text-body-1 transition-colors ' +
+  // gap-2 는 제출 중 스피너처럼 라벨 옆에 아이콘이 붙을 때만 의미가 있다(텍스트 하나면 무영향).
+  'flex h-[52px] w-full items-center justify-center gap-2 rounded-md text-body-1 transition-colors ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 ' +
   'active:scale-[0.99] disabled:bg-neutral-300 disabled:text-neutral-500 disabled:pointer-events-none';
 

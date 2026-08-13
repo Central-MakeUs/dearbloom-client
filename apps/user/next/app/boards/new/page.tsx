@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header, BottomButton, TextField, cn } from '@dearbloom/ui';
+import { Header, BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
 import {
   BOARD_NAME_MAX_LENGTH,
   getBoardNameError,
@@ -81,6 +81,7 @@ export default function NewBoardPage() {
       <div className="flex-1" />
       <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
         <BottomButton type="submit" color="black" disabled={!valid || submitting}>
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           완료
         </BottomButton>
       </div>

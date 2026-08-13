@@ -10,6 +10,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spinner,
   TextField,
   Textarea,
   cn,
@@ -443,6 +444,7 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
           </BottomButton>
         ) : (
           <BottomButton color="green" disabled={submitting} onClick={submit}>
+            {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
             {submitting ? '전송 중...' : '문의 보내기'}
           </BottomButton>
         )}

@@ -6,7 +6,7 @@ import { LOGIN_HREF } from '@/src/lib/env';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Field, Input, NumberField, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, NumberField, Spinner, Textarea } from '@dearbloom/ui';
 import { PhotoGridField, type PhotoItem } from '../_components/PhotoGridField';
 import {
   PackageListField,
@@ -174,6 +174,7 @@ export function ArtworkForm() {
       {progress && <p className="text-caption-1 text-neutral-500">{progress}</p>}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? <Spinner className="text-current" label="" /> : null}
         {isSubmitting ? '등록 중…' : '작품 등록'}
       </Button>
     </form>

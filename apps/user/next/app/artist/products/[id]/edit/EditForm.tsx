@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Button, Field, Input, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, Spinner, Textarea } from '@dearbloom/ui';
 import type { ArtworkPackage, ArtworkPhoto } from '@dearbloom/shared';
 import { PhotoGridField, photoFromUrl, type PhotoItem } from '../../_components/PhotoGridField';
 import {
@@ -153,6 +153,7 @@ export function EditForm({
       {submitError && <p className="text-caption-1 text-danger">{submitError}</p>}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? <Spinner className="text-current" label="" /> : null}
         {isSubmitting ? '저장 중…' : '저장'}
       </Button>
     </form>
