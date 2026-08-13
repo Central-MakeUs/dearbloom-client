@@ -22,8 +22,15 @@ import {
 } from '@/lib/artworkFilter';
 
 const token = Astro.cookies.get('accessToken')?.value;
-// 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지). 비로그인은 캐시 가능(SEO).
-if (token) Astro.response.headers.set('Cache-Control', 'private, no-store');
+if (token) {
+  // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지).
+  Astro.response.headers.set('Cache-Control', 'private, no-store');
+} else {
+  // 익명 렌더에는 개인 상태가 없다(isSaved 는 null) → CDN 에 짧게 올려 SEO·재방문 트래픽을 함수 없이 받는다.
+  // Vary: Cookie 로 accessToken 을 든 요청이 이 익명 응답을 받지 않게 한다.
+  Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+  Astro.response.headers.set('Vary', 'Cookie');
+}
 
 const filter = parseFilterParams(Astro.url);
 const view = parseView(Astro.url);
@@ -99,7 +106,8 @@ const CHIP_CLASS =
       <div class="mb-0.5 mt-[3px] flex h-10 items-center justify-between pl-5 pr-2">
         <span class="text-body-5 text-neutral-600">전체 {page.totalCount}</span>
         <div class="flex items-center">
-          <ArtworkSortSheet current={filter.sort ?? 'LATEST'} filterQuery={filterOnlyQuery} client:load />
+          {/* 정렬은 보조 조작 — 첫 렌더를 막지 않고 유휴 시간에 붙인다. */}
+          <ArtworkSortSheet current={filter.sort ?? 'LATEST'} filterQuery={filterOnlyQuery} client:idle />
           {/*
             보기 전환 — Figma icons/40/3Grid. 그리드일 땐 점 3x3, 리스트일 땐 2x2(시안 1060:16189).
             누르면 바뀔 상태가 아니라 "지금 무엇으로 갈 수 있는지"를 아이콘으로 보여준다.

@@ -1,5 +1,6 @@
 import { RegionTag, SaveHeart, SkeletonImage } from '@dearbloom/ui';
 import { artistRegionLabel, type ArtworkListItem } from '@dearbloom/shared';
+import { optimizedImageUrl } from '@/lib/imageUrl';
 
 interface Props {
   artwork: ArtworkListItem;
@@ -23,7 +24,7 @@ export function ArtworkListRow({ artwork }: Props) {
       {photos.map((url, i) => (
         <a key={`${url}-${i}`} href={href} className="shrink-0">
           <SkeletonImage
-            src={url ?? undefined}
+            src={optimizedImageUrl(url, 120)}
             alt={i === 0 ? artwork.title : ''}
             loading="lazy"
             className="h-[150px] w-[120px] rounded-md"
