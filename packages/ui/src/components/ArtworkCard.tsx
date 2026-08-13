@@ -132,7 +132,9 @@ export function ArtworkCard({
           strokeWidth={1.5}
           endpoint={saveEndpoint}
           onChange={onSavedChange}
-          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center text-error transition-transform active:scale-90"
+          // Figma 437:7469 — 36x36 원(#1F1F1F 30%) 위에 하트. 사진 위라 원이 있어야 하트가 산다.
+          // 하트 색만 QA 지시대로 흰색 → 빨강(error).
+          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-error transition-transform active:scale-90"
         />
       </div>
       <a href={detailHref} className="block">
