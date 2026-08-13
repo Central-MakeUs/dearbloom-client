@@ -1,5 +1,6 @@
 import { ampmDateTimeLabel, type ChatMessage, type ChatRole } from '@dearbloom/shared';
 import { cn } from '@dearbloom/ui';
+import { ChatImagePreview } from './ChatImagePreview';
 import { InquiryCardBubble } from './InquiryCardBubble';
 
 interface MessageRowProps {
@@ -26,9 +27,8 @@ export function MessageRow({ message, myRole, artworkHref }: MessageRowProps) {
       // 작은 이미지가 몇 px 짜리 점이 돼 메시지가 안 보이는 것처럼 읽힌다.
       // loading="lazy" 도 쓰면 안 된다 — 로드 전 0x0 이라 스크롤 컨테이너 안에서
       // 뷰포트 판정이 걸리지 않아 이미지가 영영 안 뜬다.
-      <img
+      <ChatImagePreview
         src={message.imageUrl}
-        alt="보낸 사진"
         className="w-[247px] rounded-xl border border-neutral-200"
       />
     ) : (
