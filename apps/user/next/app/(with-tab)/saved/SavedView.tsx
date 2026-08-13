@@ -23,6 +23,7 @@ import {
   type ArtworkListItem,
   type SharedBoardSummary,
 } from '@dearbloom/shared';
+import { AppLink } from '@/src/components/common/AppLink';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
 import { getSwipedTab, type SavedTab } from './savedSwipe';
 
@@ -178,9 +179,9 @@ export function SavedView({
         aria-label="공동보드 만들기"
         className="pointer-events-auto h-12 w-12 rounded-full text-neutral-0 shadow-elevation [&_svg]:size-6"
       >
-        <a href="/app/boards/new">
+        <AppLink href="/app/boards/new">
           <Plus strokeWidth={2} aria-hidden />
-        </a>
+        </AppLink>
       </Button>
     </div>
   );
@@ -195,14 +196,14 @@ export function SavedView({
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
           {initialBoards.map((board) => (
-            <a key={board.sharedBoardId} href={`/app/boards/${board.sharedBoardId}`} className="flex flex-col">
+            <AppLink key={board.sharedBoardId} href={`/app/boards/${board.sharedBoardId}`} className="flex flex-col">
               <BoardCollage
                 artworks={board.thumbnailUrlList.map((thumbnailUrl) => ({ thumbnailUrl }))}
                 className="mb-2"
               />
               <div className="truncate text-body-4 text-neutral-950">{board.sharedBoardName}</div>
               <div className="text-caption-2 text-neutral-600">{board.sharedArtworkCount}개의 작품</div>
-            </a>
+            </AppLink>
           ))}
         </div>
       )}

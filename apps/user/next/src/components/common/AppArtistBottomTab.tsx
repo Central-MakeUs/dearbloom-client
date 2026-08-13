@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { TabButton } from '@dearbloom/ui';
 import { isArtistTabHidden } from './artistTab';
+import { AppLink } from './AppLink';
 
 /**
  * 작가 전용 하단 탭. IA 도메인(대시보드/신청/작품/채팅/마이) 기준.
@@ -33,6 +34,7 @@ export function AppArtistBottomTab() {
         <TabButton
           key={tab.key}
           href={tab.href}
+          linkComponent={AppLink}
           label={tab.label}
           active={tab.match(pathname)}
           icon={(active) => <tab.Icon active={active} />}

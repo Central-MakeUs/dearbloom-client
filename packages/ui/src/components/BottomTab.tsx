@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { TabButton } from './TabButton';
 
@@ -51,6 +51,12 @@ interface BottomTabProps {
   /** 배경 변형. light(기본) → neutral-100, dark → neutral-900. */
   variant?: BottomTabVariant;
   className?: string;
+  /**
+   * 링크를 그릴 컴포넌트. 기본은 `<a>`(문서 이동).
+   * 탐색 탭만 Astro(`/snaps`)고 나머지는 Next(`/app/*`)라, Next 앱에서는 AppLink 를
+   * 넘겨 자기 라우트로 가는 탭만 클라이언트 라우팅되게 합니다.
+   */
+  linkComponent?: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
 }
 
 const surface = {
@@ -69,7 +75,7 @@ const inactive = {
   dark: 'text-neutral-400 hover:text-neutral-200',
 } as const satisfies Record<BottomTabVariant, string>;
 
-export function BottomTab({ currentPath, variant = 'light', className }: BottomTabProps) {
+export function BottomTab({ currentPath, variant = 'light', className, linkComponent }: BottomTabProps) {
   return (
     <nav
       className={cn(
@@ -84,6 +90,7 @@ export function BottomTab({ currentPath, variant = 'light', className }: BottomT
         <TabButton
           key={tab.key}
           href={tab.href}
+          linkComponent={linkComponent}
           label={tab.label}
           active={tab.match(currentPath)}
           activeClassName={active[variant]}

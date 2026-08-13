@@ -3,6 +3,7 @@ import { getMemberMe, getArtistMe } from '@dearbloom/shared';
 import { Button, Header, SkeletonImage } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
 
+import { AppLink } from '@/src/components/common/AppLink';
 import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
 import { MyMenuRow } from '@/src/components/common/MyMenuRow';
@@ -56,12 +57,12 @@ export default async function ArtistMyPage() {
           <span className="truncate text-caption-1 text-neutral-600">{me.email}</span>
         </div>
       </div>
-      <a
+      <AppLink
         href="/app/artist/profile"
         className="shrink-0 rounded-md border border-neutral-300 bg-neutral-100 px-3 py-1 text-body-1 text-neutral-950"
       >
         수정
-      </a>
+      </AppLink>
     </section>
   );
 

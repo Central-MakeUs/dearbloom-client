@@ -1,3 +1,5 @@
+import { AppLink } from './AppLink';
+
 /**
  * 마이페이지 메뉴 한 줄 — 라벨 + 우측 화살표.
  *
@@ -32,12 +34,13 @@ export function MyMenuRow({
     </span>
   );
 
+  // 문의 내역·탈퇴는 이 앱 라우트고 개인정보 처리방침은 Astro 라, AppLink 가 갈라줍니다.
   if (href) {
     return (
-      <a href={href} className={rowClass}>
+      <AppLink href={href} className={rowClass}>
         {labelNode}
         {arrow}
-      </a>
+      </AppLink>
     );
   }
 

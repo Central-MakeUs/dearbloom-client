@@ -3,6 +3,7 @@ import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
 import { ProfileUpdatedToast } from './ProfileUpdatedToast';
 import { Header } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 import { DefaultAvatar } from '@/src/components/common/DefaultAvatar';
 import { LoginSheet } from '../../(auth)/LoginSheet';
 
@@ -49,12 +50,12 @@ export default async function MyPage({
             <span className="truncate text-caption-1 text-neutral-600">{member.email}</span>
           </div>
         </div>
-        <a
+        <AppLink
           href="/app/profile/edit"
           className="shrink-0 rounded-md border border-neutral-300 bg-neutral-100 px-3 py-1 text-body-1 text-neutral-950"
         >
           수정
-        </a>
+        </AppLink>
       </section>
 
       {/* 메뉴 + 로그아웃 모달 */}

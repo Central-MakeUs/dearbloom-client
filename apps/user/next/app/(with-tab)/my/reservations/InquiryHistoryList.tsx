@@ -10,6 +10,7 @@ import {
   type CustomerInquiryListItem,
   type InquiryStatus,
 } from '@dearbloom/shared';
+import { AppLink } from '@/src/components/common/AppLink';
 
 type TabKey = 'inquiry' | 'canceled';
 
@@ -118,7 +119,7 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
       <ul className="flex flex-col gap-3 px-4 pb-4">
         {shown.map((it) => (
           <li key={it.inquiryId}>
-            <a
+            <AppLink
               href={`/app/my/reservations/${it.inquiryId}`}
               className="block rounded-lg bg-neutral-0 p-4"
             >
@@ -143,7 +144,7 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
                   <p className="mt-0.5 text-body-4 text-neutral-950">{it.packageName}</p>
                 </div>
               </div>
-            </a>
+            </AppLink>
           </li>
         ))}
       </ul>

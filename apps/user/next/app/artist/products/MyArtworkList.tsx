@@ -17,6 +17,7 @@ import {
   Card,
   SkeletonImage,
 } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 
 const formatPrice = (won: number) => `${won.toLocaleString('ko-KR')}원`;
 
@@ -53,9 +54,9 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
           </a>
           <div className="flex shrink-0 flex-col gap-1">
             <Button asChild variant="outline" size="sm">
-              <a href={`/app/artist/products/${a.artworkId}/edit`}>
+              <AppLink href={`/app/artist/products/${a.artworkId}/edit`}>
                 <Pencil className="size-3.5" /> 수정
-              </a>
+              </AppLink>
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
