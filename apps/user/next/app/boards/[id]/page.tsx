@@ -35,7 +35,7 @@ import type {
 } from '@dearbloom/shared';
 import { artistRegionLabel } from '@dearbloom/shared';
 import { useHydrated } from '@/src/lib/useHydrated';
-import { getNextSharedArtworkLike } from '@/src/lib/sharedArtworkLike';
+import { getNextSharedArtworkLike, getRankedSharedArtworks } from '@/src/lib/sharedArtworkLike';
 import { formatSharedCommentTime, sortSharedCommentsNewestFirst } from '@/src/lib/sharedComments';
 import { showCandidateToast } from './CandidateToast';
 import { ShareBoardSheet } from './ShareBoardSheet';
@@ -268,7 +268,7 @@ export default function BoardDetailPage() {
 
   const grid = (
     <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3">
-      {board.sharedArtworkList.map((artwork: SharedArtwork) => (
+      {getRankedSharedArtworks(board.sharedArtworkList).map(({ artwork, rank }) => (
         <div key={artwork.sharedArtworkId} className="flex flex-col">
           <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
             <a
@@ -286,6 +286,18 @@ export default function BoardDetailPage() {
                 <div className="h-full w-full bg-gradient-to-br from-primary-100 to-primary-300" />
               )}
             </a>
+            {rank && (
+              <div className="absolute left-0 top-0 flex h-7 w-[67px] items-center justify-center gap-1 rounded-br-md bg-primary text-caption-1 text-neutral-0">
+                <span aria-hidden className="flex size-4 items-center justify-center overflow-hidden">
+                  <img
+                    src="/app/images/shared-rank-crown.svg"
+                    alt=""
+                    className="h-[12.137px] w-[13.334px] max-w-none"
+                  />
+                </span>
+                <span>{rank}순위</span>
+              </div>
+            )}
             <button
               type="button"
               aria-label={artwork.isLiked ? '좋아요 취소' : '좋아요'}
