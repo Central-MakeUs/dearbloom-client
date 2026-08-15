@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
   RegionTag,
   SkeletonImage,
+  showToast,
   cn,
 } from '@dearbloom/ui';
 import type {
@@ -37,7 +38,6 @@ import { artistRegionLabel } from '@dearbloom/shared';
 import { useHydrated } from '@/src/lib/useHydrated';
 import { getNextSharedArtworkLike, getRankedSharedArtworks } from '@/src/lib/sharedArtworkLike';
 import { formatSharedCommentTime, sortSharedCommentsNewestFirst } from '@/src/lib/sharedComments';
-import { showCandidateToast } from './CandidateToast';
 import { ShareBoardSheet } from './ShareBoardSheet';
 import { SharedLikeIcon } from './SharedLikeIcon';
 
@@ -99,13 +99,13 @@ export default function BoardDetailPage() {
 
   useEffect(() => {
     if (!candidateUpdated) return;
-    showCandidateToast('내 후보가 수정되었어요', 'success');
+    showToast('내 후보가 수정되었어요');
     window.history.replaceState(window.history.state, '', window.location.pathname);
   }, [candidateUpdated]);
 
   useEffect(() => {
     if (!boardRenamed) return;
-    showCandidateToast('보드 이름이 변경되었어요', 'success');
+    showToast('보드 이름이 변경되었어요');
     window.history.replaceState(window.history.state, '', window.location.pathname);
   }, [boardRenamed]);
 
@@ -593,7 +593,7 @@ export default function BoardDetailPage() {
                 method: 'DELETE',
               });
               if (!response.ok) return;
-              showCandidateToast('보드가 삭제되었어요', 'success');
+              showToast('보드가 삭제되었어요');
               router.replace('/saved?tab=board');
             }}
           >
@@ -627,7 +627,7 @@ export default function BoardDetailPage() {
                 method: 'DELETE',
               });
               if (!response.ok) return;
-              showCandidateToast('공동보드에서 나갔어요', 'success');
+              showToast('공동보드에서 나갔어요');
               router.replace('/saved?tab=board');
             }}
           >

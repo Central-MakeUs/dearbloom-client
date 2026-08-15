@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, Info, Minus, Plus, Search } from 'lucide-react';
-import { toast } from 'sonner';
 import {
   BottomButton,
   DeleteButton,
@@ -14,6 +13,7 @@ import {
   TextField,
   Textarea,
   cn,
+  showToast,
 } from '@dearbloom/ui';
 import type { InquiryCreateResult, InquiryPreparation, University } from '@dearbloom/shared';
 import {
@@ -195,7 +195,7 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
         aria-disabled={!selectable}
         onClick={() => {
           if (!selectable) {
-            toast.error(`${durationLabel(durationMinutes)} 촬영은 이 시간에 시작할 수 없어요.`);
+            showToast(`${durationLabel(durationMinutes)} 촬영은 이 시간에 시작할 수 없어요.`, 'error');
             return;
           }
           setStartTime(time);

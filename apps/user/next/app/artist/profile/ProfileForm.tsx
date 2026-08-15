@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
 import { nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
-import { Button, Field, Input, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, Textarea, showToast } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
 import { LOGIN_HREF } from '@/src/lib/env';
@@ -87,7 +86,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
       // 변경 사항이 없으면 네트워크 호출 생략.
       if (Object.keys(patch).length === 0) {
-        toast.success('저장되었습니다.');
+        showToast('저장되었습니다.');
         return;
       }
 
@@ -104,10 +103,10 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(b.error || '저장 실패');
       }
-      toast.success('저장되었습니다.');
+      showToast('저장되었습니다.');
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : '오류가 발생했어요');
+      showToast(err instanceof Error ? err.message : '오류가 발생했어요', 'error');
     }
   };
 

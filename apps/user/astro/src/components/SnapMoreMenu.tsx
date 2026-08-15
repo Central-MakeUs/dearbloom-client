@@ -7,6 +7,7 @@ import {
   RadioGroupItem,
   Textarea,
   cn,
+  showToast,
 } from '@dearbloom/ui';
 import { ARTWORK_REPORT_CONTENT_MAX } from '@dearbloom/shared';
 
@@ -70,6 +71,12 @@ export function SnapMoreMenu({
     }
   }
 
+  function completeReport() {
+    setReported(true);
+    close(false);
+    showToast('신고가 완료되었어요');
+  }
+
   async function submit() {
     if (!canSubmit || busy) return;
     setBusy(true);
@@ -89,14 +96,12 @@ export function SnapMoreMenu({
       }
       // 이미 신고한 작품 — 실패가 아니라 '접수됨' 상태로 수렴시킨다.
       if (res.status === 409) {
-        setReported(true);
-        close(false);
+        completeReport();
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
 
-      setReported(true);
-      close(false);
+      completeReport();
     } catch {
       setError('신고를 접수하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
