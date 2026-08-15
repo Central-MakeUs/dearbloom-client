@@ -7,6 +7,7 @@ import type { ArtistRegionCode } from '@dearbloom/shared';
 import { BottomButton } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
+import { withFlashToast } from '@/src/lib/flashToast';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
@@ -91,7 +92,7 @@ export function ArtistOnboardingForm({
     setIsSubmitting(true);
 
     if (forceOnboarding) {
-      window.location.replace('/app/artist/dashboard');
+      window.location.replace(withFlashToast('/app/artist/dashboard', 'welcome'));
       return;
     }
 
@@ -131,11 +132,13 @@ export function ArtistOnboardingForm({
   const imageField = (
     <div className="flex flex-col items-center gap-3">
       <label
-        className="relative flex h-28 w-28 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-neutral-200 ring-2 ring-neutral-0 shadow-elevation focus-within:ring-primary"
+        className="relative block h-28 w-28 cursor-pointer rounded-full bg-neutral-200 ring-2 ring-neutral-0 shadow-elevation transition-shadow active:ring-primary"
         htmlFor="artist-profile-image"
       >
-        {profileImage}
-        <span className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-neutral-0 bg-primary text-neutral-0">
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          {profileImage}
+        </div>
+        <span className="absolute bottom-0 right-0 z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-neutral-0 bg-primary text-neutral-0 shadow-md">
           <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="18">
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -177,8 +180,12 @@ export function ArtistOnboardingForm({
 
   const submitButton = (
     <div className="absolute inset-x-0 bottom-0 bg-neutral-100 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
-      <BottomButton disabled={isSubmitting} type="submit">
-        {isSubmitting ? '저장 중…' : '다음'}
+      <BottomButton
+        color="green"
+        disabled={!imageFile || regions.length === 0 || isSubmitting}
+        type="submit"
+      >
+        {isSubmitting ? '저장 중…' : '디어블룸 시작하기'}
       </BottomButton>
     </div>
   );

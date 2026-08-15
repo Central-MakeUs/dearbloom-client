@@ -4,6 +4,7 @@ import type { AuthRole } from '@dearbloom/features-auth';
 import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+import { withFlashToast } from '@/src/lib/flashToast';
 import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { setAuthCookie } from '@/src/lib/authCookies';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
@@ -145,7 +146,10 @@ function redirectAfterLogin(
   const returnUrl = safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
   const destination = needsOnboarding
     ? getOnboardingTermsPath(role, forceOnboarding, returnUrl)
-    : returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
+    : withFlashToast(
+        returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard'),
+        'login',
+      );
   const url = new URL(destination, getPublicOrigin(request));
 
   return clearOAuthCookies(NextResponse.redirect(url));

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ToastMessage } from '@dearbloom/ui';
 
 /**
  * 프로필 수정 후 돌아왔을 때 뜨는 완료 토스트.
@@ -23,16 +24,9 @@ export function ProfileUpdatedToast() {
 
   return (
     <div
-      role="status"
       className="pointer-events-none fixed inset-x-0 bottom-[73px] z-30 flex justify-center animate-in fade-in"
     >
-      {/* pill 스타일은 공동보드 토스트(CandidateToast)와 동일하게 맞춘다. */}
-      <div className="flex items-center gap-[2px] rounded-full bg-neutral-800 px-4 py-2 text-body-6 text-neutral-0 shadow-elevation">
-        <span className="flex size-5 shrink-0 items-center justify-center">
-          <img src="/app/images/toast-success.svg" alt="" className="size-3" />
-        </span>
-        <span className="whitespace-nowrap">프로필이 수정되었습니다</span>
-      </div>
+      <ToastMessage message="프로필이 수정되었습니다" status="success" />
     </div>
   );
 }

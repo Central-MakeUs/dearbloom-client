@@ -3,20 +3,30 @@ import { redirect } from 'next/navigation';
 
 import { Header } from '@dearbloom/ui';
 
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
+import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { safeReturnUrl } from '@/src/lib/returnUrl';
 
 import { ArtistOnboardingForm } from './ArtistOnboardingForm';
 
 type ArtistOnboardingPageProps = {
-  searchParams: Promise<{ error?: string; forceOnboarding?: string }>;
+  searchParams: Promise<{ error?: string; forceOnboarding?: string; returnUrl?: string }>;
 };
 
 export default async function ArtistOnboardingPage({ searchParams }: ArtistOnboardingPageProps) {
   if (!(await cookies()).has('accessToken')) redirect('/dev/login');
 
-  const { error, forceOnboarding: forceOnboardingParam } = await searchParams;
+  const { error, forceOnboarding: forceOnboardingParam, returnUrl: returnUrlParam } =
+    await searchParams;
   const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
-  const header = <Header backHref="/app/role" />;
+  const returnUrl = safeReturnUrl(returnUrlParam);
+  const header = (
+    <div>
+      <Header backHref={getOnboardingTermsPath('ARTIST', forceOnboarding, returnUrl)} />
+      <OnboardingProgress step={2} total={2} />
+    </div>
+  );
 
   const content = (
     <section className="px-4 pt-2">

@@ -41,3 +41,4 @@ export * from './components/ArtworkCard';
 export * from './components/BottomSheet';
 export * from './components/ShareBottomSheet';
 export * from './components/CustomerProfileAvatar';
+export * from './components/ToastMessage';

@@ -44,13 +44,13 @@ export const REGION_OPTIONS = Object.entries(REGION_LABELS).map(([value, label])
  */
 export const ARTIST_REGION_LABELS = {
   SEOUL: '서울',
-  GYEONGGI_NORTH: '경기북부',
-  GYEONGGI_SOUTH: '경기남부',
+  GYEONGGI_NORTH: '경기 북부',
+  GYEONGGI_SOUTH: '경기 남부',
   INCHEON: '인천',
   BUSAN: '부산',
   DAEGU: '대구',
   GWANGJU: '광주',
-  DAEJEON_SEJONG: '대전·세종',
+  DAEJEON_SEJONG: '대전/세종',
   ULSAN: '울산',
   GANGWON: '강원',
   CHUNGBUK: '충북',
