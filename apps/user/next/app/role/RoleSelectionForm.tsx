@@ -9,6 +9,7 @@ import { BottomButton, Card, cn, Header, Spinner } from '@dearbloom/ui';
 
 import artistRoleIcon from '../../public/images/role-artist.svg';
 import customerRoleIcon from '../../public/images/role-customer.svg';
+import { withFlashToast } from '@/src/lib/flashToast';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
@@ -172,8 +173,8 @@ export function RoleSelectionForm({
     >
       <Card
         className={cn(
-          'relative h-[145px] w-full overflow-hidden border-0 bg-primary-100 px-7 py-6 shadow-elevation',
-          role === value && 'ring-2 ring-primary',
+          'relative h-[145px] w-full overflow-hidden border-[1.5px] border-transparent bg-primary-100 px-7 py-6 shadow-[0_3px_6px_0_rgba(0,0,0,0.1)]',
+          role === value && 'border-primary-400',
         )}
       >
         <span className="block text-head-2 text-neutral-950">{title}</span>
@@ -272,5 +273,8 @@ function getLoginDestination(
     return getOnboardingTermsPath(role, forceOnboarding, returnUrl);
   }
 
-  return returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
+  return withFlashToast(
+    returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard'),
+    'login',
+  );
 }

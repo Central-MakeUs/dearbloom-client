@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import type { MemberRole } from '@dearbloom/shared';
 import { BottomButton, Checkbox, cn, Header } from '@dearbloom/ui';
 
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
 
 export function TermsAgreementForm({
@@ -153,6 +154,7 @@ export function TermsAgreementForm({
     <main className="min-h-dvh bg-neutral-100">
       <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
         <Header onBack={() => window.location.replace('/app/role')} />
+        <OnboardingProgress step={1} total={role === 'CUSTOMER' ? 3 : 2} />
         <section className="px-5 pt-2">
           <div className="py-3">
             <h1 className="text-head-1 text-neutral-900">서비스 이용을 위해 동의해 주세요.</h1>

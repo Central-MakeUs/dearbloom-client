@@ -1,7 +1,7 @@
 'use client';
 
 import { ARTIST_REGION_OPTIONS, type ArtistRegionCode } from '@dearbloom/shared';
-import { ToggleGroup, ToggleGroupItem } from '@dearbloom/ui';
+import { cn } from '@dearbloom/ui';
 
 type ArtistRegionFieldProps = {
   error?: string | null;
@@ -9,22 +9,45 @@ type ArtistRegionFieldProps = {
   value: ArtistRegionCode[];
 };
 
-export function ArtistRegionField({ error, onValueChange, value }: ArtistRegionFieldProps) {
+export function ArtistRegionField({
+  error,
+  onValueChange,
+  value,
+}: ArtistRegionFieldProps) {
+  const regionOptions = ARTIST_REGION_OPTIONS.map((region) => {
+    const selected = value.includes(region.value);
+
+    return (
+      <button
+        aria-pressed={selected}
+        className={cn(
+          'rounded-full border-[1.2px] px-3 py-2 text-caption-1 transition-colors',
+          selected
+            ? 'border-primary bg-primary-200 font-semibold text-primary'
+            : 'border-transparent bg-neutral-200 text-neutral-700',
+        )}
+        key={region.value}
+        onClick={() =>
+          onValueChange(
+            selected ? value.filter((item) => item !== region.value) : [...value, region.value],
+          )
+        }
+        type="button"
+      >
+        {region.label}
+      </button>
+    );
+  });
+
   return (
     <div>
-      <span className="mb-1 block text-body-4 text-neutral-800">활동 지역</span>
-      <ToggleGroup
-        aria-label="활동 지역"
-        onValueChange={(regions) => onValueChange(regions as ArtistRegionCode[])}
-        type="multiple"
-        value={value}
-      >
-        {ARTIST_REGION_OPTIONS.map((region) => (
-          <ToggleGroupItem key={region.value} value={region.value}>
-            {region.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+      <div className="mb-1 flex items-center gap-1.5">
+        <span className="text-body-4 text-neutral-800">활동 지역</span>
+        <span className="text-caption-2 text-neutral-500">한 곳 이상 선택해주세요</span>
+      </div>
+      <div aria-label="활동 지역" className="flex flex-wrap gap-2" role="group">
+        {regionOptions}
+      </div>
       {error ? (
         <p className="mt-1 text-caption-1 text-danger" role="alert">
           {error}
