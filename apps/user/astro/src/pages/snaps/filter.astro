@@ -1,7 +1,7 @@
 ---
 export const prerender = false; // 진입 시 URL 의 현재 필터를 그대로 읽어 초기값으로 씁니다.
 
-import { Header } from '@dearbloom/ui';
+import { Header, NativeExitDialog } from '@dearbloom/ui';
 import { FilterSettingsView } from '@/components/FilterSettingsView';
 import { parseFilterParams, toQueryString } from '@/lib/artworkFilter';
 
@@ -27,5 +27,6 @@ const backHref = `/snaps${toQueryString(params)}`;
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     <Header title="필터 설정" backHref={backHref} client:load />
     <FilterSettingsView initial={params} client:load />
+    <NativeExitDialog client:load />
   </body>
 </html>
