@@ -1,4 +1,5 @@
 import './globals.css';
+import { NativeExitDialog } from '@dearbloom/ui';
 import { Toaster } from 'sonner';
 
 export const metadata = { title: 'dearBloom' };
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans text-ink">
         {children}
+        <NativeExitDialog />
         <Toaster position="top-center" richColors />
       </body>
     </html>

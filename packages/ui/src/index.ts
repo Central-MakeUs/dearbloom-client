@@ -36,6 +36,7 @@ export * from './components/ScrollFade';
 export * from './components/Spinner';
 export * from './components/SaveHeart';
 export * from './components/LoginRequiredDialog';
+export * from './components/NativeExitDialog';
 export * from './components/ArtworkCard';
 export * from './components/BottomSheet';
 export * from './components/ShareBottomSheet';

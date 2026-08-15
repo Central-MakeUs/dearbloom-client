@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Share, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Linking,
+  Platform,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
@@ -29,6 +38,11 @@ import {
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
 import { getInviteWebViewUrl } from './nativeDeepLink';
+import {
+  createNativeExitRequestScript,
+  getAndroidBackAction,
+  isNativeExitConfirm,
+} from './nativeBack';
 import { getSessionWebViewUrl } from './nativeSession';
 import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
 import {
@@ -257,6 +271,7 @@ async function requestPushToken(): Promise<NativePushTokenResult> {
 export default function App() {
   const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
+  const canWebViewGoBack = useRef(false);
   const isNativeLoginPending = useRef(false);
   const sessionBootstrapState = useRef<'checking' | 'reading' | 'redirecting' | 'ready'>(
     'checking',
@@ -265,6 +280,23 @@ export default function App() {
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (getAndroidBackAction(canWebViewGoBack.current) === 'go-back') {
+        webViewRef.current?.goBack();
+        return true;
+      }
+
+      webViewRef.current?.injectJavaScript(createNativeExitRequestScript());
+
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     const openDeepLink = (url: string | null) => {
@@ -376,6 +408,11 @@ export default function App() {
       return;
     }
 
+    if (Platform.OS === 'android' && isNativeExitConfirm(data)) {
+      BackHandler.exitApp();
+      return;
+    }
+
     const nextSafeAreaColors = parseNativeSafeAreaColors(data);
 
     if (nextSafeAreaColors) {
@@ -457,6 +494,9 @@ export default function App() {
       onLoadStart={() => setLoadError(null)}
       onLoadEnd={handleWebViewLoadEnd}
       onMessage={handleWebViewMessage}
+      onNavigationStateChange={({ canGoBack }) => {
+        canWebViewGoBack.current = canGoBack;
+      }}
       pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
       renderLoading={() => loading}
