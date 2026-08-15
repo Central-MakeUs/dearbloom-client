@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
+  AccessibilityInfo,
+  Animated,
   BackHandler,
+  Easing,
+  Image,
   Linking,
   Platform,
   Share,
@@ -59,9 +62,13 @@ const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}' }); true;`;
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
+const loadingLabelImage = require('./assets/loading-label.png');
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
+const loadingSymbolImage = require('./assets/loading-symbol.png');
 const colors = {
-  brand: 'rgb(124, 92, 255)',
   ink: 'rgb(17, 20, 24)',
+  loading: 'rgb(229, 235, 232)',
   page: 'rgb(255, 255, 255)',
   sub: 'rgb(107, 114, 128)',
 };
@@ -92,6 +99,61 @@ type WebViewHttpLoadErrorEvent = {
     url: string;
   };
 };
+
+function LoadingView() {
+  const rotation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | undefined;
+    let mounted = true;
+
+    void AccessibilityInfo.isReduceMotionEnabled().then((reduceMotionEnabled) => {
+      if (!mounted || reduceMotionEnabled) return;
+
+      animation = Animated.loop(
+        Animated.timing(rotation, {
+          duration: 1000,
+          easing: Easing.linear,
+          toValue: 1,
+          useNativeDriver: true,
+        }),
+      );
+      animation.start();
+    });
+
+    return () => {
+      mounted = false;
+      animation?.stop();
+    };
+  }, [rotation]);
+
+  const rotate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  const symbol = (
+    <Animated.View style={{ transform: [{ rotate }] }}>
+      <Image accessible={false} source={loadingSymbolImage} style={styles.loadingSymbol} />
+    </Animated.View>
+  );
+  const label = (
+    <View style={styles.loadingLabel}>
+      <Image accessible={false} source={loadingLabelImage} style={styles.loadingLabelImage} />
+    </View>
+  );
+
+  return (
+    <View
+      accessibilityLabel="DearBloom 로딩 중"
+      accessibilityRole="progressbar"
+      accessible
+      style={styles.loading}
+    >
+      {symbol}
+      {label}
+    </View>
+  );
+}
 
 function getWebViewUrl() {
   const webViewUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
@@ -454,12 +516,7 @@ export default function App() {
     }
   };
 
-  const loading = (
-    <View style={styles.centered}>
-      <ActivityIndicator color={colors.brand} />
-      <Text style={styles.loadingText}>dearBloom 로딩 중</Text>
-    </View>
-  );
+  const loading = <LoadingView />;
 
   const error = (
     <View style={styles.centered}>
@@ -469,8 +526,12 @@ export default function App() {
     </View>
   );
 
-  const topSafeAreaStyle = { backgroundColor: safeAreaColors.top };
-  const bottomSafeAreaStyle = { backgroundColor: safeAreaColors.bottom };
+  const topSafeAreaStyle = {
+    backgroundColor: isSessionReady ? safeAreaColors.top : colors.loading,
+  };
+  const bottomSafeAreaStyle = {
+    backgroundColor: isSessionReady ? safeAreaColors.bottom : colors.loading,
+  };
   const webViewStyle = [
     styles.webView,
     { backgroundColor: safeAreaColors.top },
@@ -535,9 +596,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  loadingText: {
-    color: colors.sub,
-    fontSize: 14,
+  loading: {
+    alignItems: 'center',
+    backgroundColor: colors.loading,
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  loadingLabel: {
+    alignItems: 'center',
+    height: 21,
+    justifyContent: 'center',
+    width: 114,
+  },
+  loadingLabelImage: {
+    height: 13,
+    width: 112,
+  },
+  loadingSymbol: {
+    height: 32,
+    width: 31,
   },
   errorTitle: {
     color: colors.ink,

@@ -69,6 +69,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     [
+      'expo-splash-screen',
+      {
+        // eslint-disable-next-line no-restricted-syntax -- Expo 네이티브 스플래시 설정은 hex 색상을 요구한다.
+        backgroundColor: '#E5EBE8',
+        image: './assets/loading-content.png',
+        imageWidth: 114,
+        resizeMode: 'contain',
+      },
+    ],
+    [
       'expo-build-properties',
       {
         ios: {
