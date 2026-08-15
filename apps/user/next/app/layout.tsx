@@ -1,8 +1,5 @@
 import './globals.css';
-import { NativeExitDialog } from '@dearbloom/ui';
-import { Toaster } from 'sonner';
-
-import { FlashToast } from '@/src/components/common/FlashToast';
+import { AppToaster, FlashToast, NativeExitDialog } from '@dearbloom/ui';
 
 export const metadata = { title: 'dearBloom' };
 
@@ -26,9 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans text-ink">
         {children}
-        <FlashToast />
         <NativeExitDialog />
-        <Toaster position="top-center" richColors />
+        <AppToaster />
+        <FlashToast />
       </body>
     </html>
   );

@@ -191,7 +191,7 @@ export function SavedView({
       {initialBoards.length === 0 ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 pb-12 text-center">
           <p className="text-body-1 text-neutral-950">공동보드가 없어요</p>
-          <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
+          <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과<br/>함께 의견을 나눠보세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
@@ -207,7 +207,6 @@ export function SavedView({
           ))}
         </div>
       )}
-      {createFab}
     </div>
   );
 
@@ -292,6 +291,7 @@ export function SavedView({
           </div>
         </div>
       </Tabs>
+      {tab === 'board' ? createFab : null}
       {editBar}
       {confirmDialog}
     </div>

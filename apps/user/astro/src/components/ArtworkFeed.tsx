@@ -95,6 +95,10 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
           thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, CARD_WIDTH)}
           regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved={!!a.isSaved}
+          unsavedHeartIconSrc="/images/save-heart-grid.svg"
+          unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+          savedHeartIconSrc="/images/save-heart-selected.svg"
+          savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
         />
       ))}
     </div>

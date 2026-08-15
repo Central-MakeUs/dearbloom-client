@@ -6,8 +6,7 @@ import { LOGIN_HREF } from '@/src/lib/env';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
-import { Button, Field, Input, Spinner, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, Spinner, Textarea, showToast } from '@dearbloom/ui';
 import type { ArtworkPackage, ArtworkPhoto } from '@dearbloom/shared';
 import { PhotoGridField, photoFromUrl, type PhotoItem } from '../../_components/PhotoGridField';
 import {
@@ -106,7 +105,7 @@ export function EditForm({
         body: JSON.stringify({ packageList: toPackagePayload(values.packageList) }),
       });
       if (!r3.ok) throw new Error('패키지 수정에 실패했어요.');
-      toast.success('저장되었습니다.');
+      showToast('저장되었습니다.');
       router.push('/artist/products');
       router.refresh();
     } catch (err) {

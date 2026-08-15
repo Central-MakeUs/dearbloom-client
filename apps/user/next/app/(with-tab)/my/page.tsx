@@ -1,21 +1,15 @@
 import { cookies } from 'next/headers';
 import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
-import { ProfileUpdatedToast } from './ProfileUpdatedToast';
 import { CustomerProfileAvatar, Header } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
 import { LoginSheet } from '../../(auth)/LoginSheet';
 
 export const dynamic = 'force-dynamic';
 
-export default async function MyPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ updated?: string }>;
-}) {
+export default async function MyPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
-  const { updated } = await searchParams;
 
   // 탭을 누른 시점에 로그인 필요가 확정이라, 안내만 남기고 로그인 시트를 바로 올린다(QA).
   const login = (message: string) => (
@@ -59,8 +53,6 @@ export default async function MyPage({
 
       {/* 메뉴 + 로그아웃 모달 */}
       <MyMenu />
-
-      {updated === '1' ? <ProfileUpdatedToast /> : null}
     </div>
   );
 }

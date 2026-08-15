@@ -2,8 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Button, cn } from '@dearbloom/ui';
+import { Button, cn, showToast } from '@dearbloom/ui';
 import type { InquiryStatus } from '@dearbloom/shared';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { ACTION_BAR_BOTTOM } from './actionBar';
@@ -62,12 +61,12 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
     setBusy(false);
     if (res.ok) {
       setPending(undefined);
-      toast.success(CONFIRM[action].success);
+      showToast(CONFIRM[action].success);
       router.push('/artist/requests');
       router.refresh();
     } else {
       const b = (await res.json().catch(() => ({}))) as { error?: string };
-      toast.error(b.error || '처리에 실패했어요.');
+      showToast(b.error || '처리에 실패했어요.', 'error');
     }
   };
 

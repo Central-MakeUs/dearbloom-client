@@ -20,6 +20,10 @@ export interface ArtworkCardProps {
   initialSaved?: boolean;
   /** 저장 프록시 엔드포인트(앱별 basePath 대응). SaveHeart 로 전달. */
   saveEndpoint?: string;
+  unsavedHeartIconSrc?: string;
+  unsavedHeartIconClassName?: string;
+  savedHeartIconSrc?: string;
+  savedHeartIconClassName?: string;
   onSavedChange?: (saved: boolean) => void;
 
   // ── 선택(편집) 모드 — selectable 이면 하트 대신 체크, 카드 전체가 선택 토글 ──
@@ -47,6 +51,10 @@ export function ArtworkCard({
   href,
   initialSaved = false,
   saveEndpoint,
+  unsavedHeartIconSrc,
+  unsavedHeartIconClassName,
+  savedHeartIconSrc,
+  savedHeartIconClassName,
   onSavedChange,
   selectable = false,
   selected = false,
@@ -131,6 +139,10 @@ export function ArtworkCard({
           size={24}
           strokeWidth={1.5}
           endpoint={saveEndpoint}
+          unsavedIconSrc={unsavedHeartIconSrc}
+          unsavedIconClassName={unsavedHeartIconClassName}
+          savedIconSrc={savedHeartIconSrc}
+          savedIconClassName={savedHeartIconClassName}
           onChange={onSavedChange}
           // Figma 437:7469 — 36x36 원(#1F1F1F 30%) 위에 하트. 사진 위라 원이 있어야 하트가 산다.
           // 하트 색만 QA 지시대로 흰색 → 빨강(error).

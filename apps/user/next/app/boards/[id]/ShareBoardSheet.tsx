@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ShareBottomSheet } from '@dearbloom/ui';
-import { showCandidateToast } from './CandidateToast';
+import { ShareBottomSheet, showToast } from '@dearbloom/ui';
 import { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@/src/lib/webShare';
 
 class ShareError extends Error {}
@@ -54,7 +53,7 @@ export function ShareBoardSheet({
       await action(await getInviteUrl());
     } catch (error) {
       if (isShareCancelled(error)) return;
-      showCandidateToast(error instanceof ShareError ? error.message : failureMessage, 'error');
+      showToast(error instanceof ShareError ? error.message : failureMessage, 'error');
     } finally {
       setLoading(false);
     }
@@ -63,7 +62,7 @@ export function ShareBoardSheet({
   const copyLink = () =>
     run(async (url) => {
       await copyText(url);
-      showCandidateToast('링크가 복사되었어요', 'success');
+      showToast('링크가 복사되었어요');
       onOpenChange(false);
     }, '링크를 복사하지 못했어요');
 
@@ -104,7 +103,7 @@ export function ShareBoardSheet({
         return;
       }
       await copyText(url);
-      showCandidateToast('링크가 복사되었어요', 'success');
+      showToast('링크가 복사되었어요');
     }, '공유 기능을 실행하지 못했어요');
 
   return (

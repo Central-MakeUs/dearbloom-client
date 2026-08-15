@@ -1,4 +1,4 @@
-export type FlashToastKind = 'login' | 'logout' | 'welcome' | 'withdrawal';
+export type FlashToastKind = 'login' | 'logout' | 'profile' | 'welcome' | 'withdrawal';
 
 export function withFlashToast(path: string, kind: FlashToastKind) {
   const url = new URL(path, 'https://dearbloom.local');

@@ -1,7 +1,5 @@
 ---
-import { BottomTab, NativeExitDialog, ScrollFade } from '@dearbloom/ui';
-import { Toaster } from 'sonner';
-import { FlashToast } from '@/components/FlashToast';
+import { AppToaster, BottomTab, FlashToast, NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -31,45 +29,9 @@ const currentPath = Astro.url.pathname;
   </head>
   <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
     <slot />
-    {/* 하단탭(60px) 바로 위에 깔리는 스크롤 페이드 — 더 볼 게 남았을 때만 보입니다.
-        둘 다 client:idle: 페이드는 장식이고, 탭은 SSR 된 <a> 라 하이드레이션 전에도 이동이 됩니다. */}
-    <ScrollFade offset={60} client:idle />
     <BottomTab currentPath={currentPath} variant={navVariant} client:idle />
+    <AppToaster client:load />
     <FlashToast client:load />
-    <Toaster position="top-center" richColors client:load />
     <NativeExitDialog client:load />
   </body>
 </html>
-
-<style is:global>
-  .candidate-toast {
-    left: 0 !important;
-    right: 0 !important;
-    margin-inline: auto !important;
-    width: 356px !important;
-  }
-
-  .candidate-toast-error {
-    margin-bottom: 44px;
-  }
-
-  .candidate-toast-success {
-    margin-bottom: 60px;
-  }
-
-  @media (max-width: 600px) {
-    .candidate-toast {
-      left: -16px !important;
-      right: 16px !important;
-      width: min(calc(100vw - 32px), 400px) !important;
-    }
-
-    .candidate-toast-error {
-      margin-bottom: 52px;
-    }
-
-    .candidate-toast-success {
-      margin-bottom: 68px;
-    }
-  }
-</style>
