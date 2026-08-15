@@ -27,7 +27,7 @@ export function AppArtistBottomTab() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch border-t border-neutral-200 bg-neutral-100 pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch border-t border-neutral-200 bg-neutral-100 pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]"
       aria-label="작가 네비게이션"
     >
       {TABS.map((tab) => (

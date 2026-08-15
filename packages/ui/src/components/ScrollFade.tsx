@@ -60,7 +60,7 @@ export function ScrollFade({ offset = 0, height = 32, className }: ScrollFadePro
       )}
       style={{
         height,
-        bottom: `calc(${offset}px + env(safe-area-inset-bottom))`,
+        bottom: `calc(${offset}px + var(--dearbloom-safe-area-bottom, env(safe-area-inset-bottom)))`,
       }}
     />
   );

@@ -80,7 +80,7 @@ export function BottomTab({ currentPath, variant = 'light', className, linkCompo
     <nav
       className={cn(
         'fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch',
-        'pb-[env(safe-area-inset-bottom)]',
+        'pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]',
         surface[variant],
         className,
       )}

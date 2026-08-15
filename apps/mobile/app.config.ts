@@ -37,7 +37,8 @@ const googleSignInPlugins: NonNullable<ExpoConfig['plugins']> = googleIosUrlSche
  * 쓰지도 않을 개인정보를 모으지 않는다.
  */
 const googleServicesFile = environment.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.dev.plist';
-const isPushEnabled = environment.PUSH_ENABLED === '1';
+const isPushEnabled =
+  environment.PUSH_ENABLED === '1' && environment.EAS_BUILD_PLATFORM !== 'android';
 
 const firebasePlugins: NonNullable<ExpoConfig['plugins']> = isPushEnabled
   ? [
