@@ -68,6 +68,10 @@ export function ArtworkListRow({ artwork }: Props) {
         initialSaved={!!artwork.isSaved}
         size={24}
         strokeWidth={1.8}
+        unsavedIconSrc="/images/save-heart-list.svg"
+        unsavedIconClassName="left-[2.1px] top-[3.64px] h-[17.76px] w-[19.8px]"
+        savedIconSrc="/images/save-heart-selected.svg"
+        savedIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
         className="flex h-12 w-12 shrink-0 items-center justify-center text-error transition-transform active:scale-90"
       />
     </div>
