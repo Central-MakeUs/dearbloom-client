@@ -27,6 +27,7 @@ const backHref = `/snaps${toQueryString(params)}`;
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     <Header title="필터 설정" backHref={backHref} client:load />
     <FilterSettingsView initial={params} client:load />
-    <NativeExitDialog client:load />
+    {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
+    <NativeExitDialog client:native />
   </body>
 </html>

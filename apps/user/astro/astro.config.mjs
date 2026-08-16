@@ -10,6 +10,19 @@ if (process.env.VERCEL && !process.env.NEXT_PUBLIC_API_URL && !process.env.PUBLI
   throw new Error('Vercel 배포에는 NEXT_PUBLIC_API_URL 또는 PUBLIC_API_URL이 필요합니다.');
 }
 
+/**
+ * `client:native` 디렉티브 등록 — RN WebView 안에서만 하이드레이트.
+ * 동작과 이유는 src/client-directives/native.mjs 주석 참고.
+ */
+const nativeClientDirective = {
+  name: 'dearbloom-native-client-directive',
+  hooks: {
+    'astro:config:setup': ({ addClientDirective }) => {
+      addClientDirective({ name: 'native', entrypoint: './src/client-directives/native.mjs' });
+    },
+  },
+};
+
 export default defineConfig({
   // 기본은 정적(SSG). 서버렌더가 필요한 페이지만 `export const prerender = false` 로 옵트인.
   // 어댑터가 있어야 on-demand(SSR) 페이지를 배포할 수 있음.
@@ -35,7 +48,7 @@ export default defineConfig({
       minimumCacheTTL: 60 * 60 * 24 * 30,
     },
   }),
-  integrations: [tailwind({ applyBaseStyles: true }), react()],
+  integrations: [tailwind({ applyBaseStyles: true }), react(), nativeClientDirective],
   server: { port: 4321 },
   vite: {
     ssr: {

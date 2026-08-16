@@ -34,6 +34,7 @@ const currentPath = Astro.url.pathname;
     <BottomTab currentPath={currentPath} variant={navVariant} />
     <AppToaster client:load />
     <FlashToast client:load />
-    <NativeExitDialog client:load />
+    {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
+    <NativeExitDialog client:native />
   </body>
 </html>
