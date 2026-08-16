@@ -36,6 +36,7 @@ import type {
 } from '@dearbloom/shared';
 import { artistRegionLabel } from '@dearbloom/shared';
 import { useHydrated } from '@/src/lib/useHydrated';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 import { getNextSharedArtworkLike, getRankedSharedArtworks } from '@/src/lib/sharedArtworkLike';
 import { formatSharedCommentTime, sortSharedCommentsNewestFirst } from '@/src/lib/sharedComments';
 import { ShareBoardSheet } from './ShareBoardSheet';
@@ -277,7 +278,7 @@ export default function BoardDetailPage() {
             >
               {artwork.thumbnailUrl ? (
                 <SkeletonImage
-                  src={artwork.thumbnailUrl}
+                  src={optimizedImageUrl(artwork.thumbnailUrl, ARTWORK_CARD_WIDTH)}
                   alt={artwork.title}
                   loading="lazy"
                   className="h-full w-full"

@@ -15,6 +15,7 @@ import {
   showToast,
 } from '@dearbloom/ui';
 import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
   left.size === right.size && [...left].every((id) => right.has(id));
@@ -103,7 +104,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
             title={a.title}
             artistNickname={a.artistNickname}
             price={a.lowestPrice}
-            thumbnailUrl={a.thumbnailUrl}
+            thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, ARTWORK_CARD_WIDTH)}
             regions={a.artistRegionList?.map(artistRegionLabel)}
             selectable
             selected={selectedIds.has(a.artworkId)}

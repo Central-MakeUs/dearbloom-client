@@ -10,6 +10,7 @@ import { Button, Field, Input, Textarea, showToast } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
 import { LOGIN_HREF } from '@/src/lib/env';
+import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const schema = z.object({
   nickname: nicknameSchema,
@@ -154,7 +155,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
       <div>
         <span className={label}>대표 이미지</span>
-        {initial.imageUrl && !imageFile && <img src={initial.imageUrl} alt="현재 대표 이미지" className="mb-2 h-20 w-20 rounded-full object-cover" />}
+        {initial.imageUrl && !imageFile && <img src={optimizedImageUrl(initial.imageUrl, 80)} alt="현재 대표 이미지" className="mb-2 h-20 w-20 rounded-full object-cover" />}
         <FileField accept="image/*" buttonLabel="사진 선택" emptyText="선택된 파일 없음" onFiles={(files) => setImageFile(files[0] ?? null)} ariaLabel="대표 이미지" />
       </div>
 

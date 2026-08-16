@@ -18,6 +18,7 @@ import {
   SkeletonImage,
 } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
+import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const formatPrice = (won: number) => `${won.toLocaleString('ko-KR')}원`;
 
@@ -43,7 +44,7 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
         {items.map((a) => (
         <Card key={a.artworkId} className="flex items-center gap-3 p-2">
           <a href={`/snaps/${a.artworkId}`} className="flex min-w-0 flex-1 items-center gap-3">
-            <SkeletonImage src={a.thumbnailUrl} alt={a.title} className="size-16 shrink-0 rounded-md" />
+            <SkeletonImage src={optimizedImageUrl(a.thumbnailUrl, 64)} alt={a.title} className="size-16 shrink-0 rounded-md" />
             <div className="min-w-0">
               <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
               <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>

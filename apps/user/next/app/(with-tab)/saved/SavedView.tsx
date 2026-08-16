@@ -25,6 +25,7 @@ import {
 } from '@dearbloom/shared';
 import { AppLink } from '@/src/components/common/AppLink';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 import { getSwipedTab, type SavedTab } from './savedSwipe';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
@@ -152,7 +153,7 @@ export function SavedView({
           title={a.title}
           artistNickname={a.artistNickname}
           price={a.lowestPrice}
-          thumbnailUrl={a.thumbnailUrl}
+          thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, ARTWORK_CARD_WIDTH)}
           regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved
           saveEndpoint={SAVED_ENDPOINT}
