@@ -52,6 +52,23 @@ try {
   loadFailed = true;
 }
 
+/*
+  아일랜드 props 는 HTML 에 JSON 으로 직렬화된다. 그리드뷰는 카드 썸네일 한 장만 쓰는데
+  작품당 사진 URL 여러 개인 photoList(리스트뷰 전용)까지 실려서, 한 화면에 원본 CDN URL 이
+  89개나 박혀 있었다. 리스트뷰에서만 넘긴다.
+*/
+const islandPage: ArtworkPage =
+  view === 'list'
+    ? page
+    : {
+        ...page,
+        artworkList: page.artworkList.map((artwork) => {
+          const trimmed = { ...artwork };
+          delete trimmed.photoList;
+          return trimmed;
+        }),
+      };
+
 const chips = filterChipLabels(filter);
 const hasFilter = hasActiveFilter(filter);
 const query = toQueryString(filter); // ArtworkFeed 가 다음 페이지 요청에 싣는다(view 는 조회 조건이 아니라 제외)
@@ -138,7 +155,7 @@ const CHIP_CLASS =
         )}
       </div>
     ) : (
-      <ArtworkFeed initialPage={page} query={query} view={view} client:load />
+      <ArtworkFeed initialPage={islandPage} query={query} view={view} client:load />
     )}
   </div>
 </AppShellLayout>
