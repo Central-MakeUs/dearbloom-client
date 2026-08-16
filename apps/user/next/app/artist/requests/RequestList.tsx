@@ -11,6 +11,7 @@ import {
   type InquiryStatus,
 } from '@dearbloom/shared';
 import { Badge, Card, SkeletonImage, cn, type BadgeProps } from '@dearbloom/ui';
+import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 type FilterKey = 'all' | 'progress' | 'reserved' | 'canceled';
 
@@ -48,7 +49,7 @@ function byUrgency(a: ArtistInquiryListItem, b: ArtistInquiryListItem): number {
 /** 고객 프로필. 이름은 옆에 그대로 나오므로 이미지는 장식으로 둔다. */
 function CustomerAvatar({ imageUrl }: { imageUrl: string | null }) {
   if (imageUrl) {
-    return <SkeletonImage src={imageUrl} alt="" className="size-7 shrink-0 rounded-full" />;
+    return <SkeletonImage src={optimizedImageUrl(imageUrl, 28)} alt="" className="size-7 shrink-0 rounded-full" />;
   }
   return (
     <span
