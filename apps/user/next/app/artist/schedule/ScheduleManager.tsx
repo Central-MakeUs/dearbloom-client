@@ -379,7 +379,8 @@ export function ScheduleManager({
           <div className="flex items-center gap-2">
             <Select value={recDay} onValueChange={(v) => setRecDay(v as DayOfWeek)}>
               <SelectTrigger aria-label="반복 요일" className="h-auto w-auto py-2">
-                <SelectValue />
+                {/* 라벨을 직접 넘긴다 — Radix 는 닫힌 상태에서 SelectItem 을 마운트하지 않는다. */}
+                <SelectValue>{DAYS.find((d) => d.key === recDay)?.label}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {DAYS.map((d) => (

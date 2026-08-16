@@ -22,7 +22,9 @@ export function TimeSelect({
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger aria-label={ariaLabel} className="h-auto w-[96px] gap-1 px-2.5 py-2">
-        <SelectValue />
+        {/* 선택값 텍스트를 직접 넘긴다 — Radix 는 닫힌 상태에서 SelectItem 을 마운트하지 않아
+            value 만 주면 트리거가 빈 칸으로 보인다. */}
+        <SelectValue>{value}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (

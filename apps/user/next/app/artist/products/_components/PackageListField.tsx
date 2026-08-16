@@ -154,7 +154,11 @@ export function PackageListField({
                 onValueChange={(v) => patch(idx, { durationMinutes: Number(v) })}
               >
                 <SelectTrigger aria-label="촬영 시간">
-                  <SelectValue placeholder="촬영 시간" />
+                  {/* 라벨을 직접 넘긴다 — Radix 는 닫힌 상태에서 SelectItem 을 마운트하지 않아
+                      value 만 주면 기존 값이 빈 칸으로 보인다. */}
+                  <SelectValue placeholder="촬영 시간">
+                    {p.durationMinutes === '' ? undefined : fmtDuration(Number(p.durationMinutes))}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {DURATION_OPTIONS.map((m) => (
