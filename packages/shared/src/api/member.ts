@@ -28,9 +28,12 @@ export interface CreateCustomerPayload {
   universityId?: number;
 }
 
+export type CustomerProfileColor = 'GREEN' | 'GREY' | 'BROWN' | 'BLUE';
+
 export interface CustomerProfile {
   customerId: number;
   name: string;
+  profileColor: CustomerProfileColor | null;
   universityId?: number;
   universityName?: string;
 }

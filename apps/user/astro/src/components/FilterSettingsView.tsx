@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { RotateCw } from 'lucide-react';
-import { ScrollFade } from '@dearbloom/ui';
 import {
   ARTIST_REGION_OPTIONS,
   ARTWORK_DATE_RANGE_MAX_DAYS,
@@ -266,7 +265,6 @@ export function FilterSettingsView({ initial }: Props) {
         {regionSection}
         {headCountSection}
       </div>
-      <ScrollFade offset={68} />
       {bottomBar}
     </div>
   );

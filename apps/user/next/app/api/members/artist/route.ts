@@ -8,6 +8,7 @@ import {
 
 import { LOGIN_HREF } from '@/src/lib/env';
 import { setAuthCookie } from '@/src/lib/authCookies';
+import { withFlashToast } from '@/src/lib/flashToast';
 
 import { parseArtistRegions } from './artistRegions';
 
@@ -31,7 +32,11 @@ export async function POST(request: NextRequest) {
     return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
   }
 
-  return redirectRelative(request, '/app/artist/dashboard', result.accessToken);
+  return redirectRelative(
+    request,
+    withFlashToast('/app/artist/dashboard', 'welcome'),
+    result.accessToken,
+  );
 }
 
 function redirectRelative(request: NextRequest, location: string, accessToken?: string) {

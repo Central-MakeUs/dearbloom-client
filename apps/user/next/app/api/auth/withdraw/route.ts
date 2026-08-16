@@ -19,6 +19,6 @@ export async function DELETE(request: NextRequest) {
 
   return new NextResponse(null, {
     status: 303,
-    headers: { Location: '/app/api/auth/logout' },
+    headers: { Location: '/app/api/auth/logout?_toast=withdrawal' },
   });
 }

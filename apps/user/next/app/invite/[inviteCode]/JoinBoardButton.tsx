@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomButton } from '@dearbloom/ui';
+import { BottomButton, Spinner } from '@dearbloom/ui';
 
 export function JoinBoardButton({
   inviteCode,
@@ -40,6 +40,7 @@ export function JoinBoardButton({
 
   return (
     <BottomButton type="button" onClick={join} disabled={submitting}>
+      {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
       공동보드 참여하기
     </BottomButton>
   );

@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import { TabButton } from '@dearbloom/ui';
+import { isArtistTabHidden } from './artistTab';
+import { AppLink } from './AppLink';
 
 /**
  * 작가 전용 하단 탭. IA 도메인(대시보드/신청/작품/채팅/마이) 기준.
@@ -18,28 +20,21 @@ const TABS = [
   { key: 'my', label: '마이', href: '/app/artist/my', match: (p: string) => p.startsWith('/artist/my') || p.startsWith('/artist/profile'), Icon: UserIcon },
 ];
 
-/** 폼/상세 화면에서는 하단탭 숨김(자체 CTA/뒤로가기 사용). */
-function isHidden(p: string): boolean {
-  if (p.includes('/artist/products/new')) return true;
-  if (p.includes('/artist/products/') && p.endsWith('/edit')) return true;
-  if (p.startsWith('/artist/profile')) return true;
-  if (/^\/artist\/chats\/.+/.test(p)) return true;
-  return false;
-}
-
 export function AppArtistBottomTab() {
   const pathname = usePathname() ?? '/';
-  if (isHidden(pathname)) return null;
+  // 폼/상세 화면에서는 숨김(자체 CTA/뒤로가기 사용). 판정은 artistTab.ts 가 단독으로 갖는다.
+  if (isArtistTabHidden(pathname)) return null;
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch border-t border-neutral-200 bg-neutral-100 pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch border-t border-neutral-200 bg-neutral-100 pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]"
       aria-label="작가 네비게이션"
     >
       {TABS.map((tab) => (
         <TabButton
           key={tab.key}
           href={tab.href}
+          linkComponent={AppLink}
           label={tab.label}
           active={tab.match(pathname)}
           icon={(active) => <tab.Icon active={active} />}

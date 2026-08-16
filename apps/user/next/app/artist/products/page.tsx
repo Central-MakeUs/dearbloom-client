@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getMyArtworks, type MyArtworkListItem } from '@dearbloom/shared';
 import { Plus } from 'lucide-react';
 import { Button, Header } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 import { MyArtworkList } from './MyArtworkList';
 import { LOGIN_HREF } from '@/src/lib/env';
 
@@ -22,9 +23,9 @@ export default async function ArtistProductsPage() {
   const registerButton =
     !needLogin && items.length > 0 ? (
       <Button asChild size="sm" className="mr-2.5">
-        <a href="/app/artist/products/new">
+        <AppLink href="/app/artist/products/new">
           <Plus className="size-4" /> 작품 등록
-        </a>
+        </AppLink>
       </Button>
     ) : undefined;
 
@@ -38,7 +39,7 @@ export default async function ArtistProductsPage() {
   ) : items.length === 0 ? (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
       <p className="text-body-5 text-neutral-500">아직 등록한 작품이 없어요.</p>
-      <a href="/app/artist/products/new" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">첫 작품 등록하기</a>
+      <AppLink href="/app/artist/products/new" className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">첫 작품 등록하기</AppLink>
     </div>
   ) : (
     <MyArtworkList items={items} />

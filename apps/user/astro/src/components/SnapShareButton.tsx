@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Share } from 'lucide-react';
-import { ShareBottomSheet } from '@dearbloom/ui';
+import { ShareBottomSheet, showToast } from '@dearbloom/ui';
 import { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@dearbloom/shared';
 
 declare global {
@@ -14,7 +14,6 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showKakao, setShowKakao] = useState(false);
-  const [feedback, setFeedback] = useState<{ message: string; status: 'success' | 'error' }>();
 
   useEffect(() => {
     setShowKakao(
@@ -27,10 +26,7 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
   }, []);
 
   const url = () => `${location.origin}${location.pathname}`;
-  const notify = (message: string, status: 'success' | 'error') => {
-    setFeedback({ message, status });
-    window.setTimeout(() => setFeedback(undefined), 2500);
-  };
+  const notify = (message: string, status: 'success' | 'error') => showToast(message, status);
   const run = async (action: () => Promise<void>, failureMessage: string) => {
     if (loading) return;
     setLoading(true);
@@ -83,18 +79,6 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
       setOpen(false);
     }, '공유 기능을 실행하지 못했어요');
 
-  const toast = feedback ? (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(97px+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4">
-      <div
-        role="status"
-        className="flex items-center gap-1 rounded-full bg-neutral-800 px-4 py-2 text-body-6 text-neutral-0 shadow-elevation"
-      >
-        <img src={`/images/toast-${feedback.status}.svg`} alt="" className="size-3" />
-        <span>{feedback.message}</span>
-      </div>
-    </div>
-  ) : null;
-
   return (
     <>
       <button
@@ -116,7 +100,6 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
         onKakao={shareKakao}
         onMore={shareMore}
       />
-      {toast}
     </>
   );
 }

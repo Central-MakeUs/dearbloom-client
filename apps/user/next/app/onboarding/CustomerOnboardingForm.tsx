@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Check, Search } from 'lucide-react';
+import Image, { type StaticImageData } from 'next/image';
+import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
@@ -10,30 +11,193 @@ import {
   getUniversityLabel,
   UniversitySearchScreen,
 } from '@/src/components/common/UniversitySearchScreen';
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
+import completeIcon from '../../public/images/onboarding-complete.svg';
+import { withFlashToast } from '@/src/lib/flashToast';
+import boardTourImage from '../../public/images/onboarding-tour-board.png';
+import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
+import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
 
-type OnboardingStep = 'complete' | 'region' | 'school';
+type OnboardingStep = 'complete' | 'region' | 'school' | 'tour';
 
-const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) =>
-  region.label
-    .replace('경기북부', '경기 북부')
-    .replace('경기남부', '경기 남부')
-    .replace('대전·세종', '대전/세종');
+const tourSlides: Array<{ description: string; image: StaticImageData; title: string }> = [
+  {
+    description: '취향에 맞는 졸업 스냅 작품을 쉽게 탐색할 수 있어요.',
+    image: exploreTourImage,
+    title: '졸업스냅 작품 탐색',
+  },
+  {
+    description: '번거로운 프로세스 대신 빠르고 간편한 문의가 가능해요.',
+    image: inquiryTourImage,
+    title: '쉽고 빠른 스마트문의',
+  },
+  {
+    description: '친구와 함께 작품 후보를 모으고 의견을 나눌 수 있어요.',
+    image: boardTourImage,
+    title: '친구들과 함께하는 공동보드',
+  },
+];
 
-function StepProgress({ step }: { step: 1 | 2 }) {
-  const bars = [1, 2].map((index) => (
-    <span
-      aria-hidden
-      className={cn('h-1 flex-1 rounded-full', index <= step ? 'bg-primary-400' : 'bg-neutral-200')}
-      key={index}
+function OnboardingComplete({
+  onExploreFeatures,
+}: {
+  onExploreFeatures: () => void;
+}) {
+  const actions = (
+    <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
+      <BottomButton color="green" onClick={onExploreFeatures}>
+        기능 둘러보기
+      </BottomButton>
+    </div>
+  );
+
+  return (
+    <main className="min-h-dvh bg-primary-100">
+      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+        <section className="flex flex-col items-center px-4 pt-[160px] text-center">
+          <Image alt="" className="size-[72px]" priority src={completeIcon} />
+          <div className="mt-6 flex w-[185px] flex-col items-center gap-2">
+            <h1 className="text-head-1 text-neutral-900">로그인이 완료되었어요!</h1>
+            <p className="text-body-2 text-neutral-800">
+              취향에 맞는 작품을 탐색하고 작가님께 문의해 보세요.
+            </p>
+          </div>
+        </section>
+        {actions}
+      </div>
+    </main>
+  );
+}
+
+function OnboardingTour({ onFinish }: { onFinish: () => void }) {
+  const [slideIndex, setSlideIndex] = useState(0);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      setSlideIndex((current) =>
+        Math.max(
+          0,
+          Math.min(tourSlides.length - 1, current + (event.key === 'ArrowRight' ? 1 : -1)),
+        ),
+      );
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const moveTo = (index: number) => {
+    setSlideIndex(Math.max(0, Math.min(tourSlides.length - 1, index)));
+  };
+
+  const startSwipe = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (touch) swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const endSwipe = (event: TouchEvent) => {
+    const start = swipeStart.current;
+    const touch = event.changedTouches[0];
+    swipeStart.current = null;
+    if (!start || !touch) return;
+
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    moveTo(slideIndex + (deltaX < 0 ? 1 : -1));
+  };
+
+  const dots = tourSlides.map((slide, index) => (
+    <button
+      aria-label={`${index + 1}번째 기능: ${slide.title}`}
+      aria-pressed={slideIndex === index}
+      className={cn(
+        'size-1.5 rounded-full transition-colors',
+        slideIndex === index ? 'bg-primary' : 'bg-neutral-400',
+      )}
+      key={slide.title}
+      onClick={() => moveTo(index)}
+      type="button"
     />
   ));
 
+  const slides = tourSlides.map((slide, index) => (
+    <section
+      aria-hidden={slideIndex !== index}
+      className="relative w-1/3 shrink-0"
+      inert={slideIndex !== index}
+      key={slide.title}
+    >
+      <div className="relative z-10 flex flex-col items-center pt-[101px] text-center">
+        <div
+          className={cn(
+            'flex flex-col items-center gap-2',
+            index === 0 ? 'w-[185px]' : index === 1 ? 'w-[195px]' : 'w-[216px]',
+          )}
+        >
+          <h1 className="text-head-1 text-primary">{slide.title}</h1>
+          <p className={cn('text-body-1 text-neutral-700', index === 2 && 'w-[201px]')}>
+            {slide.description}
+          </p>
+        </div>
+      </div>
+      <Image
+        alt={`${slide.title} 화면 예시`}
+        className={cn(
+          'absolute left-1/2 top-[max(212px,calc(50%_-_202.5px))] h-[405px] -translate-x-1/2',
+          index === 2 ? 'w-[333px]' : 'w-[192px]',
+        )}
+        priority={index === 0}
+        src={slide.image}
+      />
+    </section>
+  ));
+
+  const isLastSlide = slideIndex === tourSlides.length - 1;
+  const actionButton = (
+    <BottomButton
+      color={isLastSlide ? 'green' : 'black'}
+      onClick={() => (isLastSlide ? onFinish() : moveTo(slideIndex + 1))}
+    >
+      {isLastSlide ? '디어블룸 시작하기' : '다음'}
+    </BottomButton>
+  );
+
   return (
-    <div aria-label={`${step}/3 단계`} className="flex gap-1 px-4">
-      {bars}
-    </div>
+    <main className="min-h-dvh bg-primary-100">
+      <div
+        aria-label="디어블룸 기능 둘러보기"
+        className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden touch-pan-y focus:outline-none"
+        onTouchCancel={() => {
+          swipeStart.current = null;
+        }}
+        onTouchEnd={endSwipe}
+        onTouchStart={startSwipe}
+        tabIndex={0}
+      >
+        <div className="absolute left-1/2 top-[67px] z-20 flex -translate-x-1/2 gap-1">{dots}</div>
+        <div
+          aria-live="polite"
+          className="flex min-h-dvh w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none"
+          style={{ transform: `translateX(-${slideIndex * (100 / 3)}%)` }}
+        >
+          {slides}
+        </div>
+        <div className="fixed inset-x-0 bottom-0 z-20 bg-primary-100">
+          <div className="mx-auto max-w-[375px] px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
+            {actionButton}
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
+
+const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) => region.label;
 
 function StepHeader({
   onBack,
@@ -42,7 +206,7 @@ function StepHeader({
 }: {
   onBack: () => void;
   onSkip?: () => void;
-  step: 1 | 2;
+  step: 2 | 3;
 }) {
   const skipButton = onSkip ? (
     <button className="px-2 text-caption-1 text-neutral-600" onClick={onSkip} type="button">
@@ -53,7 +217,7 @@ function StepHeader({
   return (
     <div>
       <Header onBack={onBack} right={skipButton} />
-      <StepProgress step={step} />
+      <OnboardingProgress step={step} />
     </div>
   );
 }
@@ -210,7 +374,7 @@ export function CustomerOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => router.back()} onSkip={() => setStep('region')} step={1} />,
+      <StepHeader onBack={() => router.back()} onSkip={() => setStep('region')} step={2} />,
       content,
       footer('다음', () => setStep('region')),
     );
@@ -239,51 +403,25 @@ export function CustomerOnboardingForm({
       <section className="px-4 pt-7">
         <h1 className="text-head-3 text-neutral-950">촬영 희망 지역을 선택해 주세요.</h1>
         <p className="mt-3 text-body-6 text-neutral-700">
-          학교 위치에 따라 출장비가 달라질 수 있어요.
+          촬영을 원하는 학교의 지역을 골라 주세요.
           <br />
-          학교명과 구체적인 캠퍼스명을 함께 적어 주세요.
+          이후 작가 추천과 일정 조율에 활용돼요.
         </p>
         <div className="mt-8 flex flex-wrap gap-2">{regionOptions}</div>
       </section>
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={2} />,
+      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={3} />,
       content,
       footer('완료', submit),
     );
   }
 
-  const finishOnboarding = () => window.location.replace(returnUrl ?? '/snaps');
-  const completeActions = (
-    <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-      {/* 기능이 준비되면 복원: <BottomButton onClick={finishOnboarding}>기능 둘러보기</BottomButton> */}
-      <button
-        className="mt-3 h-10 w-full text-body-5 text-neutral-700"
-        onClick={finishOnboarding}
-        type="button"
-      >
-        바로 시작하기
-      </button>
-    </div>
-  );
+  const finishOnboarding = () =>
+    window.location.replace(withFlashToast(returnUrl ?? '/snaps', 'welcome'));
 
-  return (
-    <main className="min-h-dvh bg-primary-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
-        <section className="flex flex-col items-center px-4 pt-[18vh] text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-300 text-neutral-0">
-            <Check aria-hidden size={34} strokeWidth={2.5} />
-          </span>
-          <h1 className="mt-6 text-head-3 text-neutral-950">모델 설정이 완료 되었어요!</h1>
-          <p className="mt-2 text-body-6 text-neutral-700">
-            취향에 맞는 작품을 탐색하고
-            <br />
-            작가님께 문의해 보세요.
-          </p>
-        </section>
-        {completeActions}
-      </div>
-    </main>
-  );
+  if (step === 'tour') return <OnboardingTour onFinish={finishOnboarding} />;
+
+  return <OnboardingComplete onExploreFeatures={() => setStep('tour')} />;
 }

@@ -3,6 +3,7 @@
 import { cn } from '../lib/cn';
 import { SaveHeart } from './SaveHeart';
 import { RegionTag } from './ui/region-tag';
+import { SkeletonImage } from './ui/skeleton';
 
 export interface ArtworkCardProps {
   artworkId: number;
@@ -19,6 +20,10 @@ export interface ArtworkCardProps {
   initialSaved?: boolean;
   /** 저장 프록시 엔드포인트(앱별 basePath 대응). SaveHeart 로 전달. */
   saveEndpoint?: string;
+  unsavedHeartIconSrc?: string;
+  unsavedHeartIconClassName?: string;
+  savedHeartIconSrc?: string;
+  savedHeartIconClassName?: string;
   onSavedChange?: (saved: boolean) => void;
 
   // ── 선택(편집) 모드 — selectable 이면 하트 대신 체크, 카드 전체가 선택 토글 ──
@@ -46,6 +51,10 @@ export function ArtworkCard({
   href,
   initialSaved = false,
   saveEndpoint,
+  unsavedHeartIconSrc,
+  unsavedHeartIconClassName,
+  savedHeartIconSrc,
+  savedHeartIconClassName,
   onSavedChange,
   selectable = false,
   selected = false,
@@ -55,11 +64,11 @@ export function ArtworkCard({
   const detailHref = href ?? `/snaps/${artworkId}`;
 
   const image = (
-    <img
+    <SkeletonImage
       src={thumbnailUrl ?? undefined}
       alt={title}
       loading="lazy"
-      className="h-full w-full object-cover"
+      className="aspect-[4/5] rounded-lg"
     />
   );
 
@@ -108,7 +117,7 @@ export function ArtworkCard({
 
     return (
       <button type="button" onClick={onSelect} aria-pressed={selected} className={cn('flex flex-col text-left', className)}>
-        <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <div className="relative mb-2">
           {image}
           {checkCircle}
         </div>
@@ -121,7 +130,7 @@ export function ArtworkCard({
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="relative mb-2">
-        <a href={detailHref} className="block aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
+        <a href={detailHref} className="block">
           {image}
         </a>
         <SaveHeart
@@ -130,8 +139,14 @@ export function ArtworkCard({
           size={24}
           strokeWidth={1.5}
           endpoint={saveEndpoint}
+          unsavedIconSrc={unsavedHeartIconSrc}
+          unsavedIconClassName={unsavedHeartIconClassName}
+          savedIconSrc={savedHeartIconSrc}
+          savedIconClassName={savedHeartIconClassName}
           onChange={onSavedChange}
-          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-neutral-0 transition-transform active:scale-90"
+          // Figma 437:7469 — 36x36 원(#1F1F1F 30%) 위에 하트. 사진 위라 원이 있어야 하트가 산다.
+          // 하트 색만 QA 지시대로 흰색 → 빨강(error).
+          className="absolute bottom-[9px] right-[9px] flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950/30 text-error transition-transform active:scale-90"
         />
       </div>
       <a href={detailHref} className="block">

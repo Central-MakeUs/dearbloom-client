@@ -1,4 +1,5 @@
 import { apiGet, apiPatch, type RequestOptions } from './http';
+import type { CustomerProfileColor } from './member';
 import type { ArtistRegionCode } from './regions';
 
 /** 고객(Customer) 계정/프로필 API. */
@@ -6,6 +7,7 @@ import type { ArtistRegionCode } from './regions';
 export interface CustomerMe {
   customerId: number;
   name: string;
+  profileColor: CustomerProfileColor | null;
   universityId: number | null;
   universityName: string | null;
   /**
@@ -29,6 +31,9 @@ export function getCustomerMe(opts: RequestOptions): Promise<CustomerMe> {
 }
 
 /** 고객 프로필(이름·지역) 수정. PATCH /api/customers/me */
-export function updateCustomerProfile(patch: CustomerProfilePatch, opts: RequestOptions): Promise<void> {
+export function updateCustomerProfile(
+  patch: CustomerProfilePatch,
+  opts: RequestOptions,
+): Promise<void> {
   return apiPatch<void>('/api/customers/me', patch, opts);
 }

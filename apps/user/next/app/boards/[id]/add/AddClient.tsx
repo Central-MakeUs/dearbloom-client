@@ -11,9 +11,10 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Spinner,
+  showToast,
 } from '@dearbloom/ui';
 import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
-import { showCandidateToast } from '../CandidateToast';
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
   left.size === right.size && [...left].every((id) => right.has(id));
@@ -61,7 +62,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id);
     else if (next.size >= 3) {
-      showCandidateToast('작품 후보는 인당 3개까지 추가 가능해요', 'error');
+      showToast('작품 후보는 인당 3개까지 추가 가능해요', 'error');
       return;
     } else next.add(id);
     setSelected(next);
@@ -80,7 +81,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
 
       router.replace(`/boards/${boardId}?candidateUpdated=1`);
     } catch {
-      showCandidateToast('작품 후보를 저장하지 못했어요', 'error');
+      showToast('작품 후보를 저장하지 못했어요', 'error');
       setSubmitting(false);
     }
   };
@@ -118,6 +119,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
         <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           보드에 추가하기 {selectedIds.size}/3
         </BottomButton>
       </div>

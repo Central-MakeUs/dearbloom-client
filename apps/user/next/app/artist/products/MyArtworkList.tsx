@@ -15,7 +15,9 @@ import {
   AlertDialogTrigger,
   Button,
   Card,
+  SkeletonImage,
 } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 
 const formatPrice = (won: number) => `${won.toLocaleString('ko-KR')}원`;
 
@@ -41,7 +43,7 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
         {items.map((a) => (
         <Card key={a.artworkId} className="flex items-center gap-3 p-2">
           <a href={`/snaps/${a.artworkId}`} className="flex min-w-0 flex-1 items-center gap-3">
-            <img src={a.thumbnailUrl} alt={a.title} className="size-16 shrink-0 rounded-md object-cover" />
+            <SkeletonImage src={a.thumbnailUrl} alt={a.title} className="size-16 shrink-0 rounded-md" />
             <div className="min-w-0">
               <div className="truncate text-body-4 text-neutral-950">{a.title}</div>
               <div className="text-body-6 text-primary">{formatPrice(a.price)}</div>
@@ -52,9 +54,9 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
           </a>
           <div className="flex shrink-0 flex-col gap-1">
             <Button asChild variant="outline" size="sm">
-              <a href={`/app/artist/products/${a.artworkId}/edit`}>
+              <AppLink href={`/app/artist/products/${a.artworkId}/edit`}>
                 <Pencil className="size-3.5" /> 수정
-              </a>
+              </AppLink>
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>

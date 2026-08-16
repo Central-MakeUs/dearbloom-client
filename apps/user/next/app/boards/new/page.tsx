@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header, BottomButton, TextField, cn } from '@dearbloom/ui';
+import { Header, BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
 import {
   BOARD_NAME_MAX_LENGTH,
   getBoardNameError,
@@ -69,21 +69,24 @@ export default function NewBoardPage() {
   );
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        submit();
-      }}
-      className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100"
-    >
-      <Header showBack onBack={() => router.back()} title="공동보드 만들기" />
-      {nameField}
-      <div className="flex-1" />
-      <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
-        <BottomButton type="submit" color="black" disabled={!valid || submitting}>
-          완료
-        </BottomButton>
-      </div>
-    </form>
+    <div className="min-h-screen bg-neutral-100">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
+        }}
+        className="mx-auto flex min-h-screen max-w-md flex-col"
+      >
+        <Header showBack onBack={() => router.back()} title="공동보드 만들기" />
+        {nameField}
+        <div className="flex-1" />
+        <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
+          <BottomButton type="submit" color="black" disabled={!valid || submitting}>
+            {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
+            완료
+          </BottomButton>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -1,11 +1,15 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, Card, cn, Header } from '@dearbloom/ui';
+import { BottomButton, Card, cn, Header, Spinner } from '@dearbloom/ui';
 
+import artistRoleIcon from '../../public/images/role-artist.svg';
+import customerRoleIcon from '../../public/images/role-customer.svg';
+import { withFlashToast } from '@/src/lib/flashToast';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
@@ -160,7 +164,7 @@ export function RoleSelectionForm({
     );
   };
 
-  const roleCard = (value: MemberRole, title: string, description: ReactNode) => (
+  const roleCard = (value: MemberRole, title: string, description: ReactNode, icon: ReactNode) => (
     <button
       aria-pressed={role === value}
       className="w-full text-left"
@@ -169,14 +173,39 @@ export function RoleSelectionForm({
     >
       <Card
         className={cn(
-          'relative h-[145px] w-full overflow-hidden border-0 bg-primary-100 px-7 py-6 shadow-elevation',
-          role === value && 'ring-2 ring-primary',
+          'relative h-[145px] w-full overflow-hidden border-[1.5px] border-transparent bg-primary-100 px-7 py-6 shadow-[0_3px_6px_0_rgba(0,0,0,0.1)]',
+          role === value && 'border-primary-400',
         )}
       >
         <span className="block text-head-2 text-neutral-950">{title}</span>
         <span className="mt-2 block w-[175px] text-body-2 text-neutral-950">{description}</span>
+        {icon}
       </Card>
     </button>
+  );
+
+  const customerIcon = (
+    <Image
+      alt=""
+      aria-hidden
+      className="absolute right-[30px] top-[30px] h-[85px] w-[78px]"
+      height={85}
+      src={customerRoleIcon}
+      unoptimized
+      width={78}
+    />
+  );
+
+  const artistIcon = (
+    <Image
+      alt=""
+      aria-hidden
+      className="absolute right-[29px] top-7 h-[91px] w-[77px]"
+      height={91}
+      src={artistRoleIcon}
+      unoptimized
+      width={77}
+    />
   );
 
   const roles = (
@@ -189,6 +218,7 @@ export function RoleSelectionForm({
           <br />
           촬영을 예약할 수 있어요.
         </>,
+        customerIcon,
       )}
       {roleCard(
         'ARTIST',
@@ -198,6 +228,7 @@ export function RoleSelectionForm({
           <br />
           촬영 문의를 받을 수 있어요.
         </>,
+        artistIcon,
       )}
     </div>
   );
@@ -210,6 +241,7 @@ export function RoleSelectionForm({
         </p>
       ) : null}
       <BottomButton color="black" disabled={!role || isSubmitting} onClick={submit}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         {isSubmitting ? '확인 중...' : '다음'}
       </BottomButton>
     </div>
@@ -223,7 +255,7 @@ export function RoleSelectionForm({
           <h1 className="px-1 py-3 text-head-1 text-neutral-950">
             디어블룸 이용 방식을 선택해 주세요.
           </h1>
-          <div className="mt-2">{roles}</div>
+          <div className="mt-3">{roles}</div>
         </section>
         {footer}
       </div>
@@ -241,5 +273,8 @@ function getLoginDestination(
     return getOnboardingTermsPath(role, forceOnboarding, returnUrl);
   }
 
-  return returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
+  return withFlashToast(
+    returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard'),
+    'login',
+  );
 }

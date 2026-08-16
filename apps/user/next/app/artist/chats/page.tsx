@@ -1,8 +1,10 @@
 import { cookies } from 'next/headers';
 import { getChatRooms, type ChatRoomSummary } from '@dearbloom/shared';
-import { ChatListEditButton, ChatRoomList } from '@dearbloom/features-chat';
+// 편집 버튼을 되살릴 땐 ChatListEditButton 임포트도 함께 푼다.
+import { /* ChatListEditButton, */ ChatRoomList } from '@dearbloom/features-chat';
 import { Button, Header } from '@dearbloom/ui';
 import { LOGIN_HREF } from '@/src/lib/env';
+import { AppLink } from '@/src/components/common/AppLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +30,9 @@ export default async function ArtistChatsPage() {
 
   return (
     <div className="mx-auto max-w-md">
-      <Header showBack={false} title="채팅 목록" right={<ChatListEditButton />} />
-      <ChatRoomList rooms={rooms} roomHref={(roomId) => `/app/artist/chats/${roomId}`} />
+      {/* 편집(⌸) 아이콘은 아직 안 쓰므로 뺀다 — 되살릴 땐 right={<ChatListEditButton />}. */}
+      <Header showBack={false} title="채팅 목록" />
+      <ChatRoomList rooms={rooms} roomHref={(roomId) => `/app/artist/chats/${roomId}`} linkComponent={AppLink} />
     </div>
   );
 }

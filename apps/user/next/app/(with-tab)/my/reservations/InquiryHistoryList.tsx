@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { cn } from '@dearbloom/ui';
+import { cn, SkeletonImage } from '@dearbloom/ui';
 import {
   ampmTimeLabel,
   compactDateLabel,
@@ -10,6 +10,7 @@ import {
   type CustomerInquiryListItem,
   type InquiryStatus,
 } from '@dearbloom/shared';
+import { AppLink } from '@/src/components/common/AppLink';
 
 type TabKey = 'inquiry' | 'canceled';
 
@@ -118,7 +119,7 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
       <ul className="flex flex-col gap-3 px-4 pb-4">
         {shown.map((it) => (
           <li key={it.inquiryId}>
-            <a
+            <AppLink
               href={`/app/my/reservations/${it.inquiryId}`}
               className="block rounded-lg bg-neutral-0 p-4"
             >
@@ -128,10 +129,10 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
                 <ChevronRight size={20} strokeWidth={2} className="ml-auto text-neutral-400" aria-hidden />
               </div>
               <div className="mt-3 flex gap-3">
-                <img
+                <SkeletonImage
                   src={it.artworkImageUrl}
                   alt=""
-                  className="h-[76px] w-[76px] shrink-0 rounded-md object-cover"
+                  className="h-[76px] w-[76px] shrink-0 rounded-md"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body-3 font-semibold text-neutral-950">{it.artworkName}</p>
@@ -143,7 +144,7 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
                   <p className="mt-0.5 text-body-4 text-neutral-950">{it.packageName}</p>
                 </div>
               </div>
-            </a>
+            </AppLink>
           </li>
         ))}
       </ul>

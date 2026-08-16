@@ -9,7 +9,6 @@ import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 import { getMemberHome } from '@/src/lib/memberHome';
 
-import dearBloomLogo from '../../../public/images/dearbloom-logo.png';
 import { SocialLoginButtons } from '../SocialLoginButtons';
 
 type LoginPageProps = {
@@ -17,7 +16,11 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { auth, forceOnboarding: forceOnboardingParam, returnUrl: returnUrlParam } = await searchParams;
+  const {
+    auth,
+    forceOnboarding: forceOnboardingParam,
+    returnUrl: returnUrlParam,
+  } = await searchParams;
   const forceOnboarding = shouldForceOnboarding(forceOnboardingParam);
   const returnUrl = safeReturnUrl(returnUrlParam);
 
@@ -40,14 +43,34 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const brand = (
     <div className="flex flex-col items-center">
-      <Image
-        alt="DearBloom"
-        className="h-[70px] w-[252px]"
-        height={70}
-        priority
-        src={dearBloomLogo}
-        width={252}
-      />
+      <div aria-label="DearBloom" className="relative h-[70px] w-[252px]" role="img">
+        <div className="absolute left-1/2 top-1/2 h-[30.988px] w-[219px] -translate-x-1/2 -translate-y-1/2">
+          <Image
+            alt=""
+            className="absolute left-0 top-[2.98px] h-[24.588px] w-[81.683px]"
+            height={25}
+            priority
+            src="/app/images/dearbloom-wordmark-dear.svg"
+            width={82}
+          />
+          <Image
+            alt=""
+            className="absolute left-[80.61px] top-[2.98px] h-[24.559px] w-[104.841px]"
+            height={25}
+            priority
+            src="/app/images/dearbloom-wordmark-bloom.svg"
+            width={105}
+          />
+          <Image
+            alt=""
+            className="absolute left-[188.57px] top-0 h-[30.988px] w-[30.431px]"
+            height={31}
+            priority
+            src="/app/images/dearbloom-symbol.svg"
+            width={30}
+          />
+        </div>
+      </div>
       <p className="w-[252px] text-center text-body-2 text-neutral-800">
         졸업스냅 작가 탐색부터 예약까지
         <br />

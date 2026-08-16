@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArtworkCard } from '@dearbloom/ui';
+import { ArtworkCard, Spinner } from '@dearbloom/ui';
 import { ArtworkListRow } from './ArtworkListRow';
+import { optimizedImageUrl } from '@/lib/imageUrl';
 import {
   ARTWORK_PAGE_SIZE,
   artistRegionLabel,
@@ -79,6 +80,9 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
     </div>
   );
 
+  // 카드 폭 = (컨테이너 max-w-md 448 - 좌우 패딩 32 - 열 간격 8) / 2 ≈ 204
+  const CARD_WIDTH = 204;
+
   const grid = (
     <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
       {items.map((a) => (
@@ -88,9 +92,13 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
           title={a.title}
           artistNickname={a.artistNickname}
           price={a.lowestPrice}
-          thumbnailUrl={a.thumbnailUrl}
+          thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, CARD_WIDTH)}
           regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved={!!a.isSaved}
+          unsavedHeartIconSrc="/images/save-heart-grid.svg"
+          unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+          savedHeartIconSrc="/images/save-heart-selected.svg"
+          savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
         />
       ))}
     </div>
@@ -108,8 +116,8 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
       </button>
     </div>
   ) : hasNext ? (
-    <div ref={sentinelRef} className="pb-8 text-center text-body-6 text-neutral-500">
-      불러오는 중…
+    <div ref={sentinelRef} className="flex justify-center pb-8">
+      <Spinner label="작품을 더 불러오는 중" />
     </div>
   ) : null;
 

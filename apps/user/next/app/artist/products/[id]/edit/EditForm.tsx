@@ -6,15 +6,23 @@ import { LOGIN_HREF } from '@/src/lib/env';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
-import { Button, Field, Input, Textarea } from '@dearbloom/ui';
-import type { ArtworkPhoto } from '@dearbloom/shared';
+import { Button, Field, Input, Spinner, Textarea, showToast } from '@dearbloom/ui';
+import type { ArtworkPackage, ArtworkPhoto } from '@dearbloom/shared';
 import { PhotoGridField, photoFromUrl, type PhotoItem } from '../../_components/PhotoGridField';
+import {
+  PackageListField,
+  packageErrorMessage,
+  packageFromServer,
+  packageSchema,
+  toPackagePayload,
+  PKG_MSG,
+} from '../../_components/PackageListField';
 
 const schema = z.object({
   title: z.string().trim().min(1, '작품명을 입력해주세요.'),
   description: z.string().optional(),
   photos: z.array(z.custom<PhotoItem>()).min(1, '사진을 1장 이상 추가하세요.'),
+  packageList: z.array(packageSchema).min(1, PKG_MSG),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -37,11 +45,13 @@ export function EditForm({
   title: initTitle,
   description: initDesc,
   photos: initPhotos,
+  packages: initPackages,
 }: {
   id: number;
   title: string;
   description: string;
   photos: ArtworkPhoto[];
+  packages: ArtworkPackage[];
 }) {
   const router = useRouter();
   const {
@@ -55,6 +65,7 @@ export function EditForm({
       title: initTitle,
       description: initDesc,
       photos: initPhotos.map((p) => photoFromUrl(p.fileUrl, p.universityId, p.universityName)),
+      packageList: initPackages.map(packageFromServer),
     },
   });
   const [submitError, setSubmitError] = useState('');
@@ -87,7 +98,14 @@ export function EditForm({
         body: JSON.stringify({ photoList }),
       });
       if (!r2.ok) throw new Error('사진 수정에 실패했어요.');
-      toast.success('저장되었습니다.');
+      // 3) 패키지 전체 교체 (부분 수정이 아니라 이 목록이 그대로 최종 패키지가 된다)
+      const r3 = await fetch(`/app/api/artist/artworks/packages?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageList: toPackagePayload(values.packageList) }),
+      });
+      if (!r3.ok) throw new Error('패키지 수정에 실패했어요.');
+      showToast('저장되었습니다.');
       router.push('/artist/products');
       router.refresh();
     } catch (err) {
@@ -113,13 +131,28 @@ export function EditForm({
         />
       </Field>
 
+      <Controller
+        control={control}
+        name="packageList"
+        render={({ field }) => (
+          <PackageListField
+            value={field.value}
+            onChange={field.onChange}
+            errors={field.value.map((_, idx) => packageErrorMessage(errors.packageList?.[idx]))}
+          />
+        )}
+      />
+
       <p className="rounded-md bg-neutral-100 px-3 py-2 text-caption-2 text-neutral-500">
-        가격·패키지·촬영 인원은 등록 시 설정한 값을 따릅니다. (수정은 추후 지원 예정)
+        저장하면 위 목록이 이 작품의 패키지가 됩니다. 이미 들어온 문의·예약은 문의 시점의 조건이 유지돼요.
+        <br />
+        촬영 인원은 등록 시 설정한 값을 따릅니다. (수정은 추후 지원 예정)
       </p>
 
       {submitError && <p className="text-caption-1 text-danger">{submitError}</p>}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? <Spinner className="text-current" label="" /> : null}
         {isSubmitting ? '저장 중…' : '저장'}
       </Button>
     </form>

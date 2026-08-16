@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { BottomButton, Header, TextField, cn } from '@dearbloom/ui';
+import { BottomButton, Header, Spinner, TextField, cn } from '@dearbloom/ui';
 import {
   BOARD_NAME_MAX_LENGTH,
   BOARD_NAME_MIN_LENGTH,
@@ -119,6 +119,7 @@ export default function EditBoardNamePage() {
           color="black"
           disabled={!loaded || !valid || !changed || submitting}
         >
+          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           완료
         </BottomButton>
       </div>

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { BottomTab } from '@dearbloom/ui';
+import { AppLink } from './AppLink';
 
 /**
  * Next 앱은 basePath '/app' 이 걸려있어서 usePathname() 은 '/app' 을 제외한 경로를 돌려줍니다.
@@ -10,5 +11,6 @@ import { BottomTab } from '@dearbloom/ui';
 export function AppBottomTab() {
   const pathname = usePathname() ?? '/';
   if (pathname.startsWith('/my/reservations')) return null;
-  return <BottomTab currentPath={`/app${pathname}`} />;
+  // 저장·채팅·마이는 이 앱 라우트라 클라이언트 라우팅, 탐색(/snaps)만 Astro 로 문서 이동.
+  return <BottomTab currentPath={`/app${pathname}`} linkComponent={AppLink} />;
 }

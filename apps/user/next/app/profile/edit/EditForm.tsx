@@ -3,9 +3,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
-import { BottomButton, TextField } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField, showToast } from '@dearbloom/ui';
 import { customerNameSchema, CUSTOMER_NAME_MAX_LENGTH } from '@dearbloom/shared';
+import { withFlashToast } from '@/src/lib/flashToast';
 
 const schema = z.object({ name: customerNameSchema });
 type FormValues = z.infer<typeof schema>;
@@ -34,12 +34,12 @@ export function EditForm({ initialName }: { initialName: string }) {
 
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      toast.error(body.error || '저장에 실패했어요.');
+      showToast(body.error || '저장에 실패했어요.', 'error');
       return;
     }
 
     // 완료 토스트는 이동한 마이페이지에서 띄운다(이 화면에서 띄우면 화면 전환에 묻힌다).
-    window.location.href = '/app/my?updated=1';
+    window.location.href = withFlashToast('/app/my', 'profile');
   };
 
   const field = (
@@ -63,6 +63,7 @@ export function EditForm({ initialName }: { initialName: string }) {
   const cta = (
     <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
       <BottomButton color="black" type="submit" disabled={!isValid || isSubmitting}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         완료
       </BottomButton>
     </div>

@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { DayOfWeek, ScheduleRule } from '@dearbloom/shared';
 import {
   AlertDialog,
@@ -20,7 +19,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Spinner,
   cn,
+  showToast,
 } from '@dearbloom/ui';
 import { TimeSelect, START_SLOTS, endSlotsAfter, nextSlot } from './TimeSelect';
 import { DateField, formatKoreanDate } from './DateField';
@@ -143,7 +144,7 @@ export function ScheduleManager({
   const enabledDayCount = DAYS.filter((d) => days[d.key].enabled).length;
   const toggleDay = (key: DayOfWeek) => {
     if (days[key].enabled && enabledDayCount <= 1) {
-      toast.error(MIN_DAY_MESSAGE);
+      showToast(MIN_DAY_MESSAGE, 'error');
       return;
     }
     setDays((p) => ({ ...p, [key]: { ...p[key], enabled: !p[key].enabled } }));
@@ -159,17 +160,17 @@ export function ScheduleManager({
       endTime: hhmmss(days[d.key].end),
     }));
     if (availabilityList.length === 0) {
-      toast.error(MIN_DAY_MESSAGE);
+      showToast(MIN_DAY_MESSAGE, 'error');
       return;
     }
     setPending('weekly');
     const res = await send(`${BASE}/weekly`, 'PUT', { availabilityList });
     setPending(null);
     if (res.ok) {
-      toast.success('저장되었어요.');
+      showToast('저장되었어요.');
       setSavedSnapshot(JSON.stringify(days));
       refresh();
-    } else toast.error(res.message ?? '저장에 실패했어요. 시간을 다시 확인해주세요.');
+    } else showToast(res.message ?? '저장에 실패했어요. 시간을 다시 확인해주세요.', 'error');
   };
 
   // 반복 예약 불가 추가 폼
@@ -185,7 +186,7 @@ export function ScheduleManager({
       (r) => r.dayOfWeek === recDay && hhmm(r.startTime) === recStart && hhmm(r.endTime) === recEnd,
     );
     if (duplicate) {
-      toast.error('이미 추가된 반복 예약 불가예요.');
+      showToast('이미 추가된 반복 예약 불가예요.', 'error');
       return;
     }
     setPending('recurring');
@@ -196,12 +197,12 @@ export function ScheduleManager({
     });
     setPending(null);
     if (res.ok) {
-      toast.success('추가되었어요.');
+      showToast('추가되었어요.');
       setRecDay(REC_DEFAULT.day);
       setRecStart(REC_DEFAULT.start);
       setRecEnd(REC_DEFAULT.end);
       refresh();
-    } else toast.error(res.message ?? '추가에 실패했어요.');
+    } else showToast(res.message ?? '추가에 실패했어요.', 'error');
   };
 
   // 개인 예약 불가 추가 폼
@@ -214,18 +215,18 @@ export function ScheduleManager({
   };
   const addDate = async () => {
     if (!blkDate) {
-      toast.error('날짜를 선택해주세요.');
+      showToast('날짜를 선택해주세요.', 'error');
       return;
     }
     if (today && blkDate < today) {
-      toast.error('지난 날짜는 선택할 수 없어요.');
+      showToast('지난 날짜는 선택할 수 없어요.', 'error');
       return;
     }
     const duplicate = dates.some(
       (r) => r.blockDate === blkDate && hhmm(r.startTime) === blkStart && hhmm(r.endTime) === blkEnd,
     );
     if (duplicate) {
-      toast.error('이미 추가된 예약 불가 날짜예요.');
+      showToast('이미 추가된 예약 불가 날짜예요.', 'error');
       return;
     }
     setPending('date');
@@ -236,12 +237,12 @@ export function ScheduleManager({
     });
     setPending(null);
     if (res.ok) {
-      toast.success('추가되었어요.');
+      showToast('추가되었어요.');
       setBlkDate('');
       setBlkStart(BLK_DEFAULT.start);
       setBlkEnd(BLK_DEFAULT.end);
       refresh();
-    } else toast.error(res.message ?? '추가에 실패했어요.');
+    } else showToast(res.message ?? '추가에 실패했어요.', 'error');
   };
 
   // 삭제 — 확인 후 실행
@@ -254,9 +255,9 @@ export function ScheduleManager({
     const res = await send(`${BASE}/${kind}?id=${id}`, 'DELETE');
     setPending(null);
     if (res.ok) {
-      toast.success('삭제되었어요.');
+      showToast('삭제되었어요.');
       refresh();
-    } else toast.error(res.message ?? '삭제에 실패했어요.');
+    } else showToast(res.message ?? '삭제에 실패했어요.', 'error');
   };
 
   const sortedRecurring = [...recurring].sort(
@@ -266,7 +267,7 @@ export function ScheduleManager({
     (a, b) => (a.blockDate ?? '').localeCompare(b.blockDate ?? '') || a.startTime.localeCompare(b.startTime),
   );
 
-  const spinner = <Loader2 className="animate-spin" aria-hidden />;
+  const spinner = <Spinner className="text-current" label="" />;
   const emptyText = (text: string) => <p className="py-2 text-center text-caption-1 text-neutral-500">{text}</p>;
 
   const blockRow = (r: ScheduleRule, kind: BlockKind, label: string, past = false) => (

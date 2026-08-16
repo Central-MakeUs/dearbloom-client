@@ -1,9 +1,13 @@
+import type { AnchorHTMLAttributes, ComponentType } from 'react';
+import { SkeletonImage } from '@dearbloom/ui';
 import { chatTimestampLabel, type ChatRoomSummary } from '@dearbloom/shared';
 
 interface ChatRoomListProps {
   rooms: ChatRoomSummary[];
   /** 방 상세 경로 (고객 `/app/chats/{id}`, 작가 `/app/artist/chats/{id}`). */
   roomHref: (roomId: number) => string;
+  /** 링크를 그릴 컴포넌트. 기본은 `<a>`(문서 이동). Next 앱은 AppLink 를 넘겨 클라이언트 라우팅합니다. */
+  linkComponent?: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
 }
 
 /**
@@ -12,28 +16,24 @@ interface ChatRoomListProps {
  * Figma 233:6353 실측 — 좌우 16, 헤더 아래 20, 행 간격 32(구분선 없음),
  * 아바타 52 원형, 아바타↔본문 12, 이름↔미리보기 4.
  */
-export function ChatRoomList({ rooms, roomHref }: ChatRoomListProps) {
+export function ChatRoomList({ rooms, roomHref, linkComponent }: ChatRoomListProps) {
   if (rooms.length === 0) {
     return <p className="px-6 py-24 text-center text-body-5 text-neutral-500">아직 채팅이 없어요.</p>;
   }
+
+  const Anchor = linkComponent ?? 'a';
 
   return (
     <ul className="flex flex-col gap-8 px-4 pt-5">
       {rooms.map((room) => (
         <li key={room.roomId}>
-          <a href={roomHref(room.roomId)} className="flex items-center gap-3">
-            {room.peerImageUrl ? (
-              <img
-                src={room.peerImageUrl}
-                alt=""
-                className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200 object-cover"
-              />
-            ) : (
-              <span
-                className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200 bg-neutral-200"
-                aria-hidden
-              />
-            )}
+          <Anchor href={roomHref(room.roomId)} className="flex items-center gap-3">
+            {/* 프로필이 없으면 SkeletonImage 가 회색 원만 남긴다 — 없는 이미지를 깜빡이게 두지 않는다. */}
+            <SkeletonImage
+              src={room.peerImageUrl ?? undefined}
+              alt=""
+              className="h-[52px] w-[52px] shrink-0 rounded-full border border-neutral-200"
+            />
 
             <div className="min-w-0 flex-1">
               {/* Head2_sb_16 — 크기·굵기는 head-3 와 같고 자간만 -1% 다르다. */}
@@ -52,7 +52,7 @@ export function ChatRoomList({ rooms, roomHref }: ChatRoomListProps) {
                 </span>
               )}
             </div>
-          </a>
+          </Anchor>
         </li>
       ))}
     </ul>

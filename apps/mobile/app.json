@@ -2,12 +2,11 @@
   "expo": {
     "name": "dearBloom",
     "slug": "dearbloom-mobile",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "scheme": "dearbloom",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "kr.co.dearbloom.mobile",
       "icon": "./assets/icon.png",
@@ -27,8 +26,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "monochromeImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#296A48"
-      },
-      "edgeToEdgeEnabled": true
+      }
     },
     "web": {
       "bundler": "metro"

@@ -1,5 +1,5 @@
 ---
-import { ScrollFade } from '@dearbloom/ui';
+import { NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -22,7 +22,6 @@ const { title } = Astro.props;
   </head>
   <body class="font-sans text-ink p-10">
     <slot />
-    {/* 하단 고정 요소가 없는 화면이라 바닥에 바로 붙입니다. */}
-    <ScrollFade client:load />
+    <NativeExitDialog client:load />
   </body>
 </html>
