@@ -1,9 +1,17 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useState, type MouseEvent } from 'react';
 import { Heart } from 'lucide-react';
 import { cn } from '../lib/cn';
-import { LoginRequiredDialog } from './LoginRequiredDialog';
+
+/*
+  로그인 모달은 radix AlertDialog 를 끌고 오는데(초기 번들의 무거운 축), 실제로 뜨는 건
+  비로그인·프로필 미생성 사용자가 하트를 눌렀을 때뿐이다. 막힌 순간에 받는다.
+  한 번 받은 뒤에는 계속 마운트해둔다 — 닫는 애니메이션이 살아있어야 하기 때문.
+*/
+const LoginRequiredDialog = lazy(() =>
+  import('./LoginRequiredDialog').then((m) => ({ default: m.LoginRequiredDialog })),
+);
 
 interface SaveHeartProps {
   artworkId: number;
@@ -65,6 +73,12 @@ export function SaveHeart({
   const [busy, setBusy] = useState(false);
   // 저장이 막힌 이유. login = 아직 로그인 안 함, customer = 로그인은 했지만 고객 프로필이 없음.
   const [blockedBy, setBlockedBy] = useState<'login' | 'customer' | null>(null);
+  // 한 번이라도 막힌 적이 있으면 모달을 계속 마운트해둔다(닫는 애니메이션 유지).
+  const [dialogNeeded, setDialogNeeded] = useState(false);
+
+  useEffect(() => {
+    if (blockedBy) setDialogNeeded(true);
+  }, [blockedBy]);
 
   async function toggle(e: MouseEvent) {
     e.preventDefault();
@@ -119,20 +133,24 @@ export function SaveHeart({
       >
         {icon}
       </button>
-      <LoginRequiredDialog
-        open={blockedBy === 'login'}
-        onOpenChange={(open) => !open && setBlockedBy(null)}
-        redirectUri={loginRedirectUri}
-        loginHref={loginHref}
-      />
-      <LoginRequiredDialog
-        open={blockedBy === 'customer'}
-        onOpenChange={(open) => !open && setBlockedBy(null)}
-        redirectUri={loginRedirectUri}
-        loginHref={customerOnboardingHref}
-        title="고객 프로필이 필요합니다"
-        description="프로필을 만들면 작품을 저장할 수 있어요."
-      />
+      {dialogNeeded && (
+        <Suspense fallback={null}>
+          <LoginRequiredDialog
+            open={blockedBy === 'login'}
+            onOpenChange={(open) => !open && setBlockedBy(null)}
+            redirectUri={loginRedirectUri}
+            loginHref={loginHref}
+          />
+          <LoginRequiredDialog
+            open={blockedBy === 'customer'}
+            onOpenChange={(open) => !open && setBlockedBy(null)}
+            redirectUri={loginRedirectUri}
+            loginHref={customerOnboardingHref}
+            title="고객 프로필이 필요합니다"
+            description="프로필을 만들면 작품을 저장할 수 있어요."
+          />
+        </Suspense>
+      )}
     </>
   );
 }
