@@ -115,11 +115,22 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
       <Field label="닉네임" htmlFor="nickname" error={errors.nickname?.message}>
-        <Input id="nickname" aria-invalid={!!errors.nickname} {...register('nickname')} />
+        <Input
+          id="nickname"
+          aria-invalid={!!errors.nickname}
+          defaultValue={initial.nickname ?? ''}
+          {...register('nickname')}
+        />
       </Field>
 
       <Field label="작가 소개" htmlFor="intro">
-        <Textarea id="intro" rows={4} placeholder="작가님을 소개해주세요" {...register('intro')} />
+        <Textarea
+          id="intro"
+          rows={4}
+          placeholder="작가님을 소개해주세요"
+          defaultValue={initial.intro ?? ''}
+          {...register('intro')}
+        />
       </Field>
 
       <ArtistRegionField
@@ -132,7 +143,13 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       />
 
       <Field label="기타 안내" htmlFor="etc">
-        <Textarea id="etc" rows={4} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />
+        <Textarea
+          id="etc"
+          rows={4}
+          placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등"
+          defaultValue={initial.etcInfo ?? ''}
+          {...register('etcInfo')}
+        />
       </Field>
 
       <div>

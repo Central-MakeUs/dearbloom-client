@@ -116,11 +116,23 @@ export function EditForm({
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
       <Field label="작품명" htmlFor="title" error={errors.title?.message}>
-        <Input id="title" aria-invalid={!!errors.title} placeholder="작품 제목" {...register('title')} />
+        <Input
+          id="title"
+          aria-invalid={!!errors.title}
+          placeholder="작품 제목"
+          defaultValue={initTitle}
+          {...register('title')}
+        />
       </Field>
 
       <Field label="작품 설명" htmlFor="description" optional>
-        <Textarea id="description" rows={4} placeholder="작품을 소개해주세요" {...register('description')} />
+        <Textarea
+          id="description"
+          rows={4}
+          placeholder="작품을 소개해주세요"
+          defaultValue={initDesc}
+          {...register('description')}
+        />
       </Field>
 
       <Field label="사진" helper="사진마다 촬영 학교를 지정할 수 있어요 (선택)" error={errors.photos?.message}>
