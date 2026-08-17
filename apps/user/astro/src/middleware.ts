@@ -7,7 +7,7 @@ const isProduction = apiBaseUrl?.replace(/\/$/, '') === 'https://api.dearbloom.c
 const accessTokenMaxAge = isProduction ? 1_800 : 10_800;
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  if (context.cookies.has('onboardingPending')) {
+  if (context.cookies.has('onboardingPending') && isPageNavigation(context.request)) {
     const token = context.cookies.get('accessToken')?.value;
     if (token) await logoutMember({ token }).catch(() => undefined);
     const response = context.url.pathname.startsWith('/api/')
@@ -20,9 +20,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return response;
   }
 
-  if (context.cookies.has('accessToken') || context.url.pathname.startsWith('/_astro/')) {
-    return next();
-  }
+  if (context.cookies.has('accessToken')) return next();
 
   const refreshToken = context.cookies.get('refreshToken')?.value;
   const role = getMemberRole(context.cookies.get('activeRole')?.value);
@@ -46,6 +44,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   return next();
 });
+
+function isPageNavigation(request: Request) {
+  return (
+    request.headers.get('sec-fetch-mode') === 'navigate' ||
+    request.headers.get('sec-fetch-dest') === 'document' ||
+    request.headers.get('accept')?.includes('text/html') === true
+  );
+}
 
 function expireAuthCookies(request: Request, response: Response) {
   const scope = getCookieScope(request);

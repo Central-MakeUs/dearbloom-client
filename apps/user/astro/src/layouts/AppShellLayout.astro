@@ -1,5 +1,5 @@
 ---
-import { AppToaster, BottomTab, FlashToast, NativeExitDialog } from '@dearbloom/ui';
+import { AppToaster, BottomTab, NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -33,7 +33,6 @@ const currentPath = Astro.url.pathname;
         서버 렌더 HTML 로만 끝냅니다 — 아일랜드로 두면 하이드레이션 비용만 듭니다. */}
     <BottomTab currentPath={currentPath} variant={navVariant} />
     <AppToaster client:load />
-    <FlashToast client:load />
     {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
     <NativeExitDialog client:native />
   </body>

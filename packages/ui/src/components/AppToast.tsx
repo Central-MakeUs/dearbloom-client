@@ -52,6 +52,7 @@ export function AppToaster() {
   return (
     <>
       <Toaster position="top-center" richColors />
+      <FlashToast />
       <style>{`
         .app-toast {
           left: 0 !important;

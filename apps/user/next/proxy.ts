@@ -3,12 +3,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { logoutMember, refreshMemberToken, type MemberRole } from '@dearbloom/shared';
 
 import { expireAuthCookie, setAuthCookie } from './src/lib/authCookies.ts';
-import { isOnboardingRequestPath } from './src/lib/onboardingRoute.ts';
+import { shouldCancelPendingOnboarding } from './src/lib/onboardingRoute.ts';
 
 export async function proxy(request: NextRequest) {
   if (
     request.cookies.has('onboardingPending') &&
-    !isOnboardingRequestPath(request.nextUrl.pathname)
+    shouldCancelPendingOnboarding(request.nextUrl.pathname, request.headers)
   ) {
     const token = request.cookies.get('accessToken')?.value;
     if (token) await logoutMember({ token }).catch(() => undefined);
