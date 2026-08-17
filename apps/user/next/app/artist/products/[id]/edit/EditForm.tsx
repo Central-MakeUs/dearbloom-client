@@ -125,11 +125,11 @@ export function EditForm({
         />
       </Field>
 
-      <Field label="작품 설명" htmlFor="description" optional>
+      <Field label="작품 안내" htmlFor="description" optional>
         <Textarea
           id="description"
           rows={4}
-          placeholder="작품을 소개해주세요"
+          placeholder="예: 빈티지 디카 추가는 모든 패키지에서 제공 가능합니다"
           defaultValue={initDesc}
           {...register('description')}
         />

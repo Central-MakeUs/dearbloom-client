@@ -15,7 +15,7 @@ import { optimizedImageUrl } from '@/src/lib/imageUrl';
 const schema = z.object({
   nickname: nicknameSchema,
   intro: z.string(),
-  etcInfo: z.string(),
+  travelFee: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -40,7 +40,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     defaultValues: {
       nickname: initial.nickname ?? '',
       intro: initial.intro ?? '',
-      etcInfo: initial.etcInfo ?? '',
+      travelFee: initial.travelFee ?? '',
     },
   });
 
@@ -76,12 +76,12 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         nickname?: string;
         intro?: string;
         regionList?: ArtistRegionCode[];
-        etcInfo?: string;
+        travelFee?: string;
         artistImageUrl?: string;
       } = {};
       if (dirtyFields.nickname) patch.nickname = values.nickname;
       if (dirtyFields.intro) patch.intro = values.intro;
-      if (dirtyFields.etcInfo) patch.etcInfo = values.etcInfo;
+      if (dirtyFields.travelFee) patch.travelFee = values.travelFee;
       if (!sameRegions(regions, initialRegions)) patch.regionList = regions;
       if (imageFile) patch.artistImageUrl = await uploadImage(imageFile);
 
@@ -143,13 +143,13 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         value={regions}
       />
 
-      <Field label="기타 안내" htmlFor="etc">
+      <Field label="출장비 안내" htmlFor="travelFee">
         <Textarea
-          id="etc"
+          id="travelFee"
           rows={4}
-          placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등"
-          defaultValue={initial.etcInfo ?? ''}
-          {...register('etcInfo')}
+          placeholder="예: 서울 전역 무료, 경기권 3만원, 그 외 지역 협의"
+          defaultValue={initial.travelFee ?? ''}
+          {...register('travelFee')}
         />
       </Field>
 

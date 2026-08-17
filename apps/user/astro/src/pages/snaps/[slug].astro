@@ -184,7 +184,7 @@ if (artwork && token) {
             )}
 
             {/* 이용 안내 — 작가 소개 + 작품 안내 통합 카드 (Figma) */}
-            {(artwork.artist.intro || artwork.artist.etcInfo) && (
+            {(artwork.artist.intro || artwork.description) && (
               <section class="mb-8">
                 <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h3>
                 <div class="mx-4 flex flex-col gap-6 rounded-md bg-neutral-0 p-5">
@@ -194,10 +194,10 @@ if (artwork && token) {
                       <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.intro}</p>
                     </div>
                   )}
-                  {artwork.artist.etcInfo && (
+                  {artwork.description && (
                     <div class="flex flex-col gap-3">
                       <p class="text-body-3 text-neutral-900">작품 안내</p>
-                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.etcInfo}</p>
+                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.description}</p>
                     </div>
                   )}
                 </div>
