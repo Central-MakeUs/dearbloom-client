@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Check } from 'lucide-react';
-import { BottomButton, cn, showToast } from '@dearbloom/ui';
+import { BottomButton, cn, Spinner, showToast } from '@dearbloom/ui';
 
 /**
  * 탈퇴 동의 체크 + 하단 CTA.
@@ -62,6 +62,7 @@ export function WithdrawForm() {
         disabled={!isAgreed || isWithdrawing}
         onClick={() => void withdraw()}
       >
+        {isWithdrawing ? <Spinner className="size-5 text-current" label="" /> : null}
         {isWithdrawing ? '처리 중…' : '탈퇴하기'}
       </BottomButton>
     </div>

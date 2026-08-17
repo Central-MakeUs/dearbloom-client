@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
-import { Button, Field, Input, Textarea, showToast } from '@dearbloom/ui';
+import { Button, Field, Input, Spinner, Textarea, showToast } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
 import { goLogin } from '@/src/lib/goLogin';
@@ -160,6 +160,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       </div>
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="mt-2 w-full">
+        {isSubmitting ? <Spinner className="text-current" label="" /> : null}
         {isSubmitting ? '저장 중…' : '저장'}
       </Button>
     </form>

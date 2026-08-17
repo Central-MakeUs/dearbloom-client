@@ -6,7 +6,7 @@ import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
-import { BottomButton, cn, DeleteButton, Header, TextField } from '@dearbloom/ui';
+import { BottomButton, cn, DeleteButton, Header, Spinner, TextField } from '@dearbloom/ui';
 import {
   getUniversityLabel,
   UniversitySearchScreen,
@@ -314,6 +314,7 @@ export function CustomerOnboardingForm({
         </p>
       ) : null}
       <BottomButton color="black" disabled={disabled || isSubmitting} onClick={onClick}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         {isSubmitting ? '저장 중...' : label}
       </BottomButton>
     </div>

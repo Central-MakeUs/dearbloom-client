@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Image from 'next/image';
 
 import type { ArtistRegionCode } from '@dearbloom/shared';
-import { BottomButton } from '@dearbloom/ui';
+import { BottomButton, Spinner } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { withFlashToast } from '@/src/lib/flashToast';
@@ -185,6 +185,7 @@ export function ArtistOnboardingForm({
         disabled={!imageFile || regions.length === 0 || isSubmitting}
         type="submit"
       >
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         {isSubmitting ? '저장 중…' : '디어블룸 시작하기'}
       </BottomButton>
     </div>

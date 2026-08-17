@@ -5,6 +5,7 @@ import {
   BottomSheet,
   RadioGroup,
   RadioGroupItem,
+  Spinner,
   Textarea,
   cn,
   showToast,
@@ -186,6 +187,7 @@ export function SnapMoreMenu({
         disabled={!canSubmit || busy}
         className={cn('mt-1', busy && 'opacity-70')}
       >
+        {busy ? <Spinner className="size-5 text-current" label="" /> : null}
         {busy ? '접수 중…' : '신고하기'}
       </BottomButton>
     </div>

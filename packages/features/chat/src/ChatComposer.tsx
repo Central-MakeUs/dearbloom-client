@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { ArrowUp, Plus } from 'lucide-react';
-import { cn } from '@dearbloom/ui';
+import { cn, Spinner } from '@dearbloom/ui';
 
 interface ChatComposerProps {
   onSendText: (content: string) => Promise<void>;
@@ -80,10 +80,15 @@ export function ChatComposer({ onSendText, onSendImage, disabled = false }: Chat
       onClick={() => void send()}
       className={cn(
         'absolute right-[5px] top-[5px] flex h-[34px] w-[34px] items-center justify-center rounded-[6px] text-neutral-0 transition-colors',
-        canSend ? 'bg-primary' : 'bg-neutral-300',
+        // 전송·업로드 중에는 canSend 가 꺼져 회색이 되는데, 그러면 스피너가 안 보인다 — 그린을 유지한다.
+        canSend || busy ? 'bg-primary' : 'bg-neutral-300',
       )}
     >
-      <ArrowUp size={24} strokeWidth={2} aria-hidden />
+      {busy ? (
+        <Spinner className="size-5 text-current" label="보내는 중" />
+      ) : (
+        <ArrowUp size={24} strokeWidth={2} aria-hidden />
+      )}
     </button>
   );
 

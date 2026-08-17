@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
   RegionTag,
   SkeletonImage,
+  Spinner,
   showToast,
   cn,
 } from '@dearbloom/ui';
@@ -112,7 +113,15 @@ export default function BoardDetailPage() {
   }, [boardRenamed]);
 
   if (!hydrated || loading) {
-    return <div className="board-detail-background min-h-dvh bg-neutral-100" />;
+    // 보드는 클라이언트에서 받아오므로 응답 전까지 배경만 남았다 — 화면 중앙에 스피너를 둔다.
+    return (
+      <div
+        className="board-detail-background flex min-h-dvh items-center justify-center bg-neutral-100"
+        aria-busy
+      >
+        <Spinner className="size-8" label="공동보드를 불러오는 중" />
+      </div>
+    );
   }
 
   if (!board) {

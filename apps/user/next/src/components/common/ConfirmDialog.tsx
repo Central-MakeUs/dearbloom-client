@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Spinner,
 } from '@dearbloom/ui';
 
 export function ConfirmDialog({
@@ -50,6 +51,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
+            className="gap-2"
             disabled={isPending}
             variant={isDestructive ? 'danger' : undefined}
             onClick={(event) => {
@@ -57,6 +59,7 @@ export function ConfirmDialog({
               onConfirm();
             }}
           >
+            {isPending ? <Spinner className="size-5 text-current" label="" /> : null}
             {isPending ? '처리 중…' : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
