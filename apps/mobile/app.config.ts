@@ -50,7 +50,7 @@ const firebasePlugins: NonNullable<ExpoConfig['plugins']> = isPushEnabled
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? 'dearBloom',
+  name: config.name ?? 'DearBloom',
   slug: config.slug ?? 'dearbloom-mobile',
   ios: {
     ...config.ios,
