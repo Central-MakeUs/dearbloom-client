@@ -1,5 +1,5 @@
 /**
- * dearBloom 공통 Tailwind 프리셋 (Figma 디자인 시스템 반영)
+ * DearBloom 공통 Tailwind 프리셋 (Figma 디자인 시스템 반영)
  *
  * 헥사코드 직접 사용 금지 — 이 파일 안에서만 정의하고, 코드에서는 토큰 클래스(예: text-primary, bg-neutral-100)를 사용하세요.
  */

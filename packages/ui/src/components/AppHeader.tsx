@@ -37,11 +37,11 @@ export function AppHeader({
   className,
 }: AppHeaderProps) {
   const logoImage = (
-    <img src={logoSrc} alt="dearBloom" width={132} height={19} className="h-[19px] w-[132px]" />
+    <img src={logoSrc} alt="DearBloom" width={132} height={19} className="h-[19px] w-[132px]" />
   );
 
   const logo = logoHref ? (
-    <a href={logoHref} aria-label="dearBloom 홈" className="flex items-center">
+    <a href={logoHref} aria-label="DearBloom 홈" className="flex items-center">
       {logoImage}
     </a>
   ) : (

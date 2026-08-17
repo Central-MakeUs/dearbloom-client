@@ -1,5 +1,5 @@
 /**
- * dearBloom API — 공통 HTTP 래퍼.
+ * DearBloom API — 공통 HTTP 래퍼.
  *
  * axios 대신 네이티브 fetch 사용: astro(SSR/Node), next(server/client), RN 모두 동일하게 동작하고
  * 별도 의존성이 없습니다. 인증이 필요한 호출은 `token`(accessToken)을 넘기면 Bearer 로 붙습니다.

@@ -21,7 +21,9 @@ import {
   toSearchParams,
 } from '@/lib/artworkFilter';
 
-const token = Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.has('onboardingPending')
+  ? undefined
+  : Astro.cookies.get('accessToken')?.value;
 if (token) {
   // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지).
   Astro.response.headers.set('Cache-Control', 'private, no-store');

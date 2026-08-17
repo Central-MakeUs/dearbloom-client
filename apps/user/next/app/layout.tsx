@@ -1,7 +1,7 @@
 import './globals.css';
 import { AppToaster, FlashToast, NativeExitDialog } from '@dearbloom/ui';
 
-export const metadata = { title: 'dearBloom' };
+export const metadata = { title: 'DearBloom' };
 
 const nativeSafeAreaScript = `
   if (window.__DEARBLOOM_NATIVE_APP__?.platform) {

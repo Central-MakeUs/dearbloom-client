@@ -1,10 +1,28 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { refreshMemberToken, type MemberRole } from '@dearbloom/shared';
+import { logoutMember, refreshMemberToken, type MemberRole } from '@dearbloom/shared';
 
 import { expireAuthCookie, setAuthCookie } from './src/lib/authCookies.ts';
+import { isOnboardingRequestPath } from './src/lib/onboardingRoute.ts';
 
 export async function proxy(request: NextRequest) {
+  if (
+    request.cookies.has('onboardingPending') &&
+    !isOnboardingRequestPath(request.nextUrl.pathname)
+  ) {
+    const token = request.cookies.get('accessToken')?.value;
+    if (token) await logoutMember({ token }).catch(() => undefined);
+
+    const response = NextResponse.next({
+      request: { headers: withoutAuthCookies(request.headers) },
+    });
+    expireAuthCookie(request, response, 'accessToken');
+    expireAuthCookie(request, response, 'refreshToken');
+    expireAuthCookie(request, response, 'activeRole');
+    expireAuthCookie(request, response, 'onboardingPending');
+    return response;
+  }
+
   if (request.cookies.has('accessToken')) return NextResponse.next();
 
   const refreshToken = request.cookies.get('refreshToken')?.value;
@@ -34,6 +52,25 @@ function withAccessToken(headers: Headers, accessToken: string) {
   const requestHeaders = new Headers(headers);
   const cookies = requestHeaders.get('cookie');
   requestHeaders.set('cookie', `${cookies ? `${cookies}; ` : ''}accessToken=${accessToken}`);
+  return requestHeaders;
+}
+
+function withoutAuthCookies(headers: Headers) {
+  const requestHeaders = new Headers(headers);
+  const authCookieNames = new Set([
+    'accessToken',
+    'refreshToken',
+    'activeRole',
+    'onboardingPending',
+  ]);
+  const cookies = requestHeaders
+    .get('cookie')
+    ?.split(';')
+    .filter((cookie) => !authCookieNames.has(cookie.trim().split('=')[0] ?? ''))
+    .join('; ');
+
+  if (cookies) requestHeaders.set('cookie', cookies);
+  else requestHeaders.delete('cookie');
   return requestHeaders;
 }
 

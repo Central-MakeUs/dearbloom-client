@@ -1,4 +1,4 @@
-# dearBloom
+# DearBloom
 
 DearDay 리브랜드 — 모노레포.
 

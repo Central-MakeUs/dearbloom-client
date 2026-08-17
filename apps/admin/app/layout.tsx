@@ -1,6 +1,6 @@
 import './globals.css';
 
-export const metadata = { title: 'dearBloom Admin' };
+export const metadata = { title: 'DearBloom Admin' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
