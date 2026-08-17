@@ -26,15 +26,17 @@ export function getOnboardingFormPath(
   return query ? `${path}?${query}` : path;
 }
 
-export function isOnboardingRequestPath(pathname: string) {
+export function isOnboardingPagePath(pathname: string) {
   const path = pathname.replace(/^\/app(?=\/|$)/, '');
 
-  return (
-    path === '/onboarding' ||
-    path.startsWith('/onboarding/') ||
-    path === '/api/members/customer' ||
-    path === '/api/members/artist' ||
-    path === '/api/artist/presigned' ||
-    path === '/api/auth/cancel-onboarding'
-  );
+  return path === '/onboarding' || path.startsWith('/onboarding/');
+}
+
+export function shouldCancelPendingOnboarding(pathname: string, headers: Headers) {
+  const isPageNavigation =
+    headers.get('sec-fetch-mode') === 'navigate' ||
+    headers.get('sec-fetch-dest') === 'document' ||
+    headers.get('accept')?.includes('text/html');
+
+  return Boolean(isPageNavigation) && !isOnboardingPagePath(pathname);
 }
