@@ -5,7 +5,7 @@ import { Minus, Plus } from 'lucide-react';
 import { cn, BottomButton } from '@dearbloom/ui';
 import type { InquiryPreparation } from '@dearbloom/shared';
 import { Calendar } from '@/src/components/common/Calendar';
-import { buildSlotGrid, isSelectableStart, toAvailableSet } from './slots';
+import { buildSlotGrid, isSelectableStart, toAvailableSet } from '@/src/lib/slots';
 
 interface DateTimeStepProps {
   preparation: InquiryPreparation;

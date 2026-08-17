@@ -51,9 +51,19 @@ export function getScheduleSummary(opts: RequestOptions): Promise<ScheduleSummar
   return apiGet<ScheduleSummary>('/api/artists/me/schedule/summary', opts);
 }
 
-/** 합성 가용 슬롯(캘린더). */
-export function getSchedule(opts: RequestOptions): Promise<unknown> {
-  return apiGet<unknown>('/api/artists/me/schedule', opts);
+/** 특정 날짜에 예약 가능한 30분 셀들의 시작 시각('HH:MM:SS' 오름차순). */
+export interface DayAvailability {
+  date: string;
+  availableTimes: string[];
+}
+
+/**
+ * 날짜별 최종 촬영 가능 시간.
+ * 기본 촬영 가능 일정에서 반복 예약 불가 · 개인 예약 불가 · 확정된 예약을 모두 뺀 결과라,
+ * 작가 일정 화면의 미리보기와 고객 스마트 문의가 같은 값을 본다.
+ */
+export function getSchedule(opts: RequestOptions): Promise<DayAvailability[]> {
+  return apiGet<DayAvailability[]>('/api/artists/me/schedule', opts);
 }
 
 // ---- 기본 촬영 가능 일정(주간) ----

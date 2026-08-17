@@ -22,7 +22,7 @@ import {
 } from '@/src/components/common/UniversitySearchScreen';
 import { ampmTimeLabel, durationLabel } from '@/src/lib/inquiry';
 import { getSlotTimes, getStartTimes } from '@/src/lib/inquirySlots';
-import { buildSlotGrid } from './slots';
+import { buildSlotGrid } from '@/src/lib/slots';
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 const dateKey = (year: number, month: number, day: number) =>

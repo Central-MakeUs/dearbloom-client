@@ -1,5 +1,5 @@
 import { apiGet, apiPatch, apiPost, type RequestOptions } from './http';
-import type { DayOfWeek } from './schedule';
+import type { DayAvailability, DayOfWeek } from './schedule';
 
 /**
  * 문의(Inquiry) API — 고객의 스마트 문의 / 작가가 받은 문의.
@@ -49,12 +49,6 @@ export interface InquiryDetail {
   durationMinutes: number;
   schoolName: string;
   requestNote: string | null;
-}
-
-/** 특정 날짜에 예약 가능한 30분 셀들의 시작 시각('HH:MM:SS' 오름차순). */
-export interface DayAvailability {
-  date: string;
-  availableTimes: string[];
 }
 
 /** 스마트 문의 화면 진입 시 한 번에 받는 준비 정보(작품·패키지 메타 + 작가 3개월 가용 캘린더). */
