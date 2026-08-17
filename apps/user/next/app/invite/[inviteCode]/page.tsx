@@ -6,6 +6,7 @@ import {
   getSharedBoardInvite,
   type SharedBoardInvite,
 } from '@dearbloom/shared';
+import { loginHref } from '@/src/lib/env';
 import { getInviteView } from './inviteView';
 import { JoinBoardButton } from './JoinBoardButton';
 
@@ -93,11 +94,7 @@ export default async function InvitePage({
     <JoinBoardButton inviteCode={inviteCode} />
   ) : (
     <Button asChild className="h-[52px] w-full rounded-md text-body-1">
-      <a
-        href={`/app/login?returnUrl=${encodeURIComponent(`/app/invite/${inviteCode}?loginComplete=1`)}`}
-      >
-        로그인 하러 가기
-      </a>
+      <a href={loginHref(`/app/invite/${inviteCode}?loginComplete=1`)}>로그인 하러 가기</a>
     </Button>
   );
 

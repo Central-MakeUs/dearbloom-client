@@ -14,3 +14,12 @@ export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN !== 'f
  */
 export const LOGIN_HREF = '/app/login';
 
+/**
+ * 로그인 페이지 주소 + 복귀 경로(returnUrl).
+ * returnUrl 은 **브라우저 기준 경로**라 next 앱 안이면 '/app' 접두어를 포함해야 한다
+ * (예: '/app/chats'). 넘기지 않으면 로그인 후 역할 홈으로 간다.
+ */
+export function loginHref(returnUrl?: string) {
+  return returnUrl ? `${LOGIN_HREF}?returnUrl=${encodeURIComponent(returnUrl)}` : LOGIN_HREF;
+}
+

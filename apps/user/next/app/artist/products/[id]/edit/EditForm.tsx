@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { goLogin } from '@/src/lib/goLogin';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -87,7 +87,7 @@ export function EditForm({
         body: JSON.stringify({ title: values.title.trim(), description: values.description ?? '' }),
       });
       if (r1.status === 401) {
-        window.location.href = LOGIN_HREF;
+        goLogin();
         return;
       }
       if (!r1.ok) throw new Error('기본 정보 수정에 실패했어요.');

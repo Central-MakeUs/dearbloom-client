@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomButton, Spinner } from '@dearbloom/ui';
 
+import { goLogin } from '@/src/lib/goLogin';
+
 export function JoinBoardButton({
   inviteCode,
   joinedBoardId,
@@ -27,7 +29,7 @@ export function JoinBoardButton({
         method: 'POST',
       });
       if (response.status === 401) {
-        window.location.href = `/app/login?returnUrl=${encodeURIComponent(`/app/invite/${inviteCode}`)}`;
+        goLogin(`/app/invite/${inviteCode}`);
         return;
       }
       if (!response.ok) throw new Error('공동보드 입장 실패');

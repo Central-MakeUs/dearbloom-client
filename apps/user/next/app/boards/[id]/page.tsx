@@ -35,6 +35,7 @@ import type {
   SharedComment,
 } from '@dearbloom/shared';
 import { artistRegionLabel } from '@dearbloom/shared';
+import { goLogin } from '@/src/lib/goLogin';
 import { useHydrated } from '@/src/lib/useHydrated';
 import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 import { getNextSharedArtworkLike, getRankedSharedArtworks } from '@/src/lib/sharedArtworkLike';
@@ -80,7 +81,7 @@ export default function BoardDetailPage() {
     fetch(`/app/api/boards/${id}`)
       .then(async (response) => {
         if (response.status === 401) {
-          window.location.href = `/app/login?returnUrl=${encodeURIComponent(`/app/boards/${id}`)}`;
+          goLogin(`/app/boards/${id}`);
           return undefined;
         }
         if (!response.ok) throw new Error('공동보드 조회 실패');

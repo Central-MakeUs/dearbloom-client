@@ -9,6 +9,7 @@ import {
   getBoardNameLength,
   isValidBoardName,
 } from '@/src/lib/boardName';
+import { goLogin } from '@/src/lib/goLogin';
 
 export default function NewBoardPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function NewBoardPage() {
         body: JSON.stringify({ sharedBoardName: name.trim() }),
       });
       if (response.status === 401) {
-        window.location.href = `/app/login?returnUrl=${encodeURIComponent('/app/boards/new')}`;
+        goLogin('/app/boards/new');
         return;
       }
       if (!response.ok) throw new Error('공동보드 생성 실패');

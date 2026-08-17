@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getInquiryPreparation } from '@dearbloom/shared';
-import { Button, Header } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { Header } from '@dearbloom/ui';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 import { SmartInquiryForm } from './SmartInquiryForm';
 
 export const dynamic = 'force-dynamic';
@@ -25,12 +25,10 @@ export default async function NewInquiryPage({
     const returnUrl = `/app/inquiries/new?artworkPackageId=${artworkPackageId ?? ''}`;
     return (
       <Shell>
-        <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-          <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-          <Button asChild size="sm">
-            <a href={`${LOGIN_HREF}?returnUrl=${encodeURIComponent(returnUrl)}`}>로그인</a>
-          </Button>
-        </div>
+        <LoginRequired
+          description="로그인하고 작가님께 문의를 시작해 보세요."
+          returnUrl={returnUrl}
+        />
       </Shell>
     );
   }

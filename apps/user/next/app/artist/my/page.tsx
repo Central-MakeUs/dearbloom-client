@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getMemberMe, getArtistMe } from '@dearbloom/shared';
-import { Button, Header, SkeletonImage } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { Header, SkeletonImage } from '@dearbloom/ui';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 import { AppLink } from '@/src/components/common/AppLink';
@@ -23,25 +23,23 @@ export default async function ArtistMyPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
 
-  const login = (message: string) => (
+  const login = (
     <div className="mx-auto max-w-md">
       <Header showBack={false} title="마이페이지" />
-      <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-        <p className="text-body-5 text-neutral-500">{message}</p>
-        <Button asChild>
-          <a href={LOGIN_HREF}>로그인</a>
-        </Button>
-      </div>
+      <LoginRequired
+        description="작가 계정으로 로그인해 주세요."
+        returnUrl="/app/artist/my"
+      />
     </div>
   );
 
-  if (!token) return login('작가 계정으로 로그인해주세요.');
+  if (!token) return login;
 
   const [me, artist] = await Promise.all([
     getMemberMe({ token }).catch(() => null),
     getArtistMe({ token }).catch(() => null),
   ]);
-  if (!me || !artist) return login('작가 계정으로 로그인해주세요.');
+  if (!me || !artist) return login;
 
   const displayName = artist.nickname;
 

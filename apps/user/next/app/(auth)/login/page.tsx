@@ -9,6 +9,7 @@ import { safeReturnUrl } from '@/src/lib/returnUrl';
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 import { getMemberHome } from '@/src/lib/memberHome';
 
+import { LoginCloseButton } from '../LoginCloseButton';
 import { SocialLoginButtons } from '../SocialLoginButtons';
 
 type LoginPageProps = {
@@ -90,6 +91,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <meta content="rgb(229 235 232)" name="theme-color" />
       <main className="min-h-dvh bg-primary-100">
         <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+          {/* 로그인은 보던 화면 위에 얹히는 단계라 항상 닫고 나갈 길을 둔다. */}
+          <LoginCloseButton fallbackHref={returnUrl ?? '/snaps'} />
           <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
           <div className="absolute inset-x-2 bottom-[88px]">
             {error}

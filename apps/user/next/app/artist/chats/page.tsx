@@ -2,8 +2,8 @@ import { cookies } from 'next/headers';
 import { getChatRooms, type ChatRoomSummary } from '@dearbloom/shared';
 // 편집 버튼을 되살릴 땐 ChatListEditButton 임포트도 함께 푼다.
 import { /* ChatListEditButton, */ ChatRoomList } from '@dearbloom/features-chat';
-import { Button, Header } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { Header } from '@dearbloom/ui';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 import { AppLink } from '@/src/components/common/AppLink';
 
 export const dynamic = 'force-dynamic';
@@ -16,12 +16,10 @@ export default async function ArtistChatsPage() {
     return (
       <div className="mx-auto max-w-md">
         <Header showBack={false} title="채팅 목록" />
-        <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-          <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-          <Button asChild size="sm">
-            <a href={LOGIN_HREF}>로그인</a>
-          </Button>
-        </div>
+        <LoginRequired
+          description="작가 계정으로 로그인하면 문의 채팅을 볼 수 있어요."
+          returnUrl="/app/artist/chats"
+        />
       </div>
     );
   }

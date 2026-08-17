@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { Header } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
 
+import { LoginRequired } from '../../(auth)/LoginRequired';
 import { WithdrawForm } from './WithdrawForm';
 
 export const dynamic = 'force-dynamic';
@@ -25,14 +25,7 @@ export default async function WithdrawPage({
   );
 
   if (!token) {
-    return page(
-      <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-        <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-        <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">
-          로그인
-        </a>
-      </div>,
-    );
+    return page(<LoginRequired returnUrl={backHref} />);
   }
 
   // Figma 실측: 헤더 아래 20px, 좌우 20px, 제목-설명 간격 8px (설명 줄바꿈 기준 폭 306)

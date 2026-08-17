@@ -9,7 +9,7 @@ import { nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom
 import { Button, Field, Input, Textarea, showToast } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { goLogin } from '@/src/lib/goLogin';
 import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const schema = z.object({
@@ -97,7 +97,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         body: JSON.stringify(patch),
       });
       if (res.status === 401) {
-        window.location.href = LOGIN_HREF;
+        goLogin();
         return;
       }
       if (!res.ok) {

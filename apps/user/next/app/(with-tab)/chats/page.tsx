@@ -4,7 +4,7 @@ import { getChatRooms, type ChatRoomSummary } from '@dearbloom/shared';
 import { /* ChatListEditButton, */ ChatRoomList } from '@dearbloom/features-chat';
 import { Header } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
-import { LoginSheet } from '../../(auth)/LoginSheet';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,11 +16,10 @@ export default async function ChatsPage() {
     return (
       <div className="mx-auto max-w-md">
         <Header showBack={false} title="채팅 목록" />
-        {/* 탭을 누른 시점에 로그인 필요가 확정이라, 안내만 남기고 로그인 시트를 바로 올린다(QA). */}
-        <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-          <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-          <LoginSheet returnUrl="/app/chats" />
-        </div>
+        <LoginRequired
+          description="로그인하고 작가님께 문의를 시작해 보세요."
+          returnUrl="/app/chats"
+        />
       </div>
     );
   }
