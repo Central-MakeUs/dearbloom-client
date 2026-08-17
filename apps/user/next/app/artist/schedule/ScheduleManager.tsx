@@ -66,7 +66,10 @@ async function send(url: string, method: string, body?: unknown): Promise<SendRe
       body: body ? JSON.stringify(body) : undefined,
     });
     if (res.ok) return { ok: true };
+    // 지우려던 규칙이 이미 없으면(다른 기기에서 삭제 등) 목적은 달성된 것이라 성공으로 본다.
+    if (method === 'DELETE' && res.status === 404) return { ok: true };
     if (res.status === 401) return { ok: false, message: '로그인이 만료되었어요. 다시 로그인해주세요.' };
+    if (res.status === 403) return { ok: false, message: '작가 계정으로 다시 로그인해주세요.' };
     const data = (await res.json().catch(() => null)) as { error?: unknown } | null;
     return { ok: false, message: typeof data?.error === 'string' ? data.error : undefined };
   } catch {
