@@ -14,6 +14,7 @@ import {
   ArtworkCard,
   Button,
   Header,
+  Spinner,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -236,14 +237,15 @@ export function SavedView({
         <AlertDialogFooter className="flex-row">
           <AlertDialogCancel className="flex-1">취소</AlertDialogCancel>
           <AlertDialogAction
-            className="flex-1"
+            className="flex-1 gap-2"
             disabled={busy}
             onClick={(e) => {
               e.preventDefault();
               deleteSelected();
             }}
           >
-            삭제
+            {busy ? <Spinner className="size-5 text-current" label="" /> : null}
+            {busy ? '삭제 중…' : '삭제'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

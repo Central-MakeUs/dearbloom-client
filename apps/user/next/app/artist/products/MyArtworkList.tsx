@@ -16,6 +16,7 @@ import {
   Button,
   Card,
   SkeletonImage,
+  Spinner,
 } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
 import { optimizedImageUrl } from '@/src/lib/imageUrl';
@@ -62,7 +63,12 @@ export function MyArtworkList({ items: initial }: { items: MyArtworkListItem[] }
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" disabled={deleting === a.artworkId}>
-                  <Trash2 className="size-3.5" /> {deleting === a.artworkId ? '삭제 중' : '삭제'}
+                  {deleting === a.artworkId ? (
+                    <Spinner className="size-3.5 text-current" label="" />
+                  ) : (
+                    <Trash2 className="size-3.5" />
+                  )}{' '}
+                  {deleting === a.artworkId ? '삭제 중' : '삭제'}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
