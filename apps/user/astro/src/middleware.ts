@@ -1,12 +1,25 @@
 import { defineMiddleware } from 'astro:middleware';
 
-import { refreshMemberToken, type MemberRole } from '@dearbloom/shared';
+import { logoutMember, refreshMemberToken, type MemberRole } from '@dearbloom/shared';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? process.env.PUBLIC_API_URL;
 const isProduction = apiBaseUrl?.replace(/\/$/, '') === 'https://api.dearbloom.co.kr';
 const accessTokenMaxAge = isProduction ? 1_800 : 10_800;
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  if (context.cookies.has('onboardingPending')) {
+    const token = context.cookies.get('accessToken')?.value;
+    if (token) await logoutMember({ token }).catch(() => undefined);
+    const response = context.url.pathname.startsWith('/api/')
+      ? new Response(JSON.stringify({ error: 'unauthorized' }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 401,
+        })
+      : await next();
+    expireAuthCookies(context.request, response);
+    return response;
+  }
+
   if (context.cookies.has('accessToken') || context.url.pathname.startsWith('/_astro/')) {
     return next();
   }
@@ -33,6 +46,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   return next();
 });
+
+function expireAuthCookies(request: Request, response: Response) {
+  const scope = getCookieScope(request);
+  const secure = scope.secure ? '; Secure' : '';
+  for (const name of ['accessToken', 'refreshToken', 'activeRole', 'onboardingPending']) {
+    const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
+    response.headers.append('Set-Cookie', `${expiredCookie}${secure}`);
+    if ('domain' in scope) {
+      response.headers.append('Set-Cookie', `${expiredCookie}; Domain=.dearbloom.co.kr; Secure`);
+    }
+  }
+}
 
 function getMemberRole(value?: string): MemberRole | undefined {
   return value === 'CUSTOMER' || value === 'ARTIST' ? value : undefined;

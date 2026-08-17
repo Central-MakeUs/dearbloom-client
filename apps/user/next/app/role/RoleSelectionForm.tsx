@@ -11,6 +11,7 @@ import artistRoleIcon from '../../public/images/role-artist.svg';
 import customerRoleIcon from '../../public/images/role-customer.svg';
 import { withFlashToast } from '@/src/lib/flashToast';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { getRoleLoginDestination, getRoleReturnUrl } from '@/src/lib/returnUrl';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -105,7 +106,10 @@ export function RoleSelectionForm({
         }
 
         const roleCookieResponse = await fetch('/app/api/auth/active-role', {
-          body: JSON.stringify({ role: body.data.selectedRole }),
+          body: JSON.stringify({
+            onboardingPending: body.data.needsOnboarding,
+            role: body.data.selectedRole,
+          }),
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
         });
@@ -270,11 +274,8 @@ function getLoginDestination(
   returnUrl?: string,
 ) {
   if (needsOnboarding) {
-    return getOnboardingTermsPath(role, forceOnboarding, returnUrl);
+    return getOnboardingTermsPath(role, forceOnboarding, getRoleReturnUrl(role, returnUrl));
   }
 
-  return withFlashToast(
-    returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard'),
-    'login',
-  );
+  return withFlashToast(getRoleLoginDestination(role, returnUrl), 'login');
 }

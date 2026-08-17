@@ -5,8 +5,8 @@ import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
 import { withFlashToast } from '@/src/lib/flashToast';
-import { safeReturnUrl } from '@/src/lib/returnUrl';
-import { setAuthCookie } from '@/src/lib/authCookies';
+import { getRoleLoginDestination, getRoleReturnUrl } from '@/src/lib/returnUrl';
+import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 
 type LocalTokenExchangeResponse = {
@@ -51,6 +51,9 @@ export async function GET(request: NextRequest) {
       forceOnboarding,
     );
     if (role) setAuthCookie(request, response, 'activeRole', role);
+    if (needsOnboarding !== undefined) {
+      setOnboardingPendingCookie(request, response, needsOnboarding);
+    }
     return response;
   }
 
@@ -65,6 +68,10 @@ export async function GET(request: NextRequest) {
     (role
       ? await getLocalOnboardingState(tokenExchangeResult.tokens.accessToken, role)
       : undefined);
+  if (!role || localNeedsOnboarding === undefined) {
+    return redirectLoginError(request, 'missing_onboarding_state', role);
+  }
+
   const response = redirectAfterLogin(
     request,
     role,
@@ -73,6 +80,7 @@ export async function GET(request: NextRequest) {
   );
   setAuthCookie(request, response, 'accessToken', tokenExchangeResult.tokens.accessToken);
   setAuthCookie(request, response, 'refreshToken', tokenExchangeResult.tokens.refreshToken);
+  setOnboardingPendingCookie(request, response, localNeedsOnboarding);
 
   return response;
 }
@@ -143,13 +151,10 @@ function redirectAfterLogin(
   }
 
   // 온보딩이 필요하면 복귀 경로를 보존해 온보딩 완료 뒤 원래 화면으로 돌아간다.
-  const returnUrl = safeReturnUrl(request.cookies.get('oauthReturnUrl')?.value);
+  const returnUrl = getRoleReturnUrl(role, request.cookies.get('oauthReturnUrl')?.value);
   const destination = needsOnboarding
     ? getOnboardingTermsPath(role, forceOnboarding, returnUrl)
-    : withFlashToast(
-        returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard'),
-        'login',
-      );
+    : withFlashToast(getRoleLoginDestination(role, returnUrl), 'login');
   const url = new URL(destination, getPublicOrigin(request));
 
   return clearOAuthCookies(NextResponse.redirect(url));

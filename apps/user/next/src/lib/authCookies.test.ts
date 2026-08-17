@@ -9,6 +9,7 @@ import {
   getAuthCookieOptions,
   getTokenActiveRole,
   setAuthCookie,
+  setOnboardingPendingCookie,
 } from './authCookies.ts';
 
 function token(activeRole: 'CUSTOMER' | 'ARTIST' = 'CUSTOMER') {
@@ -32,16 +33,16 @@ function request(
 }
 
 test('dearbloom subdomains replace host-only cookies', () => {
-  const dearBloomRequest = request(
+  const DearBloomRequest = request(
     'user-next.vercel.app',
     'https:',
     'https',
     'dev.dearbloom.co.kr',
   );
-  const options = getAuthCookieOptions(dearBloomRequest, 3600);
+  const options = getAuthCookieOptions(DearBloomRequest, 3600);
   const response = NextResponse.json({});
 
-  setAuthCookie(dearBloomRequest, response, 'accessToken', token());
+  setAuthCookie(DearBloomRequest, response, 'accessToken', token());
 
   const setCookies = response.headers.getSetCookie();
   assert.equal(options.domain, '.dearbloom.co.kr');
@@ -53,10 +54,10 @@ test('dearbloom subdomains replace host-only cookies', () => {
 });
 
 test('dearbloom root replaces stale host-only cookies', () => {
-  const dearBloomRequest = request('dearbloom.co.kr', 'https:');
+  const DearBloomRequest = request('dearbloom.co.kr', 'https:');
   const response = NextResponse.json({});
 
-  setAuthCookie(dearBloomRequest, response, 'accessToken', token());
+  setAuthCookie(DearBloomRequest, response, 'accessToken', token());
 
   const setCookies = response.headers.getSetCookie();
   assert.equal(setCookies.length, 4);
@@ -95,4 +96,23 @@ test('cookie lifetime follows fixed backend settings by environment', () => {
 test('active role is preserved separately for access token refresh', () => {
   assert.equal(getTokenActiveRole(token('ARTIST')), 'ARTIST');
   assert.equal(getTokenActiveRole('not-a-jwt'), undefined);
+});
+
+test('pending onboarding marker uses both cookie scopes and can be cleared', () => {
+  const DearBloomRequest = request(
+    'user-next.vercel.app',
+    'https:',
+    'https',
+    'dev.dearbloom.co.kr',
+  );
+  const pendingResponse = NextResponse.json({});
+  const completeResponse = NextResponse.json({});
+
+  setOnboardingPendingCookie(DearBloomRequest, pendingResponse, true);
+  setOnboardingPendingCookie(DearBloomRequest, completeResponse, false);
+
+  assert.equal(pendingResponse.headers.getSetCookie().length, 2);
+  assert.match(pendingResponse.headers.getSetCookie()[0] ?? '', /onboardingPending=1/);
+  assert.equal(completeResponse.headers.getSetCookie().length, 2);
+  assert.ok(completeResponse.headers.getSetCookie().every((cookie) => /Max-Age=0/.test(cookie)));
 });

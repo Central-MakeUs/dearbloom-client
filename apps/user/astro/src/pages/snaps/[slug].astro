@@ -20,7 +20,9 @@ import {
 } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
-const token = Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.has('onboardingPending')
+  ? undefined
+  : Astro.cookies.get('accessToken')?.value;
 const backHref = getArtworkBackHref(Astro.url.searchParams.get('returnTo'));
 const returnQuery = backHref === '/snaps' ? '' : `?returnTo=${encodeURIComponent(backHref)}`;
 
@@ -72,7 +74,7 @@ if (artwork && token) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>{artwork?.title ?? '작품'} · dearBloom</title>
+    <title>{artwork?.title ?? '작품'} · DearBloom</title>
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     {

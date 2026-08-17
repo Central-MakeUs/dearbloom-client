@@ -2,6 +2,7 @@ import type { NextRequest, NextResponse } from 'next/server';
 
 export type MemberRole = 'CUSTOMER' | 'ARTIST';
 type AuthCookieName = 'accessToken' | 'refreshToken' | 'activeRole';
+type SessionCookieName = AuthCookieName | 'onboardingPending';
 
 const DEVELOPMENT_TOKEN_MAX_AGE = {
   accessToken: 10_800,
@@ -35,7 +36,7 @@ export function setAuthCookie(
 export function expireAuthCookie(
   request: NextRequest,
   response: NextResponse,
-  name: AuthCookieName,
+  name: SessionCookieName,
 ) {
   const expiredCookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax`;
   const host =
@@ -49,8 +50,22 @@ export function expireAuthCookie(
   }
 }
 
+export function setOnboardingPendingCookie(
+  request: NextRequest,
+  response: NextResponse,
+  pending: boolean,
+) {
+  if (!pending) {
+    expireAuthCookie(request, response, 'onboardingPending');
+    return;
+  }
+
+  const clearsHostOnlyCookie = writeAuthCookie(request, response, 'onboardingPending', '1');
+  if (clearsHostOnlyCookie) clearHostOnlyCookie(response, 'onboardingPending');
+}
+
 export function getAuthCookieMaxAge(
-  name: AuthCookieName,
+  name: SessionCookieName,
   apiBaseUrl = process.env.NEXT_PUBLIC_API_URL,
 ) {
   const maxAge =
@@ -100,7 +115,7 @@ function getRequestHostname(request: NextRequest) {
 function writeAuthCookie(
   request: NextRequest,
   response: NextResponse,
-  name: AuthCookieName,
+  name: SessionCookieName,
   value: string,
 ) {
   const options = getAuthCookieOptions(request, getAuthCookieMaxAge(name));
@@ -108,7 +123,7 @@ function writeAuthCookie(
   return Boolean(options.domain);
 }
 
-function clearHostOnlyCookie(response: NextResponse, name: AuthCookieName) {
+function clearHostOnlyCookie(response: NextResponse, name: SessionCookieName) {
   response.headers.append(
     'Set-Cookie',
     `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax; Secure`,

@@ -7,7 +7,7 @@ import {
 } from '@dearbloom/shared';
 
 import { LOGIN_HREF } from '@/src/lib/env';
-import { setAuthCookie } from '@/src/lib/authCookies';
+import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
 import { withFlashToast } from '@/src/lib/flashToast';
 
 import { parseArtistRegions } from './artistRegions';
@@ -43,6 +43,7 @@ function redirectRelative(request: NextRequest, location: string, accessToken?: 
   const response = new NextResponse(null, { status: 303, headers: { Location: location } });
   if (accessToken) {
     setAuthCookie(request, response, 'accessToken', accessToken);
+    setOnboardingPendingCookie(request, response, false);
   }
 
   return response;
