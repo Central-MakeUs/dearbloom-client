@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Button } from '@dearbloom/ui';
 import {
@@ -11,6 +11,7 @@ import { loginHref } from '@/src/lib/env';
 import { getInviteView } from './inviteView';
 import { JoinBoardButton } from './JoinBoardButton';
 import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { getMetadataOrigin } from '@/src/lib/metadataOrigin';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export async function generateMetadata({
   const { inviteCode } = await params;
   const invite = await getSharedBoardInvite(inviteCode).catch(() => undefined);
   const title = invite ? `${invite.boardName} 공동보드에 초대되었어요` : '공동보드 초대';
-  const origin = process.env.NEXT_PUBLIC_ASTRO_URL ?? 'http://localhost:4321';
+  const origin = getMetadataOrigin(process.env.NEXT_PUBLIC_ASTRO_URL, await headers());
   const url = new URL(`/app/invite/${encodeURIComponent(inviteCode)}`, origin);
   const image = new URL('/app/images/kakao-board-invite.png', origin);
 
