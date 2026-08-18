@@ -21,24 +21,21 @@ export function ArtworkImageViewer({ backHref, images, initialIndex, title }: Pr
   }, [initialIndex]);
 
   const photoFrame = (image: Props['images'][number], index: number) => (
-    <div className="relative aspect-[375/494] w-full max-w-md overflow-hidden">
+    <div className="relative aspect-[375/494] max-h-full w-full max-w-md overflow-hidden">
       <img
         src={image.url}
         alt={`${title} ${index + 1}번 사진`}
-        className="absolute inset-0 size-full object-cover"
+        className="absolute inset-0 size-full object-contain"
         draggable={false}
       />
-      <div className="absolute inset-0 bg-neutral-950/[0.08]" aria-hidden />
-      {image.universityName ? (
-        <span className="absolute bottom-4 right-4 rounded-[6px] bg-neutral-950/40 px-3 py-2 text-body-5 text-neutral-0">
-          {image.universityName}
-        </span>
-      ) : null}
     </div>
   );
 
   const slides = images.map((image, index) => (
-    <div key={`${image.url}-${index}`} className="flex h-full w-full shrink-0 snap-center items-center justify-center">
+    <div
+      key={`${image.url}-${index}`}
+      className="flex h-full w-full shrink-0 snap-center items-center justify-center py-[52px]"
+    >
       {photoFrame(image, index)}
     </div>
   ));
@@ -51,8 +48,18 @@ export function ArtworkImageViewer({ backHref, images, initialIndex, title }: Pr
     </div>
   );
 
+  const currentSchool = images[currentIndex]?.universityName;
+  const schoolBadge = currentSchool ? (
+    <span
+      className="pointer-events-none absolute bottom-4 right-4 z-20 rounded-[6px] bg-neutral-950/40 px-3 py-2 text-body-5 text-neutral-0"
+      aria-live="polite"
+    >
+      {currentSchool}
+    </span>
+  ) : null;
+
   const initialImage = !ready ? (
-    <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-100">
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-100 py-[52px]">
       {photoFrame(images[initialIndex]!, initialIndex)}
     </div>
   ) : null;
@@ -61,6 +68,7 @@ export function ArtworkImageViewer({ backHref, images, initialIndex, title }: Pr
     <main className="relative h-dvh overflow-hidden bg-neutral-100">
       <ArtworkImageHeader backHref={backHref} right={counter} className="absolute inset-x-0 top-0" />
       {initialImage}
+      {schoolBadge}
       <div
         ref={scrollerRef}
         className="flex h-full snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

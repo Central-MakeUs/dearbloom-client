@@ -89,7 +89,7 @@ export function updateArtistTravelFee(travelFee: string, opts: RequestOptions): 
 
 /**
  * GET /api/artists/me/artworks 목록 아이템. 공개 목록(ArtworkListItem)과 달리
- * `price`(단일 대표가), `savedCount`/`viewCount`(작가 통계)를 주며 `isSaved`가 없음.
+ * `price`(단일 대표가)를 주며 `isSaved`가 없음.
  */
 export interface MyArtworkListItem {
   artworkId: number;
@@ -100,10 +100,6 @@ export interface MyArtworkListItem {
   artistNickname: string;
   artistRegionList: ArtistRegionCode[];
   thumbnailUrl: string;
-  /** 저장(찜)된 횟수 */
-  savedCount: number;
-  /** 조회수 */
-  viewCount: number;
 }
 
 export function getMyArtworks(opts: RequestOptions): Promise<MyArtworkListItem[]> {
