@@ -18,9 +18,11 @@ export default async function WithdrawPage({
   const backHref = from === 'artist' ? '/app/artist/my' : '/app/my';
 
   const page = (children: ReactNode) => (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
-      <AppBackHeader fallbackHref={backHref} title="탈퇴하기" />
-      {children}
+    <div className="min-h-screen bg-neutral-100">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col">
+        <AppBackHeader fallbackHref={backHref} title="탈퇴하기" />
+        {children}
+      </div>
     </div>
   );
 

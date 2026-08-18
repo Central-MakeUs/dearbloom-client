@@ -21,10 +21,10 @@ export function ArtistRegionField({
       <button
         aria-pressed={selected}
         className={cn(
-          'rounded-full border-[1.2px] px-3 py-2 text-caption-1 transition-colors',
+          'rounded-full px-3 py-1.5 text-body-5 transition-colors',
           selected
-            ? 'border-primary bg-primary-200 font-semibold text-primary'
-            : 'border-transparent bg-neutral-200 text-neutral-700',
+            ? 'border-[1.2px] border-primary bg-primary-200 font-semibold text-primary'
+            : 'bg-neutral-200 text-neutral-700',
         )}
         key={region.value}
         onClick={() =>
