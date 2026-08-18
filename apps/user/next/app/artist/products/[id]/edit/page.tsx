@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { getMyArtwork } from '@dearbloom/shared';
 import { EditForm } from './EditForm';
 import { LoginRequired } from '../../../../(auth)/LoginRequired';
-import { Header } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = <Header backHref="/app/artist/products" title="작품 수정" />;
+  const header = <AppBackHeader fallbackHref="/app/artist/products" title="작품 수정" />;
 
   if (!token) {
     return (

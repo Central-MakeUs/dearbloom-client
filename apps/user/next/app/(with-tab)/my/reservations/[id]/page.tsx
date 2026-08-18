@@ -7,11 +7,12 @@ import {
   type InquiryStatus,
 } from '@dearbloom/shared';
 import { CancelInquiry } from './CancelInquiry';
-import { Header as TitleHeader, SkeletonImage } from '@dearbloom/ui';
+import { SkeletonImage } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => <TitleHeader backHref="/app/my/reservations" title="문의 상세" />;
+const Header = () => <AppBackHeader fallbackHref="/app/my/reservations" title="문의 상세" />;
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-start justify-between gap-4 py-2">

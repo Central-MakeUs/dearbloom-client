@@ -45,6 +45,7 @@ import {
   createNativeExitRequestScript,
   getAndroidBackAction,
   isNativeExitConfirm,
+  parseNativeNavigationState,
 } from './nativeBack';
 import { getSessionWebViewUrl } from './nativeSession';
 import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
@@ -337,7 +338,7 @@ async function requestPushToken(): Promise<NativePushTokenResult> {
 export default function App() {
   const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
-  const canWebViewGoBack = useRef(false);
+  const hasNativeInternalBack = useRef(false);
   const isNativeLoginPending = useRef(false);
   const sessionBootstrapState = useRef<'checking' | 'reading' | 'redirecting' | 'ready'>(
     'checking',
@@ -351,7 +352,7 @@ export default function App() {
     if (Platform.OS !== 'android') return;
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (getAndroidBackAction(canWebViewGoBack.current) === 'go-back') {
+      if (getAndroidBackAction(hasNativeInternalBack.current) === 'go-back') {
         webViewRef.current?.goBack();
         return true;
       }
@@ -474,6 +475,12 @@ export default function App() {
       return;
     }
 
+    const nativeNavigationState = parseNativeNavigationState(data);
+    if (nativeNavigationState !== undefined) {
+      hasNativeInternalBack.current = nativeNavigationState;
+      return;
+    }
+
     if (Platform.OS === 'android' && isNativeExitConfirm(data)) {
       BackHandler.exitApp();
       return;
@@ -562,12 +569,12 @@ export default function App() {
         const { statusCode, url } = event.nativeEvent;
         setLoadError(`HTTP ${statusCode}\n${url}`);
       }}
-      onLoadStart={() => setLoadError(null)}
+      onLoadStart={() => {
+        hasNativeInternalBack.current = false;
+        setLoadError(null);
+      }}
       onLoadEnd={handleWebViewLoadEnd}
       onMessage={handleWebViewMessage}
-      onNavigationStateChange={({ canGoBack }) => {
-        canWebViewGoBack.current = canGoBack;
-      }}
       pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
       renderLoading={() => loading}

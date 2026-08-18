@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { BottomButton, Header, Spinner, TextField, cn } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { replaceApp } from '@/src/lib/appNavigation';
 import {
   BOARD_NAME_MAX_LENGTH,
   BOARD_NAME_MIN_LENGTH,
@@ -47,7 +49,7 @@ export default function EditBoardNamePage() {
         setInitialName(board.sharedBoardName);
         setName(board.sharedBoardName);
       })
-      .catch(() => router.replace(`/boards/${id}`))
+      .catch(() => replaceApp(router, `/app/boards/${id}`))
       .finally(() => {
         if (active) setLoaded(true);
       });
@@ -69,7 +71,7 @@ export default function EditBoardNamePage() {
       setSubmitting(false);
       return;
     }
-    router.replace(`/boards/${id}?boardRenamed=1`);
+    replaceApp(router, `/app/boards/${id}?boardRenamed=1`);
   };
 
   const nameField = (
@@ -110,7 +112,7 @@ export default function EditBoardNamePage() {
       }}
       className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100"
     >
-      <Header showBack onBack={() => router.back()} title="보드 이름 변경하기" />
+      <AppBackHeader fallbackHref={`/app/boards/${id}`} showBack title="보드 이름 변경하기" />
       {nameField}
       <div className="flex-1" />
       <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">

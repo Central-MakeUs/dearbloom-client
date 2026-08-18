@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 // ⋯ 메뉴를 되살릴 때 함께 푼다.
 // import { MoreHorizontal } from 'lucide-react';
 import { Header, Spinner } from '@dearbloom/ui';
@@ -15,6 +15,7 @@ import { useLiveMessages } from './useLiveMessages';
 const PAGE_SIZE = 30;
 
 interface ChatRoomViewProps {
+  header?: ReactNode;
   roomId: number;
   myRole: ChatRole;
   peerName: string;
@@ -33,6 +34,7 @@ interface ChatRoomViewProps {
  * 되살릴 땐 이 파일의 주석 블록(임포트·state·menuButton·시트/토스트)을 함께 푼다.
  */
 export function ChatRoomView({
+  header,
   roomId,
   myRole,
   peerName,
@@ -218,7 +220,7 @@ export function ChatRoomView({
   // 이게 없으면 페이지가 흰 바탕이 되어 수신 말풍선(neutral-0)이 배경에 묻힌다.
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-      <Header title={peerName} onBack={() => (window.location.href = backHref)} />
+      {header ?? <Header title={peerName} onBack={() => (window.location.href = backHref)} />}
       {list}
       <ChatComposer onSendText={sendText} onSendImage={sendImage} />
       {/*

@@ -9,11 +9,11 @@ import {
 } from '@dearbloom/shared';
 import { ScheduleManager } from './ScheduleManager';
 import { LoginRequired } from '../../(auth)/LoginRequired';
-import { Header as TitleHeader } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => <TitleHeader backHref="/app/artist/dashboard" title="일정 관리" />;
+const Header = () => <AppBackHeader fallbackHref="/app/artist/dashboard" title="일정 관리" />;
 
 export default async function ArtistSchedulePage() {
   const token = (await cookies()).get('accessToken')?.value;

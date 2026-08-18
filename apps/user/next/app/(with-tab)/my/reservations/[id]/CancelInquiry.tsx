@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, showToast } from '@dearbloom/ui';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
+import { replaceApp } from '@/src/lib/appNavigation';
 
 /** 문의 취소 — 카드 안쪽 연한 그린 버튼(Figma). 진행중 문의에서만 노출된다. */
 export function CancelInquiry({ id }: { id: number }) {
@@ -19,7 +20,7 @@ export function CancelInquiry({ id }: { id: number }) {
       const response = await fetch(`/app/api/inquiries/${id}/cancel`, { method: 'PATCH' });
       if (response.ok) {
         showToast('문의를 취소했어요.');
-        router.push('/my/reservations');
+        replaceApp(router, '/app/my/reservations');
         router.refresh();
         return;
       }

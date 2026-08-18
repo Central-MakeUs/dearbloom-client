@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { cn } from '@dearbloom/ui';
+import { shouldUseHistoryBack } from '@/lib/backNavigation';
 
 interface Props {
   backHref: string;
@@ -9,8 +10,30 @@ interface Props {
 }
 
 export function ArtworkImageHeader({ backHref, title, right, className }: Props) {
+  function goBack(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    if (
+      shouldUseHistoryBack(
+        document.referrer,
+        backHref,
+        location.origin,
+        window.history.length,
+        window.history.state,
+      )
+    ) {
+      window.history.back();
+    } else {
+      window.location.replace(backHref);
+    }
+  }
+
   const backButton = (
-    <a href={backHref} aria-label="뒤로가기" className="flex size-11 items-center justify-center">
+    <a
+      href={backHref}
+      onClick={goBack}
+      aria-label="뒤로가기"
+      className="flex size-11 items-center justify-center"
+    >
       <img src="/images/image-detail-back.svg" alt="" className="size-7" aria-hidden />
     </a>
   );

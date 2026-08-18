@@ -5,7 +5,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, Card, cn, Header, Spinner } from '@dearbloom/ui';
+import { BottomButton, Card, cn, Spinner } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 import artistRoleIcon from '../../public/images/role-artist.svg';
 import customerRoleIcon from '../../public/images/role-customer.svg';
@@ -254,7 +255,7 @@ export function RoleSelectionForm({
   return (
     <main className="min-h-dvh bg-neutral-100">
       <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-20">
-        <Header onBack={() => window.history.back()} />
+        <AppBackHeader fallbackHref="/snaps" />
         <section className="px-4 pt-2">
           <h1 className="px-1 py-3 text-head-1 text-neutral-950">
             디어블룸 이용 방식을 선택해 주세요.

@@ -46,7 +46,7 @@ const galleryQuery = (school = selectedSchool) => {
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     <main class="mx-auto min-h-screen max-w-md bg-neutral-100">
-      <ArtworkImageHeader backHref={`/snaps/${slug}${returnQuery}`} title="이미지 상세" />
+      <ArtworkImageHeader backHref={`/snaps/${slug}${returnQuery}`} title="이미지 상세" client:load />
       {
         images.length > 0 ? (
           <>
@@ -60,6 +60,7 @@ const galleryQuery = (school = selectedSchool) => {
                   return (
                     <a
                       href={`/snaps/${slug}/images${galleryQuery(school)}`}
+                      data-history-replace
                       aria-current={selected ? 'page' : undefined}
                       class:list={[
                         'shrink-0 rounded-[20px] border px-3 py-1.5 text-body-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
@@ -95,5 +96,31 @@ const galleryQuery = (school = selectedSchool) => {
         )
       }
     </main>
+    <script>
+      document.addEventListener('click', (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        const target = event.target;
+        const link = target instanceof Element ? target.closest<HTMLAnchorElement>('a[data-history-replace]') : null;
+        if (!link) return;
+
+        event.preventDefault();
+        window.history.replaceState(
+          { ...window.history.state, dearbloomBackHref: `/snaps/${slug}${returnQuery}` },
+          '',
+          link.href,
+        );
+        window.location.reload();
+      });
+    </script>
   </body>
 </html>

@@ -6,11 +6,14 @@ import { z } from 'zod';
 import { BottomButton, Spinner, TextField, showToast } from '@dearbloom/ui';
 import { customerNameSchema, CUSTOMER_NAME_MAX_LENGTH } from '@dearbloom/shared';
 import { withFlashToast } from '@/src/lib/flashToast';
+import { useRouter } from 'next/navigation';
+import { replaceApp } from '@/src/lib/appNavigation';
 
 const schema = z.object({ name: customerNameSchema });
 type FormValues = z.infer<typeof schema>;
 
 export function EditForm({ initialName }: { initialName: string }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -39,7 +42,7 @@ export function EditForm({ initialName }: { initialName: string }) {
     }
 
     // 완료 토스트는 이동한 마이페이지에서 띄운다(이 화면에서 띄우면 화면 전환에 묻힌다).
-    window.location.href = withFlashToast('/app/my', 'profile');
+    replaceApp(router, withFlashToast('/app/my', 'profile'));
   };
 
   const field = (

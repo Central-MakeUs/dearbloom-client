@@ -2,11 +2,11 @@ import { cookies } from 'next/headers';
 import { getCustomerMe } from '@dearbloom/shared';
 import { EditForm } from './EditForm';
 import { LoginRequired } from '../../(auth)/LoginRequired';
-import { Header as TitleHeader } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => <TitleHeader backHref="/app/my" title="프로필 수정하기" />;
+const Header = () => <AppBackHeader fallbackHref="/app/my" title="프로필 수정하기" />;
 
 export default async function ProfileEditPage() {
   const token = (await cookies()).get('accessToken')?.value;

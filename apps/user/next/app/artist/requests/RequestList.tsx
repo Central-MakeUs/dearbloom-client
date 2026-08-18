@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { ChevronRight, User } from 'lucide-react';
 import {
   ampmTimeLabel,
@@ -11,6 +10,7 @@ import {
   type InquiryStatus,
 } from '@dearbloom/shared';
 import { Badge, Card, SkeletonImage, cn, type BadgeProps } from '@dearbloom/ui';
+import { AppLink } from '@/src/components/common/AppLink';
 import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 type FilterKey = 'all' | 'progress' | 'reserved' | 'canceled';
@@ -94,8 +94,8 @@ export function RequestList({ items }: { items: ArtistInquiryListItem[] }) {
   );
 
   const card = (it: ArtistInquiryListItem) => (
-    <Link
-      href={`/artist/requests/${it.inquiryId}`}
+    <AppLink
+      href={`/app/artist/requests/${it.inquiryId}`}
       aria-label={`${it.customerName} 님의 ${it.artworkName} 문의, ${it.statusLabel}`}
       className="block"
     >
@@ -125,7 +125,7 @@ export function RequestList({ items }: { items: ArtistInquiryListItem[] }) {
           {ampmTimeLabel(it.startTime)}
         </p>
       </Card>
-    </Link>
+    </AppLink>
   );
 
   const list =

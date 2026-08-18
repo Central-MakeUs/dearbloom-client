@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { goLogin } from '@/src/lib/goLogin';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -109,7 +110,7 @@ export function ArtworkForm() {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(b.error || '작품 등록 실패');
       }
-      router.push('/artist/products');
+      replaceApp(router, '/app/artist/products');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : '오류가 발생했어요');
     } finally {
