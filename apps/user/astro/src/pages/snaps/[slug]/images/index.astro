@@ -114,12 +114,7 @@ const galleryQuery = (school = selectedSchool) => {
         if (!link) return;
 
         event.preventDefault();
-        window.history.replaceState(
-          { ...window.history.state, dearbloomBackHref: `/snaps/${slug}${returnQuery}` },
-          '',
-          link.href,
-        );
-        window.location.reload();
+        window.location.replace(link.href);
       });
     </script>
   </body>
