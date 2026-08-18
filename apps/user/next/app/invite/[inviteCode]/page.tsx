@@ -113,12 +113,6 @@ export default async function InvitePage({
                 inviteCode={inviteCode}
                 joinedBoardId={invite.alreadyJoined ? invite.sharedBoardId : undefined}
               />
-              <a
-                className="mt-3 flex h-10 items-center justify-center text-body-1 text-neutral-800"
-                href="/snaps"
-              >
-                기능 둘러보기
-              </a>
             </div>
           </div>
         </main>

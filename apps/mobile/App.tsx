@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
+  Alert,
   Animated,
   BackHandler,
   Easing,
@@ -42,9 +43,7 @@ import {
 } from './nativeSafeArea';
 import { getInviteWebViewUrl } from './nativeDeepLink';
 import {
-  createNativeExitRequestScript,
   getAndroidBackAction,
-  isNativeExitConfirm,
   parseNativeNavigationState,
 } from './nativeBack';
 import { getSessionWebViewUrl } from './nativeSession';
@@ -338,26 +337,44 @@ async function requestPushToken(): Promise<NativePushTokenResult> {
 export default function App() {
   const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
-  const hasNativeInternalBack = useRef(false);
+  const hasAppNavigationBack = useRef(false);
+  const hasWebViewBack = useRef(false);
   const isNativeLoginPending = useRef(false);
   const sessionBootstrapState = useRef<'checking' | 'reading' | 'redirecting' | 'ready'>(
     'checking',
   );
   const [webViewUrl, setWebViewUrl] = useState(initialWebViewUrl);
+  const [webViewKey, setWebViewKey] = useState(0);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
+
+  const replaceWebViewRoot = useCallback((url: string) => {
+    hasAppNavigationBack.current = false;
+    hasWebViewBack.current = false;
+    setWebViewUrl(url);
+    setWebViewKey((currentKey) => currentKey + 1);
+  }, []);
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (getAndroidBackAction(hasNativeInternalBack.current) === 'go-back') {
+      if (
+        getAndroidBackAction(hasAppNavigationBack.current, hasWebViewBack.current) === 'go-back'
+      ) {
         webViewRef.current?.goBack();
         return true;
       }
 
-      webViewRef.current?.injectJavaScript(createNativeExitRequestScript());
+      Alert.alert(
+        '디어블룸을 종료할까요?',
+        '진행 중인 화면은 그대로 저장되지 않을 수 있어요.',
+        [
+          { style: 'cancel', text: '취소' },
+          { onPress: () => BackHandler.exitApp(), style: 'destructive', text: '종료' },
+        ],
+      );
 
       return true;
     });
@@ -374,14 +391,14 @@ export default function App() {
 
       sessionBootstrapState.current = 'ready';
       setIsSessionReady(true);
-      setWebViewUrl(inviteWebViewUrl);
+      replaceWebViewRoot(inviteWebViewUrl);
     };
 
     void Linking.getInitialURL().then(openDeepLink);
     const subscription = Linking.addEventListener('url', ({ url }) => openDeepLink(url));
 
     return () => subscription.remove();
-  }, [initialWebViewUrl]);
+  }, [initialWebViewUrl, replaceWebViewRoot]);
 
   // 서버는 data.deepLink 에 내부 절대경로만 담는다. 알림 탭과 인앱 배너 탭이 함께 쓴다.
   const openPushDeepLink = useCallback(
@@ -391,9 +408,9 @@ export default function App() {
 
       sessionBootstrapState.current = 'ready';
       setIsSessionReady(true);
-      setWebViewUrl(pushWebViewUrl);
+      replaceWebViewRoot(pushWebViewUrl);
     },
-    [initialWebViewUrl],
+    [initialWebViewUrl, replaceWebViewRoot],
   );
 
   // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다.
@@ -458,7 +475,7 @@ export default function App() {
       const sessionWebViewUrl = getSessionWebViewUrl(initialWebViewUrl, cookies);
       if (sessionWebViewUrl !== initialWebViewUrl) {
         sessionBootstrapState.current = 'redirecting';
-        setWebViewUrl(sessionWebViewUrl);
+        replaceWebViewRoot(sessionWebViewUrl);
         return;
       }
     } catch {
@@ -477,12 +494,7 @@ export default function App() {
 
     const nativeNavigationState = parseNativeNavigationState(data);
     if (nativeNavigationState !== undefined) {
-      hasNativeInternalBack.current = nativeNavigationState;
-      return;
-    }
-
-    if (Platform.OS === 'android' && isNativeExitConfirm(data)) {
-      BackHandler.exitApp();
+      hasAppNavigationBack.current = nativeNavigationState;
       return;
     }
 
@@ -556,6 +568,7 @@ export default function App() {
   ];
   const webView = (
     <WebView
+      key={webViewKey}
       ref={webViewRef}
       allowsBackForwardNavigationGestures={Platform.OS === 'ios'}
       injectedJavaScript={nativeSafeAreaSyncScript}
@@ -570,11 +583,14 @@ export default function App() {
         setLoadError(`HTTP ${statusCode}\n${url}`);
       }}
       onLoadStart={() => {
-        hasNativeInternalBack.current = false;
+        hasAppNavigationBack.current = false;
         setLoadError(null);
       }}
       onLoadEnd={handleWebViewLoadEnd}
       onMessage={handleWebViewMessage}
+      onNavigationStateChange={({ canGoBack, url }) => {
+        hasWebViewBack.current = canGoBack && isTrustedMessageUrl(url, initialWebViewUrl);
+      }}
       pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
       renderLoading={() => loading}

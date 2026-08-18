@@ -19,8 +19,8 @@ import {
 } from '@/src/components/common/UniversitySearchScreen';
 import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import completeIcon from '../../public/images/onboarding-complete.svg';
-import { withFlashToast } from '@/src/lib/flashToast';
 import { navigateAppBack } from '@/src/lib/appNavigation';
+import { getOnboardingCompletionPath } from '@/src/lib/onboardingRoute';
 import boardTourImage from '../../public/images/onboarding-tour-board.png';
 import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
 import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
@@ -472,8 +472,7 @@ export function CustomerOnboardingForm({
     );
   }
 
-  const finishOnboarding = () =>
-    window.location.replace(withFlashToast(returnUrl ?? '/snaps', 'welcome'));
+  const finishOnboarding = () => window.location.replace(getOnboardingCompletionPath(returnUrl));
 
   if (step === 'tour') return <OnboardingTour onFinish={finishOnboarding} />;
 

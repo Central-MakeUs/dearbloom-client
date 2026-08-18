@@ -2,11 +2,20 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  getOnboardingCompletionPath,
   getOnboardingFormPath,
   getOnboardingTermsPath,
   isOnboardingPagePath,
   shouldCancelPendingOnboarding,
 } from './onboardingRoute.ts';
+
+test('공동보드 초대 온보딩 완료 뒤 초대 화면으로 돌아간다', () => {
+  assert.equal(
+    getOnboardingCompletionPath('/app/invite/XAK6PD?loginComplete=1'),
+    '/app/invite/XAK6PD?loginComplete=1&_toast=welcome',
+  );
+  assert.equal(getOnboardingCompletionPath(), '/snaps?_toast=welcome');
+});
 
 test('역할과 forceOnboarding을 온보딩 경로에 보존한다', () => {
   assert.equal(getOnboardingTermsPath('CUSTOMER'), '/app/onboarding/terms?role=CUSTOMER');
