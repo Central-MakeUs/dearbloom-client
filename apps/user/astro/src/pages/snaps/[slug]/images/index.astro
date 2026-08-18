@@ -109,7 +109,7 @@ const galleryQuery = (school = selectedSchool) => {
         }
 
         const target = event.target;
-        const link = target instanceof Element ? target.closest<HTMLAnchorElement>('a[data-history-replace]') : null;
+        const link = target instanceof Element ? target.closest('a[data-history-replace]') : null;
         if (!link) return;
 
         event.preventDefault();
