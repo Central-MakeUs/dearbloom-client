@@ -96,10 +96,9 @@ const galleryQuery = (school = selectedSchool) => {
         )
       }
     </main>
-    <script>
+    <script is:inline>
       document.addEventListener('click', (event) => {
         if (
-          event.defaultPrevented ||
           event.button !== 0 ||
           event.metaKey ||
           event.ctrlKey ||
@@ -115,7 +114,7 @@ const galleryQuery = (school = selectedSchool) => {
 
         event.preventDefault();
         window.location.replace(link.href);
-      });
+      }, true);
     </script>
   </body>
 </html>
