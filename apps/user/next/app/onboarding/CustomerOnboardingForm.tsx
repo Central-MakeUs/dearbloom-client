@@ -143,7 +143,7 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
           )}
         >
           <h1 className="text-head-1 text-primary">{slide.title}</h1>
-          <p className={cn('text-body-1 text-neutral-700', index === 2 && 'w-[201px]')}>
+          <p className={cn('text-body-2 text-neutral-700', index === 2 && 'w-[201px]')}>
             {slide.description}
           </p>
         </div>
@@ -212,7 +212,7 @@ function StepHeader({
   step: 2 | 3 | 4;
 }) {
   const skipButton = onSkip ? (
-    <button className="px-2 text-caption-1 text-neutral-600" onClick={onSkip} type="button">
+    <button className="px-2 text-body-5 text-neutral-600" onClick={onSkip} type="button">
       건너뛰기
     </button>
   ) : null;
@@ -404,8 +404,8 @@ export function CustomerOnboardingForm({
 
     const content = (
       <section className="px-4 pt-7">
-        <h1 className="text-head-3 text-neutral-950">학교를 선택해 주세요.</h1>
-        <p className="mt-3 text-body-6 text-neutral-700">
+        <h1 className="text-head-1 text-neutral-900">학교를 선택해 주세요.</h1>
+        <p className="mt-2 text-body-2 text-neutral-800">
           학교 위치에 따라 출장비가 달라질 수 있어요.
           <br />
           학교명과 구체적인 캠퍼스명을 함께 적어 주세요.
@@ -440,10 +440,10 @@ export function CustomerOnboardingForm({
         aria-pressed={region === option.value}
         // 선택 상태에 테두리가 없어 배경만으로는 구분이 잘 안 됐다(QA). 필터 설정 칩과 같은 규칙으로 맞춘다.
         className={cn(
-          'rounded-full border-[1.2px] px-3 py-2 text-caption-1 transition-colors',
+          'rounded-full px-3 py-1.5 text-body-5 transition-colors',
           region === option.value
-            ? 'border-primary bg-primary-200 font-semibold text-primary'
-            : 'border-transparent bg-neutral-200 text-neutral-700',
+            ? 'border-[1.2px] border-primary bg-primary-200 font-semibold text-primary'
+            : 'bg-neutral-200 text-neutral-700',
         )}
         key={option.value}
         onClick={() => setRegion(region === option.value ? undefined : option.value)}
@@ -454,14 +454,14 @@ export function CustomerOnboardingForm({
     ));
 
     const content = (
-      <section className="px-4 pt-7">
-        <h1 className="text-head-3 text-neutral-950">촬영 희망 지역을 선택해 주세요.</h1>
-        <p className="mt-3 text-body-6 text-neutral-700">
+      <section className="px-5 pt-7">
+        <h1 className="text-head-1 text-neutral-900">촬영 희망 지역을 선택해 주세요.</h1>
+        <p className="mt-2 text-body-2 text-neutral-800">
           촬영을 원하는 학교의 지역을 골라 주세요.
           <br />
           이후 작가 추천과 일정 조율에 활용돼요.
         </p>
-        <div className="mt-8 flex flex-wrap gap-2">{regionOptions}</div>
+        <div className="-mx-1 mt-8 flex flex-wrap gap-2">{regionOptions}</div>
       </section>
     );
 

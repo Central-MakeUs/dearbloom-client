@@ -70,7 +70,7 @@ export default {
       // Figma 최종 폰트 시스템(Pretendard). 볼드 2종(head-1, body-3) 추가 + 자간 조정.
       fontSize: {
         // Head — 140% line-height
-        'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '700' }], // Head1_b_20
+        'head-1': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.5px', fontWeight: '700' }], // Head1_b_20
         'head-2': ['20px', { lineHeight: '1.4em', letterSpacing: '-0.015em', fontWeight: '600' }], // Head2_sb_20
         // Head3_sb_16 — Figma 에 자간 값이 없어 0. (Head1/Head2 만 자간을 가진다)
         'head-3': ['16px', { lineHeight: '1.5em', fontWeight: '600' }],

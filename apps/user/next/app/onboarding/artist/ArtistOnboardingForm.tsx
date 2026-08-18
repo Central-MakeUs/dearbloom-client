@@ -332,7 +332,7 @@ export function ArtistOnboardingForm({
   }
 
   const content = (
-    <section className="px-4 pt-2">
+    <section className="px-4 pt-4">
       <div className="px-1 py-3">
         <h1 className="text-head-1 text-neutral-900">작가 프로필을 완성해 주세요.</h1>
         <p className="mt-3 text-body-2 text-neutral-800">
