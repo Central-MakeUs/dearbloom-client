@@ -1,4 +1,5 @@
 import type { MemberRole } from '@dearbloom/shared';
+import { withFlashToast } from './flashToast.ts';
 
 export function getOnboardingTermsPath(
   role: MemberRole,
@@ -24,6 +25,10 @@ export function getOnboardingFormPath(
   const query = params.toString();
 
   return query ? `${path}?${query}` : path;
+}
+
+export function getOnboardingCompletionPath(returnUrl?: string) {
+  return withFlashToast(returnUrl ?? '/snaps', 'welcome');
 }
 
 export function isOnboardingPagePath(pathname: string) {
