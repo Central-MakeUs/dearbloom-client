@@ -1,1 +1,8 @@
-export { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@dearbloom/shared';
+export {
+  copyText,
+  getKakaoFeedShareOptions,
+  isMobileShareDevice,
+  isShareCancelled,
+  loadKakaoSdk,
+  requestNativeKakaoAvailability,
+} from '@dearbloom/shared';

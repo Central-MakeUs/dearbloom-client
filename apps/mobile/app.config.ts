@@ -63,6 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     infoPlist: {
       ...config.ios?.infoPlist,
+      LSApplicationQueriesSchemes: ['kakaolink'],
       // 알림 권한은 사용자가 수락한 뒤에만 요청하므로 백그라운드 모드는 remote-notification 만 켠다.
       UIBackgroundModes: ['remote-notification'],
     },
@@ -94,6 +95,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     ...googleSignInPlugins,
     ...firebasePlugins,
+    './plugins/withKakaoTalkQuery',
     'expo-apple-authentication',
   ],
 });

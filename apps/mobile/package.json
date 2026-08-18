@@ -13,6 +13,7 @@
     "test:back": "node --test nativeBack.test.mjs",
     "test:safe-area": "node --test nativeSafeArea.test.mjs",
     "test:deep-link": "node --test nativeDeepLink.test.mjs",
+    "test:kakao": "node --test nativeKakao.test.mjs",
     "test:push": "node --test nativePush.test.mjs",
     "test:session": "node --test nativeSession.test.mjs",
     "test:share": "node --test nativeShare.test.mjs",
