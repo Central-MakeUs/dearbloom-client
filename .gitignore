@@ -28,6 +28,7 @@ apps/user/*/public/images/dearbloom-logo.svg
 apps/user/*/public/images/candidate-*.svg
 apps/user/*/public/images/toast-*.svg
 apps/user/*/public/images/kakao-talk.png
+apps/user/*/public/images/kakao-board-invite.png
 apps/user/*/public/images/invite-login-complete.svg
 apps/user/*/public/images/image-detail-back.svg
 apps/user/*/public/images/shared-*.svg

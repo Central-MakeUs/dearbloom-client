@@ -48,6 +48,7 @@ try {
 
 const won = (n: number) => `${n.toLocaleString()}원`;
 const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.sortOrder) : [];
+const shareImageUrl = photos.find((photo) => photo.fileType === 'IMAGE')?.fileUrl;
 
 // 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
@@ -93,7 +94,12 @@ if (artwork && token) {
             {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
             <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
             <div class="flex items-center">
-              <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:idle />
+              <SnapShareButton
+                title={artwork.title}
+                imageUrl={shareImageUrl}
+                kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY}
+                client:idle
+              />
               <SnapMoreMenu
                 artworkId={artwork.artworkId}
                 initialReported={reported}

@@ -8,7 +8,10 @@ declare module 'astro' {
 declare global {
   interface Window {
     /** RN WebView 가 컨텐츠 로드 전에 주입하는 플래그 (apps/mobile/App.tsx). */
-    __DEARBLOOM_NATIVE_APP__?: { platform?: string };
+    __DEARBLOOM_NATIVE_APP__?: {
+      platform?: string;
+      supportsKakaoAvailability?: boolean;
+    };
   }
 }
 

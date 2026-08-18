@@ -49,6 +49,10 @@ import {
 import { getSessionWebViewUrl } from './nativeSession';
 import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
 import {
+  createNativeKakaoAvailabilityResultScript,
+  isNativeKakaoAvailabilityRequest,
+} from './nativeKakao';
+import {
   createPushTokenResultScript,
   getPushDeepLinkWebViewUrl,
   isNativePushRegisterRequest,
@@ -61,7 +65,7 @@ const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}' }); true;`;
+const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}', supportsKakaoAvailability: true }); true;`;
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
 const loadingLabelImage = require('./assets/loading-label.png');
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
@@ -492,6 +496,12 @@ export default function App() {
       await Share.share(
         getNativeShareContent(shareRequest, Platform.OS === 'ios' ? 'ios' : 'android'),
       );
+      return;
+    }
+
+    if (isNativeKakaoAvailabilityRequest(data)) {
+      const available = await Linking.canOpenURL('kakaolink://').catch(() => false);
+      webViewRef.current?.injectJavaScript(createNativeKakaoAvailabilityResultScript(available));
       return;
     }
 

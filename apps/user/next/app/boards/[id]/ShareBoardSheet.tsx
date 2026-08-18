@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { ShareBottomSheet, showToast } from '@dearbloom/ui';
-import { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@/src/lib/webShare';
+import {
+  copyText,
+  getKakaoFeedShareOptions,
+  isMobileShareDevice,
+  isShareCancelled,
+  loadKakaoSdk,
+  requestNativeKakaoAvailability,
+} from '@/src/lib/webShare';
 
 class ShareError extends Error {}
 
@@ -68,15 +75,25 @@ export function ShareBoardSheet({
 
   const shareKakao = () =>
     run(async (url) => {
+      if ((await requestNativeKakaoAvailability()) === false) {
+        showToast('카카오톡이 설치되어 있지 않아요', 'error');
+        return;
+      }
       const key = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY;
       if (!key) throw new ShareError('카카오톡 공유를 사용할 수 없어요');
       const kakao = await loadKakaoSdk();
       if (!kakao.isInitialized()) kakao.init(key);
-      kakao.Share.sendDefault({
-        objectType: 'text',
-        text: `${boardName} 공동보드에 초대했어요.`,
-        link: { mobileWebUrl: url, webUrl: url },
-      });
+      kakao.Share.sendDefault(
+        getKakaoFeedShareOptions({
+          buttonTitle: '공동보드 참여하기',
+          description: '친구들과 함께 졸업스냅 작품 후보를 모으고 의견을 나눠 보세요.',
+          imageHeight: 214,
+          imageUrl: `${window.location.origin}/app/images/kakao-board-invite.png`,
+          imageWidth: 428,
+          title: `${boardName} 공동보드에 초대되었어요`,
+          url,
+        }),
+      );
     }, '카카오톡 공유를 실행하지 못했어요');
 
   const shareMore = () =>

@@ -1,12 +1,32 @@
+interface KakaoShareLink {
+  mobileWebUrl: string;
+  webUrl: string;
+}
+
+interface KakaoFeedShareOptions {
+  objectType: 'feed';
+  content: {
+    description: string;
+    imageHeight?: number;
+    imageUrl: string;
+    imageWidth?: number;
+    link: KakaoShareLink;
+    title: string;
+  };
+  buttons: { link: KakaoShareLink; title: string }[];
+}
+
+interface KakaoTextShareOptions {
+  objectType: 'text';
+  text: string;
+  link: KakaoShareLink;
+}
+
 interface KakaoSdk {
   init: (key: string) => void;
   isInitialized: () => boolean;
   Share: {
-    sendDefault: (options: {
-      objectType: 'text';
-      text: string;
-      link: { mobileWebUrl: string; webUrl: string };
-    }) => void;
+    sendDefault: (options: KakaoFeedShareOptions | KakaoTextShareOptions) => void;
   };
 }
 
@@ -15,6 +35,14 @@ declare global {
     Kakao?: KakaoSdk;
   }
 }
+
+type NativeBridgeWindow = Window & {
+  ReactNativeWebView?: { postMessage: (message: string) => void };
+  __DEARBLOOM_NATIVE_APP__?: { supportsKakaoAvailability?: boolean };
+};
+
+const NATIVE_KAKAO_AVAILABILITY = 'NATIVE_KAKAO_AVAILABILITY';
+const NATIVE_KAKAO_AVAILABILITY_RESULT = 'NATIVE_KAKAO_AVAILABILITY_RESULT';
 
 let kakaoSdkPromise: Promise<KakaoSdk> | undefined;
 
@@ -68,4 +96,57 @@ export function isMobileShareDevice(
     /Android|iPhone|iPad|iPod/i.test(userAgent) ||
     (/Macintosh/i.test(userAgent) && maxTouchPoints > 1)
   );
+}
+
+export function getKakaoFeedShareOptions({
+  buttonTitle,
+  description,
+  imageHeight,
+  imageUrl,
+  imageWidth,
+  title,
+  url,
+}: {
+  buttonTitle: string;
+  description: string;
+  imageHeight?: number;
+  imageUrl: string;
+  imageWidth?: number;
+  title: string;
+  url: string;
+}): KakaoFeedShareOptions {
+  return {
+    objectType: 'feed',
+    content: {
+      description,
+      imageUrl,
+      ...(imageHeight && imageWidth ? { imageHeight, imageWidth } : {}),
+      link: { mobileWebUrl: url, webUrl: url },
+      title,
+    },
+    buttons: [
+      {
+        title: buttonTitle,
+        link: { mobileWebUrl: url, webUrl: url },
+      },
+    ],
+  };
+}
+
+export function requestNativeKakaoAvailability() {
+  const nativeWindow = window as NativeBridgeWindow;
+  const bridge = nativeWindow.ReactNativeWebView;
+  if (!nativeWindow.__DEARBLOOM_NATIVE_APP__?.supportsKakaoAvailability || !bridge) {
+    return Promise.resolve(undefined);
+  }
+
+  return new Promise<boolean>((resolve) => {
+    const handleResult = (event: Event) => {
+      window.removeEventListener(NATIVE_KAKAO_AVAILABILITY_RESULT, handleResult);
+      resolve((event as CustomEvent<{ available: boolean }>).detail.available);
+    };
+
+    window.addEventListener(NATIVE_KAKAO_AVAILABILITY_RESULT, handleResult);
+    bridge.postMessage(JSON.stringify({ type: NATIVE_KAKAO_AVAILABILITY }));
+  });
 }

@@ -1,16 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Share } from 'lucide-react';
 import { ShareBottomSheet, showToast } from '@dearbloom/ui';
-import { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@dearbloom/shared';
+import {
+  copyText,
+  getKakaoFeedShareOptions,
+  isMobileShareDevice,
+  isShareCancelled,
+  loadKakaoSdk,
+  requestNativeKakaoAvailability,
+} from '@dearbloom/shared';
 
 declare global {
   interface Window {
-    __DEARBLOOM_NATIVE_APP__?: { platform?: string };
+    __DEARBLOOM_NATIVE_APP__?: {
+      platform?: string;
+      supportsKakaoAvailability?: boolean;
+    };
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
 }
 
-export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?: string }) {
+export function SnapShareButton({
+  imageUrl,
+  kakaoKey,
+  title,
+}: {
+  imageUrl?: string;
+  kakaoKey?: string;
+  title: string;
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showKakao, setShowKakao] = useState(false);
@@ -48,14 +66,29 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
 
   const shareKakao = () =>
     run(async () => {
+      if ((await requestNativeKakaoAvailability()) === false) {
+        notify('카카오톡이 설치되어 있지 않아요', 'error');
+        return;
+      }
       if (!kakaoKey) throw new Error('Kakao key missing');
       const kakao = await loadKakaoSdk();
       if (!kakao.isInitialized()) kakao.init(kakaoKey);
-      kakao.Share.sendDefault({
-        objectType: 'text',
-        text: `디어블룸에서 ${title} 작품을 확인해 보세요.`,
-        link: { mobileWebUrl: url(), webUrl: url() },
-      });
+      const shareUrl = url();
+      kakao.Share.sendDefault(
+        imageUrl
+          ? getKakaoFeedShareOptions({
+              buttonTitle: '작품 자세히 보기',
+              description: '디어블룸에서 졸업스냅 작품을 확인해 보세요.',
+              imageUrl,
+              title,
+              url: shareUrl,
+            })
+          : {
+              objectType: 'text',
+              text: `디어블룸에서 ${title} 작품을 확인해 보세요.`,
+              link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+            },
+      );
     }, '카카오톡 공유를 실행하지 못했어요');
 
   const shareMore = () =>
