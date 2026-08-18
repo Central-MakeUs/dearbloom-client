@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { shouldUseArtworkHistoryBack } from '@/lib/artworkReturnPath';
+import { shouldUseHistoryBack } from '@/lib/backNavigation';
 
 interface Props {
   /** 히스토리를 쓸 수 없을 때(직접 진입·새로고침) 이동할 경로. */
@@ -17,11 +17,12 @@ interface Props {
  */
 export function SnapBackButton({ fallbackHref }: Props) {
   function goBack(e: MouseEvent<HTMLAnchorElement>) {
-    if (shouldUseArtworkHistoryBack(document.referrer, location.pathname, location.origin, window.history.length)) {
-      e.preventDefault();
+    e.preventDefault();
+    if (shouldUseHistoryBack(document.referrer, fallbackHref, location.origin, window.history.length)) {
       window.history.back();
+    } else {
+      window.location.replace(fallbackHref);
     }
-    // 아니면 기본 동작(fallbackHref 로 이동)에 맡긴다.
   }
 
   return (
