@@ -47,7 +47,7 @@ export function SmartInquiryCta({
 
   // 높이 = border 1 + padding 16 + 버튼 52 + padding 16 = 85(+safe-area).
   const trigger = (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-100 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-md">
         <BottomButtonBar
           leading={

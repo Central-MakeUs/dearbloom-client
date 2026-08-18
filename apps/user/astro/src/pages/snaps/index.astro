@@ -87,6 +87,7 @@ const CHIP_CLASS =
   <AppHeader logoHref="/snaps" />
 
   <div class="mx-auto max-w-md">
+    <div class="sticky top-[calc(44px+env(safe-area-inset-top))] z-30 bg-neutral-100">
     {/*
       필터 칩바 — Figma 437:7705. 어느 칩을 눌러도 필터 설정으로 가고, 해시로 해당 섹션에 붙는다.
       세로 위치는 실측(상태바 제외): 헤더 하단 44 → 칩바 52~84 → 정렬행 87~127 → 그리드 129.
@@ -141,6 +142,7 @@ const CHIP_CLASS =
         </div>
       </div>
     )}
+    </div>
 
     {/* 작품 피드 */}
     {loadFailed ? (

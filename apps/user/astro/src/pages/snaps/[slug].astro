@@ -1,8 +1,7 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import { NativeExitDialog, RegionTag } from '@dearbloom/ui';
-import { SnapDetailTabs } from '@/components/SnapDetailTabs';
+import { AppToaster, FlashToast, NativeExitDialog, RegionTag } from '@dearbloom/ui';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
 import { SchoolChipsExpander } from '@/components/SchoolChipsExpander';
@@ -25,6 +24,7 @@ const token = Astro.cookies.has('onboardingPending')
   : Astro.cookies.get('accessToken')?.value;
 const backHref = getArtworkBackHref(Astro.url.searchParams.get('returnTo'));
 const returnQuery = backHref === '/snaps' ? '' : `?returnTo=${encodeURIComponent(backHref)}`;
+const imageGalleryHref = `/snaps/${slug}/images${returnQuery}`;
 
 if (token) {
   // 로그인별 isSaved 가 담기므로 CDN 공유 캐시 금지(익명 렌더가 로그인 사용자에게 새는 것 방지).
@@ -94,7 +94,12 @@ if (artwork && token) {
             <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
             <div class="flex items-center">
               <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:idle />
-              <SnapMoreMenu artworkId={artwork.artworkId} initialReported={reported} client:idle />
+              <SnapMoreMenu
+                artworkId={artwork.artworkId}
+                initialReported={reported}
+                authenticated={!!token}
+                client:idle
+              />
             </div>
           </header>
 
@@ -110,13 +115,15 @@ if (artwork && token) {
                     <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover" controls />
                   ) : (
                     /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
-                    <img
-                      src={optimizedImageUrl(p.fileUrl, 190)}
-                      alt={artwork.title}
-                      loading={i === 0 ? 'eager' : 'lazy'}
-                      fetchpriority={i === 0 ? 'high' : undefined}
-                      class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover"
-                    />
+                    <a href={imageGalleryHref} class="shrink-0 snap-start">
+                      <img
+                        src={optimizedImageUrl(p.fileUrl, 190)}
+                        alt={artwork.title}
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                        fetchpriority={i === 0 ? 'high' : undefined}
+                        class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover"
+                      />
+                    </a>
                   ),
                 )}
               </div>
@@ -137,8 +144,6 @@ if (artwork && token) {
               <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
 
-            {/* 인페이지 탭 — 상세정보 활성 / 후기는 API 대기라 disabled */}
-            <SnapDetailTabs client:visible />
           </div>
 
           <div class="pb-28 pt-4">
@@ -206,19 +211,20 @@ if (artwork && token) {
               </section>
             )}
 
-            {/* 이 작가의 다른 작품 (Figma: 최하단, CTA 위) */}
+            {/* 이 작가의 다른 작품 (Figma: 최하단 가로 캐러셀, CTA 위) */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-8">
                 <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
-                <div class="grid grid-cols-3 gap-2 px-4">
+                <div class="flex snap-x scroll-pl-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {artwork.otherArtworkList.map((o) => (
-                    <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block">
-                      <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
-                        {/* 3열 그리드 — 한 칸 폭 = (448 - 좌우 32 - 간격 16) / 3 ≈ 133 */}
-                        <img src={optimizedImageUrl(o.imageUrl, 133)} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
+                    <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block w-[137px] shrink-0 snap-start">
+                      <div class="h-[177px] overflow-hidden rounded-md bg-neutral-300">
+                        <img src={optimizedImageUrl(o.imageUrl, 137)} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
                       </div>
-                      {o.title && <p class="mt-1 truncate text-body-4 text-neutral-900">{o.title}</p>}
-                      {o.artistNickname && <p class="truncate text-caption-1 text-neutral-700">{o.artistNickname}</p>}
+                      <div class="mt-2 px-1">
+                        {o.title && <p class="truncate text-body-4 text-neutral-900">{o.title}</p>}
+                        {o.artistNickname && <p class="mt-0.5 truncate text-caption-1 text-neutral-700">{o.artistNickname}</p>}
+                      </div>
                     </a>
                   ))}
                 </div>
@@ -238,6 +244,8 @@ if (artwork && token) {
         </>
       )
     }
+    <AppToaster client:load />
+    <FlashToast client:load />
     {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
     <NativeExitDialog client:native />
   </body>
