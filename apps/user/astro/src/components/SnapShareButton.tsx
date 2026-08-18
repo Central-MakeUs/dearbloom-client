@@ -42,7 +42,7 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
   const copyLink = () =>
     run(async () => {
       await copyText(url());
-      notify('링크가 복사되었어요', 'success');
+      notify('클립보드에 복사되었습니다', 'success');
       setOpen(false);
     }, '링크를 복사하지 못했어요');
 
@@ -75,7 +75,7 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
         return;
       }
       await copyText(shareUrl);
-      notify('링크가 복사되었어요', 'success');
+      notify('클립보드에 복사되었습니다', 'success');
       setOpen(false);
     }, '공유 기능을 실행하지 못했어요');
 

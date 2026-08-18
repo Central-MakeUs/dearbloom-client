@@ -80,7 +80,8 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       });
       if (!response.ok) throw new Error('공동보드 저장 실패');
 
-      router.replace(`/boards/${boardId}?candidateUpdated=1`);
+      const candidateAction = initialSelected.size === 0 ? 'added' : 'updated';
+      router.replace(`/boards/${boardId}?candidateAction=${candidateAction}`);
     } catch {
       showToast('작품 후보를 저장하지 못했어요', 'error');
       setSubmitting(false);

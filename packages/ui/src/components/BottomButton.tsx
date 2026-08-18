@@ -67,7 +67,7 @@ export function BottomButtonBar({ leading, className, children }: BottomButtonBa
  */
 export const bottomIconButtonClass =
   'flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md ' +
-  'border-[1.5px] border-neutral-400 bg-neutral-100 text-neutral-800 transition-colors ' +
+  'border-[1.2px] border-neutral-400 bg-neutral-100 text-neutral-800 transition-colors ' +
   'hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ' +
   'disabled:opacity-40 disabled:pointer-events-none';
 

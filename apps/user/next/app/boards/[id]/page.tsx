@@ -60,7 +60,7 @@ export default function BoardDetailPage() {
   const searchParams = useSearchParams();
   const { id } = useParams<{ id: string }>();
   const hydrated = useHydrated();
-  const candidateUpdated = searchParams.get('candidateUpdated') === '1';
+  const candidateAction = searchParams.get('candidateAction');
   const boardRenamed = searchParams.get('boardRenamed') === '1';
 
   const [board, setBoard] = useState<BoardDetail>();
@@ -101,10 +101,10 @@ export default function BoardDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!candidateUpdated) return;
-    showToast('내 후보가 수정되었어요');
+    if (candidateAction !== 'added' && candidateAction !== 'updated') return;
+    showToast(candidateAction === 'added' ? '내 후보가 추가되었어요' : '내 후보가 수정되었어요');
     window.history.replaceState(window.history.state, '', window.location.pathname);
-  }, [candidateUpdated]);
+  }, [candidateAction]);
 
   useEffect(() => {
     if (!boardRenamed) return;
