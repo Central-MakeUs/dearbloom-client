@@ -7,7 +7,8 @@ import {
   shortDateLabel,
   type InquiryStatus,
 } from '@dearbloom/shared';
-import { Badge, Card, CardContent, Header as TitleHeader, SkeletonImage, cn, type BadgeProps } from '@dearbloom/ui';
+import { Badge, Card, CardContent, SkeletonImage, cn, type BadgeProps } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 import { durationLabel } from '@/src/lib/inquiry';
 import { InquiryActions } from './InquiryActions';
 import { ACTION_BAR_OFFSET, hasInquiryActions } from './actionBar';
@@ -15,7 +16,7 @@ import { InquiryTimeline } from './InquiryTimeline';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => <TitleHeader backHref="/app/artist/requests" title="신청 상세" />;
+const Header = () => <AppBackHeader fallbackHref="/app/artist/requests" title="신청 상세" />;
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-start justify-between gap-4 py-1.5">

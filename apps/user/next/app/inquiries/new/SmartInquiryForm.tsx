@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, Info, Minus, Plus, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   BottomButton,
   DeleteButton,
@@ -16,6 +17,7 @@ import {
   showToast,
 } from '@dearbloom/ui';
 import type { InquiryCreateResult, InquiryPreparation, University } from '@dearbloom/shared';
+import { navigateAppBack, replaceApp } from '@/src/lib/appNavigation';
 import {
   getUniversityLabel,
   UniversitySearchScreen,
@@ -33,6 +35,7 @@ const shortDateLabel = (date: string) => {
   return `${date.slice(2).replaceAll('-', '.')} (${weekday})`;
 };
 export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparation }) {
+  const router = useRouter();
   const requiredSlotCount = preparation.requiredSlotCount ?? 1;
   const minHeadCount = preparation.minHeadCount ?? 1;
   const durationMinutes =
@@ -418,7 +421,7 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
               ? setStep('school')
               : step === 'school'
                 ? setStep('schedule')
-                : history.back()
+                : navigateAppBack(router, '/snaps')
           }
         />
         <div className="pt-3">
@@ -454,6 +457,7 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
 }
 
 function InquirySentView({ chatRoomId }: { chatRoomId?: number }) {
+  const router = useRouter();
   const chatHref = chatRoomId ? `/app/chats/${chatRoomId}` : '/app/chats';
 
   return (
@@ -473,7 +477,7 @@ function InquirySentView({ chatRoomId }: { chatRoomId?: number }) {
           </div>
         </div>
         <div className="mt-auto flex flex-col items-center gap-3">
-          <BottomButton color="green" onClick={() => (window.location.href = chatHref)}>
+          <BottomButton color="green" onClick={() => replaceApp(router, chatHref)}>
             채팅방으로 이동하기
           </BottomButton>
           <a href="/snaps" className="py-2 text-body-1 text-neutral-800">

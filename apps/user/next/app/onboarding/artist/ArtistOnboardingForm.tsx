@@ -10,6 +10,7 @@ import { BottomButton, Header, Spinner, TextField } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { withFlashToast } from '@/src/lib/flashToast';
+import { navigateAppBack } from '@/src/lib/appNavigation';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
@@ -324,7 +325,7 @@ export function ArtistOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => router.back()} step={2} />,
+      <StepHeader onBack={() => navigateAppBack(router, '/app/role')} step={2} />,
       content,
       footer('다음', continueFromName, !isNameValid),
     );

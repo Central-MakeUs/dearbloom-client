@@ -1,14 +1,14 @@
 import { cookies } from 'next/headers';
 import { ArtworkForm } from './ArtworkForm';
 import { LoginRequired } from '../../../(auth)/LoginRequired';
-import { Header } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewArtworkPage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = <Header backHref="/app/artist/products" title="작품 등록" />;
+  const header = <AppBackHeader fallbackHref="/app/artist/products" title="작품 등록" />;
 
   if (!token) {
     return (

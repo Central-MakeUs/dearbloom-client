@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
-import { Header } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 import { LoginRequired } from '../../(auth)/LoginRequired';
 import { WithdrawForm } from './WithdrawForm';
@@ -19,7 +19,7 @@ export default async function WithdrawPage({
 
   const page = (children: ReactNode) => (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100">
-      <Header backHref={backHref} title="탈퇴하기" />
+      <AppBackHeader fallbackHref={backHref} title="탈퇴하기" />
       {children}
     </div>
   );

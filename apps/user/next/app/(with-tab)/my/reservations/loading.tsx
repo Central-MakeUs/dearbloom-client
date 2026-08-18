@@ -1,4 +1,5 @@
-import { Header as TitleHeader, Skeleton } from '@dearbloom/ui';
+import { Skeleton } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 /**
  * 문의 내역 자리표시자.
@@ -7,7 +8,7 @@ import { Header as TitleHeader, Skeleton } from '@dearbloom/ui';
 export default function ReservationsLoading() {
   return (
     <div className="mx-auto max-w-md" aria-busy>
-      <TitleHeader backHref="/app/my" title="문의 내역" />
+      <AppBackHeader fallbackHref="/app/my" title="문의 내역" />
 
       <div className="flex border-b border-neutral-200">
         <span className="flex-1 border-b-2 border-primary py-3 text-center text-body-3 text-primary">

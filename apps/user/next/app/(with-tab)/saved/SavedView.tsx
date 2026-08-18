@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type TouchEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import {
   AlertDialog,
@@ -27,6 +28,7 @@ import {
 import { AppLink } from '@/src/components/common/AppLink';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
 import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { getSwipedTab, type SavedTab } from './savedSwipe';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
@@ -44,6 +46,7 @@ export function SavedView({
   initialBoards: SharedBoardSummary[];
   initialTab: SavedTab;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [tab, setTab] = useState<SavedTab>(initialTab);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
@@ -104,7 +107,7 @@ export function SavedView({
         body: JSON.stringify({ artworkIdList: [...selected] }),
       });
       if (res.status === 401) {
-        window.location.href = '/app';
+        replaceApp(router, '/app');
         return;
       }
       if (!res.ok) throw new Error(String(res.status));

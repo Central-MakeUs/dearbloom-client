@@ -3,6 +3,7 @@ import { ApiError, getChatMessages, getChatRooms } from '@dearbloom/shared';
 import { ChatRoomView } from '@dearbloom/features-chat';
 import { Header } from '@dearbloom/ui';
 import { LoginRequired } from '../../(auth)/LoginRequired';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,7 @@ export default async function ChatDetailPage({ params }: { params: Promise<{ id:
       peerName={room?.peerName ?? '채팅'}
       initialMessages={messages}
       backHref="/app/chats"
+      header={<AppBackHeader fallbackHref="/app/chats" title={room?.peerName ?? '채팅'} />}
     />
   );
 }

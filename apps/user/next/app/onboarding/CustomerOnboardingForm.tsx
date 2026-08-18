@@ -20,6 +20,7 @@ import {
 import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import completeIcon from '../../public/images/onboarding-complete.svg';
 import { withFlashToast } from '@/src/lib/flashToast';
+import { navigateAppBack } from '@/src/lib/appNavigation';
 import boardTourImage from '../../public/images/onboarding-tour-board.png';
 import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
 import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
@@ -366,7 +367,7 @@ export function CustomerOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => router.back()} step={2} />,
+      <StepHeader onBack={() => navigateAppBack(router, '/app/role')} step={2} />,
       content,
       footer('다음', () => setStep('school'), !isNameValid),
     );

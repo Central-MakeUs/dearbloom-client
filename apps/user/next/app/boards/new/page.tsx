@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header, BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { replaceApp } from '@/src/lib/appNavigation';
 import {
   BOARD_NAME_MAX_LENGTH,
   getBoardNameError,
@@ -36,7 +38,7 @@ export default function NewBoardPage() {
       }
       if (!response.ok) throw new Error('공동보드 생성 실패');
       const board = (await response.json()) as { sharedBoardId: number };
-      router.replace(`/boards/${board.sharedBoardId}`);
+      replaceApp(router, `/app/boards/${board.sharedBoardId}`);
     } catch {
       setSubmitting(false);
     }
@@ -78,7 +80,7 @@ export default function NewBoardPage() {
         }}
         className="mx-auto flex min-h-screen max-w-md flex-col"
       >
-        <Header showBack onBack={() => router.back()} title="공동보드 만들기" />
+        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드 만들기" />
         {nameField}
         <div className="flex-1" />
         <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">

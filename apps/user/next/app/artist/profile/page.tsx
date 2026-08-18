@@ -2,14 +2,14 @@ import { cookies } from 'next/headers';
 import { getArtistMe } from '@dearbloom/shared';
 import { ProfileForm } from './ProfileForm';
 import { LoginRequired } from '../../(auth)/LoginRequired';
-import { Header } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ArtistProfilePage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = <Header backHref="/app/artist/products" title="작가 프로필" />;
+  const header = <AppBackHeader fallbackHref="/app/artist/products" title="작가 프로필" />;
 
   const prompt = (title: string, description: string) => (
     <div className="mx-auto max-w-md">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -93,7 +94,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       // 변경 사항이 없으면 네트워크 호출 생략.
       if (Object.keys(patch).length === 0) {
         showToast('저장되었습니다.');
-        router.push('/artist/my');
+        replaceApp(router, '/app/artist/my');
         return;
       }
 
@@ -115,7 +116,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         throw new Error(b.error || '저장 실패');
       }
       showToast('저장되었습니다.');
-      router.push('/artist/my');
+      replaceApp(router, '/app/artist/my');
     } catch (err) {
       showToast(err instanceof Error ? err.message : '오류가 발생했어요', 'error');
     }

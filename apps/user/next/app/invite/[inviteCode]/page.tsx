@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Button, Header } from '@dearbloom/ui';
+import { Button } from '@dearbloom/ui';
 import {
   fetchPublicWithAuthFallback,
   getSharedBoardInvite,
@@ -9,6 +9,7 @@ import {
 import { loginHref } from '@/src/lib/env';
 import { getInviteView } from './inviteView';
 import { JoinBoardButton } from './JoinBoardButton';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,7 @@ export default async function InvitePage({
   if (!invite) {
     return (
       <main className="mx-auto min-h-dvh max-w-md bg-neutral-100">
-        <Header showBack backHref="/app/saved?tab=board" title="공동보드 초대" />
+        <AppBackHeader showBack fallbackHref="/app/saved?tab=board" title="공동보드 초대" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-600">
           유효하지 않은 초대 링크예요.
         </p>

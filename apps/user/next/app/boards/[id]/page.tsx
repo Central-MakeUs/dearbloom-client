@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { MoreHorizontal, UserRound } from 'lucide-react';
 import {
-  Header,
   Button,
   Badge,
   BottomButton,
@@ -29,6 +28,8 @@ import {
   showToast,
   cn,
 } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { pushApp, replaceApp } from '@/src/lib/appNavigation';
 import type {
   SharedArtwork,
   SharedBoardPage,
@@ -127,7 +128,7 @@ export default function BoardDetailPage() {
   if (!board) {
     return (
       <div className="board-detail-background mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-        <Header showBack onBack={() => router.replace('/saved?tab=board')} title="공동보드" />
+        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-500">
           보드를 찾을 수 없어요.
         </p>
@@ -345,7 +346,7 @@ export default function BoardDetailPage() {
       <BottomButtonBar leading={<ShareButton onClick={() => setShareOpen(true)} />}>
         <BottomButton
           color={board.hasMySharedArtworks ? 'black' : 'green'}
-          onClick={() => router.push(`/boards/${board.sharedBoardId}/add`)}
+          onClick={() => pushApp(router, `/app/boards/${board.sharedBoardId}/add`)}
         >
           {board.hasMySharedArtworks ? '내 후보 수정하기' : '내 후보 추가하기'}
         </BottomButton>
@@ -543,7 +544,7 @@ export default function BoardDetailPage() {
             <button
               type="button"
               className="h-14 border-b border-neutral-200 text-left text-body-2 text-neutral-950"
-              onClick={() => router.push(`/boards/${board.sharedBoardId}/edit-name`)}
+              onClick={() => pushApp(router, `/app/boards/${board.sharedBoardId}/edit-name`)}
             >
               보드 이름 변경하기
             </button>
@@ -605,7 +606,7 @@ export default function BoardDetailPage() {
               });
               if (!response.ok) return;
               showToast('보드가 삭제되었어요');
-              router.replace('/saved?tab=board');
+              replaceApp(router, '/app/saved?tab=board');
             }}
           >
             확인
@@ -639,7 +640,7 @@ export default function BoardDetailPage() {
               });
               if (!response.ok) return;
               showToast('공동보드에서 나갔어요');
-              router.replace('/saved?tab=board');
+              replaceApp(router, '/app/saved?tab=board');
             }}
           >
             확인
@@ -660,9 +661,9 @@ export default function BoardDetailPage() {
 
   return (
     <div className="board-detail-background relative mx-auto min-h-dvh max-w-md bg-neutral-100">
-      <Header
+      <AppBackHeader
         showBack
-        onBack={() => router.replace('/saved?tab=board')}
+        fallbackHref="/app/saved?tab=board"
         title={board.sharedBoardName}
         right={headerActions}
       />

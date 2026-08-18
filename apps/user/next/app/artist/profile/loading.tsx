@@ -1,10 +1,11 @@
-import { Header, Skeleton } from '@dearbloom/ui';
+import { Skeleton } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 /** 작가 프로필 — 기존 값(닉네임·소개·지역·기타)을 받아 채우는 폼이라 필드 모양만 먼저 둔다. */
 export default function ArtistProfileLoading() {
   return (
     <div className="mx-auto max-w-md" aria-busy>
-      <Header backHref="/app/artist/products" title="작가 프로필" />
+      <AppBackHeader fallbackHref="/app/artist/products" title="작가 프로필" />
       <div className="flex flex-col gap-5 px-4 pt-5">
         {[
           { label: 'w-16', input: 'h-12' },

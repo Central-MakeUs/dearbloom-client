@@ -7,7 +7,6 @@ import {
   ArtworkCard,
   BottomButton,
   Button,
-  Header,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -15,6 +14,8 @@ import {
   showToast,
 } from '@dearbloom/ui';
 import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
@@ -81,7 +82,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       if (!response.ok) throw new Error('공동보드 저장 실패');
 
       const candidateAction = initialSelected.size === 0 ? 'added' : 'updated';
-      router.replace(`/boards/${boardId}?candidateAction=${candidateAction}`);
+      replaceApp(router, `/app/boards/${boardId}?candidateAction=${candidateAction}`);
     } catch {
       showToast('작품 후보를 저장하지 못했어요', 'error');
       setSubmitting(false);
@@ -117,7 +118,12 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-neutral-100">
-      <Header showBack onBack={() => router.back()} title="내 후보 추가하기" right={infoButton} />
+      <AppBackHeader
+        fallbackHref={`/app/boards/${boardId}`}
+        showBack
+        title="내 후보 추가하기"
+        right={infoButton}
+      />
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
         <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>

@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
 import { getMyInquiries, type CustomerInquiryListItem } from '@dearbloom/shared';
-import { Header as TitleHeader } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 import { LoginRequired } from '../../../(auth)/LoginRequired';
 import { InquiryHistoryList } from './InquiryHistoryList';
 
 export const dynamic = 'force-dynamic';
 
-const Header = () => <TitleHeader backHref="/app/my" title="문의 내역" />;
+const Header = () => <AppBackHeader fallbackHref="/app/my" title="문의 내역" />;
 
 export default async function ReservationsPage() {
   const token = (await cookies()).get('accessToken')?.value;

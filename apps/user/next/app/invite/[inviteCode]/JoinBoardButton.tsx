@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomButton, Spinner } from '@dearbloom/ui';
 
+import { replaceApp } from '@/src/lib/appNavigation';
 import { goLogin } from '@/src/lib/goLogin';
 
 export function JoinBoardButton({
@@ -19,7 +20,7 @@ export function JoinBoardButton({
   const join = async () => {
     if (submitting) return;
     if (joinedBoardId) {
-      router.replace(`/boards/${joinedBoardId}`);
+      replaceApp(router, `/app/boards/${joinedBoardId}`);
       return;
     }
 
@@ -34,7 +35,7 @@ export function JoinBoardButton({
       }
       if (!response.ok) throw new Error('공동보드 입장 실패');
       const joined = (await response.json()) as { sharedBoardId: number };
-      router.replace(`/boards/${joined.sharedBoardId}`);
+      replaceApp(router, `/app/boards/${joined.sharedBoardId}`);
     } catch {
       setSubmitting(false);
     }
