@@ -34,6 +34,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -57,7 +58,11 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     });
     if (!p.ok) throw new Error('이미지 presigned 실패');
     const { presignedUrl, fileUrl } = (await p.json()) as { presignedUrl: string; fileUrl: string };
-    const put = await fetch(presignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+    const put = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: { 'Content-Type': file.type },
+    });
     if (!put.ok) throw new Error('이미지 업로드 실패(S3)');
     return fileUrl;
   }
@@ -88,6 +93,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       // 변경 사항이 없으면 네트워크 호출 생략.
       if (Object.keys(patch).length === 0) {
         showToast('저장되었습니다.');
+        router.push('/artist/my');
         return;
       }
 
@@ -102,10 +108,14 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
       }
       if (!res.ok) {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
+        if (res.status === 409) {
+          setError('nickname', { type: 'manual', message: '이미 존재하는 프로필 이름입니다' });
+          return;
+        }
         throw new Error(b.error || '저장 실패');
       }
       showToast('저장되었습니다.');
-      router.refresh();
+      router.push('/artist/my');
     } catch (err) {
       showToast(err instanceof Error ? err.message : '오류가 발생했어요', 'error');
     }
@@ -115,7 +125,7 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
-      <Field label="닉네임" htmlFor="nickname" error={errors.nickname?.message}>
+      <Field label="프로필 이름" htmlFor="nickname" error={errors.nickname?.message}>
         <Input
           id="nickname"
           aria-invalid={!!errors.nickname}
@@ -155,8 +165,20 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
       <div>
         <span className={label}>대표 이미지</span>
-        {initial.imageUrl && !imageFile && <img src={optimizedImageUrl(initial.imageUrl, 80)} alt="현재 대표 이미지" className="mb-2 h-20 w-20 rounded-full object-cover" />}
-        <FileField accept="image/*" buttonLabel="사진 선택" emptyText="선택된 파일 없음" onFiles={(files) => setImageFile(files[0] ?? null)} ariaLabel="대표 이미지" />
+        {initial.imageUrl && !imageFile && (
+          <img
+            src={optimizedImageUrl(initial.imageUrl, 80)}
+            alt="현재 대표 이미지"
+            className="mb-2 h-20 w-20 rounded-full object-cover"
+          />
+        )}
+        <FileField
+          accept="image/*"
+          buttonLabel="사진 선택"
+          emptyText="선택된 파일 없음"
+          onFiles={(files) => setImageFile(files[0] ?? null)}
+          ariaLabel="대표 이미지"
+        />
       </div>
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="mt-2 w-full">

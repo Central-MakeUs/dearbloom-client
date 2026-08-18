@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   if (!token) return errorResponse(401, '로그인이 필요합니다.');
 
   const payload = await getPayload(request);
-  if (!payload) return errorResponse(400, '학교 또는 지역 정보가 올바르지 않습니다.');
+  if (!payload) return errorResponse(400, '이름, 학교 또는 지역 정보가 올바르지 않습니다.');
 
   try {
     const result = await createCustomer(payload, { token });
