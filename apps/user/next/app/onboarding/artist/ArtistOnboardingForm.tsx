@@ -1,14 +1,27 @@
 'use client';
 
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type ReactNode } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
-import type { ArtistRegionCode } from '@dearbloom/shared';
-import { BottomButton } from '@dearbloom/ui';
+import { nicknameSchema, type ArtistRegionCode } from '@dearbloom/shared';
+import { BottomButton, Header, Spinner, TextField } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
+import { withFlashToast } from '@/src/lib/flashToast';
+import { navigateAppBack } from '@/src/lib/appNavigation';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+
+function StepHeader({ onBack, step }: { onBack: () => void; step: 2 | 3 }) {
+  return (
+    <div>
+      <Header onBack={onBack} />
+      <OnboardingProgress step={step} total={3} />
+    </div>
+  );
+}
 
 export function ArtistOnboardingForm({
   forceOnboarding,
@@ -17,6 +30,13 @@ export function ArtistOnboardingForm({
   forceOnboarding: boolean;
   hasServerError: boolean;
 }) {
+  const router = useRouter();
+  const [step, setStep] = useState<'name' | 'profile'>('name');
+  const [name, setName] = useState('');
+  const [isNameTouched, setIsNameTouched] = useState(false);
+  const [isDuplicateNickname, setIsDuplicateNickname] = useState(false);
+  const [isCheckingName, setIsCheckingName] = useState(false);
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [regions, setRegions] = useState<ArtistRegionCode[]>([]);
@@ -25,6 +45,45 @@ export function ArtistOnboardingForm({
     hasServerError ? '작가 정보를 저장하지 못했습니다. 입력값을 확인해 주세요.' : '',
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const trimmedName = name.trim();
+  const parsedName = nicknameSchema.safeParse(trimmedName);
+  const isNameValid = parsedName.success;
+  const nameError = isDuplicateNickname
+    ? '이미 존재하는 프로필 이름이에요.'
+    : (isNameTouched || name.length > 0) && !parsedName.success
+      ? parsedName.error.issues[0]?.message
+      : undefined;
+
+  const continueFromName = async () => {
+    if (!isNameValid || isCheckingName) return;
+    if (forceOnboarding) {
+      setStep('profile');
+      return;
+    }
+
+    setError('');
+    setIsCheckingName(true);
+
+    try {
+      const response = await fetch(
+        `/app/api/members/artist/nickname/availability?nickname=${encodeURIComponent(trimmedName)}`,
+      );
+      const body = (await response.json()) as { available?: boolean; message?: string };
+      if (!response.ok) throw new Error(body.message);
+
+      setIsDuplicateNickname(body.available === false);
+      if (body.available) setStep('profile');
+    } catch (caught) {
+      setError(
+        caught instanceof Error && caught.message
+          ? caught.message
+          : '프로필 이름 중복 여부를 확인하지 못했습니다.',
+      );
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
 
   function selectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -73,10 +132,7 @@ export function ArtistOnboardingForm({
     return fileUrl;
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-
+  const submit = async () => {
     if (!imageFile) {
       setError('프로필 사진을 선택해 주세요.');
       return;
@@ -91,27 +147,40 @@ export function ArtistOnboardingForm({
     setIsSubmitting(true);
 
     if (forceOnboarding) {
-      window.location.replace('/app/artist/dashboard');
+      window.location.replace(withFlashToast('/app/artist/dashboard', 'welcome'));
       return;
     }
 
     try {
-      const formData = new FormData(form);
-      formData.delete('region');
+      const formData = new FormData();
       regions.forEach((region) => formData.append('region', region));
       formData.set('imageUrl', await uploadImage(imageFile));
-      const response = await fetch(form.action, { method: 'POST', body: formData });
+      formData.set('nickname', trimmedName);
+
+      const response = await fetch('/app/api/members/artist', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.status === 409) {
+        setIsDuplicateNickname(true);
+        setStep('name');
+        setIsSubmitting(false);
+        return;
+      }
 
       if (response.redirected) {
         window.location.assign(response.url);
         return;
       }
-      throw new Error('작가 정보를 저장하지 못했습니다.');
+
+      const body = (await response.json()) as { message?: string };
+      throw new Error(body.message ?? '작가 정보를 저장하지 못했습니다.');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '오류가 발생했습니다.');
       setIsSubmitting(false);
     }
-  }
+  };
 
   const profileImage = previewUrl ? (
     <Image
@@ -131,12 +200,22 @@ export function ArtistOnboardingForm({
   const imageField = (
     <div className="flex flex-col items-center gap-3">
       <label
-        className="relative flex h-28 w-28 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-neutral-200 ring-2 ring-neutral-0 shadow-elevation focus-within:ring-primary"
+        className="relative block h-28 w-28 cursor-pointer rounded-full bg-neutral-200 ring-2 ring-neutral-0 shadow-elevation transition-shadow active:ring-primary"
         htmlFor="artist-profile-image"
       >
-        {profileImage}
-        <span className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-neutral-0 bg-primary text-neutral-0">
-          <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="18">
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+          {profileImage}
+        </div>
+        <span className="absolute bottom-0 right-0 z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-neutral-0 bg-primary text-neutral-0 shadow-md">
+          <svg
+            aria-hidden
+            fill="none"
+            height="18"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="18"
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
         </span>
@@ -169,26 +248,109 @@ export function ArtistOnboardingForm({
     </div>
   );
 
-  const errorMessage = error ? (
-    <p className="text-caption-1 text-danger" role="alert">
-      {error}
-    </p>
-  ) : null;
+  const pageShell = (header: ReactNode, content: ReactNode, footer: ReactNode) => (
+    <main className="min-h-dvh bg-neutral-100">
+      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
+        {header}
+        {content}
+        {footer}
+      </div>
+    </main>
+  );
 
-  const submitButton = (
+  const footer = (
+    label: string,
+    onClick: () => void,
+    disabled = false,
+    color: 'black' | 'green' = 'black',
+  ) => (
     <div className="absolute inset-x-0 bottom-0 bg-neutral-100 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
-      <BottomButton disabled={isSubmitting} type="submit">
-        {isSubmitting ? '저장 중…' : '다음'}
+      {error ? (
+        <p className="mb-2 text-center text-caption-1 text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <BottomButton
+        color={color}
+        disabled={disabled || isSubmitting || isCheckingName}
+        onClick={onClick}
+      >
+        {isSubmitting || isCheckingName ? (
+          <Spinner className="size-5 text-current" label="" />
+        ) : null}
+        {isSubmitting ? '저장 중…' : isCheckingName ? '확인 중…' : label}
       </BottomButton>
     </div>
   );
 
-  return (
-    <form action="/app/api/members/artist" className="mt-6 flex flex-col gap-7" method="post" onSubmit={submit}>
-      {imageField}
-      {details}
-      {errorMessage}
-      {submitButton}
-    </form>
+  if (step === 'name') {
+    const content = (
+      <section className="pt-7">
+        <div className="px-5">
+          <h1 className="text-head-1 text-neutral-900">작가 또는 사진관 이름을 입력해 주세요.</h1>
+          <p className="mt-2 text-body-2 text-neutral-800">
+            고객과 원활하게 소통할 수 있도록
+            <br />
+            설정한 이름이 고객에게 표시돼요.
+          </p>
+        </div>
+        <div className="mt-8 px-4">
+          <TextField
+            autoComplete="name"
+            counter={`${name.length}/12`}
+            error={!!nameError}
+            helper={nameError ?? '최대 12자까지 입력할 수 있어요'}
+            id="artist-name"
+            label="프로필 이름"
+            maxLength={12}
+            minLength={2}
+            onBlur={() => setIsNameTouched(true)}
+            onChange={(event) => {
+              setName(event.target.value);
+              setIsDuplicateNickname(false);
+              setError('');
+            }}
+            onClear={() => {
+              setName('');
+              setIsDuplicateNickname(false);
+              setError('');
+            }}
+            pattern="^[가-힣a-zA-Z0-9_]+( [가-힣a-zA-Z0-9_]+)*$"
+            placeholder="프로필에 표시될 이름을 입력해주세요"
+            required
+            value={name}
+          />
+        </div>
+      </section>
+    );
+
+    return pageShell(
+      <StepHeader onBack={() => navigateAppBack(router, '/app/role')} step={2} />,
+      content,
+      footer('다음', continueFromName, !isNameValid),
+    );
+  }
+
+  const content = (
+    <section className="px-4 pt-4">
+      <div className="px-1 py-3">
+        <h1 className="text-head-1 text-neutral-900">작가 프로필을 완성해 주세요.</h1>
+        <p className="mt-3 text-body-2 text-neutral-800">
+          고객에게 보여질 사진과
+          <br />
+          주로 활동하는 지역을 입력해 주세요.
+        </p>
+      </div>
+      <div className="mt-6 flex flex-col gap-7">
+        {imageField}
+        {details}
+      </div>
+    </section>
+  );
+
+  return pageShell(
+    <StepHeader onBack={() => setStep('name')} step={3} />,
+    content,
+    footer('디어블룸 시작하기', submit, !imageFile || regions.length === 0, 'green'),
   );
 }

@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header, BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField, cn } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { replaceApp } from '@/src/lib/appNavigation';
 import {
   BOARD_NAME_MAX_LENGTH,
   getBoardNameError,
   getBoardNameLength,
   isValidBoardName,
 } from '@/src/lib/boardName';
+import { goLogin } from '@/src/lib/goLogin';
 
 export default function NewBoardPage() {
   const router = useRouter();
@@ -30,12 +33,12 @@ export default function NewBoardPage() {
         body: JSON.stringify({ sharedBoardName: name.trim() }),
       });
       if (response.status === 401) {
-        window.location.href = `/app/login?returnUrl=${encodeURIComponent('/app/boards/new')}`;
+        goLogin('/app/boards/new');
         return;
       }
       if (!response.ok) throw new Error('공동보드 생성 실패');
       const board = (await response.json()) as { sharedBoardId: number };
-      router.replace(`/boards/${board.sharedBoardId}`);
+      replaceApp(router, `/app/boards/${board.sharedBoardId}`);
     } catch {
       setSubmitting(false);
     }
@@ -69,22 +72,24 @@ export default function NewBoardPage() {
   );
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        submit();
-      }}
-      className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100"
-    >
-      <Header showBack onBack={() => router.back()} title="공동보드 만들기" />
-      {nameField}
-      <div className="flex-1" />
-      <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
-        <BottomButton type="submit" color="black" disabled={!valid || submitting}>
-          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
-          완료
-        </BottomButton>
-      </div>
-    </form>
+    <div className="min-h-screen bg-neutral-100">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
+        }}
+        className="mx-auto flex min-h-screen max-w-md flex-col"
+      >
+        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드 만들기" />
+        {nameField}
+        <div className="flex-1" />
+        <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
+          <BottomButton type="submit" color="black" disabled={!valid || submitting}>
+            {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
+            완료
+          </BottomButton>
+        </div>
+      </form>
+    </div>
   );
 }

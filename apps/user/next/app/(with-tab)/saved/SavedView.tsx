@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type TouchEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import {
   AlertDialog,
@@ -14,6 +15,7 @@ import {
   ArtworkCard,
   Button,
   Header,
+  Spinner,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -25,6 +27,8 @@ import {
 } from '@dearbloom/shared';
 import { AppLink } from '@/src/components/common/AppLink';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { getSwipedTab, type SavedTab } from './savedSwipe';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
@@ -42,6 +46,7 @@ export function SavedView({
   initialBoards: SharedBoardSummary[];
   initialTab: SavedTab;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [tab, setTab] = useState<SavedTab>(initialTab);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
@@ -102,7 +107,7 @@ export function SavedView({
         body: JSON.stringify({ artworkIdList: [...selected] }),
       });
       if (res.status === 401) {
-        window.location.href = '/app';
+        replaceApp(router, '/app');
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
@@ -152,10 +157,14 @@ export function SavedView({
           title={a.title}
           artistNickname={a.artistNickname}
           price={a.lowestPrice}
-          thumbnailUrl={a.thumbnailUrl}
+          thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, ARTWORK_CARD_WIDTH)}
           regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved
           saveEndpoint={SAVED_ENDPOINT}
+          unsavedHeartIconSrc="/app/images/save-heart-grid.svg"
+          unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+          savedHeartIconSrc="/app/images/save-heart-selected.svg"
+          savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
           onSavedChange={(saved) => {
             if (!saved) setItems((prev) => prev.filter((x) => x.artworkId !== a.artworkId));
           }}
@@ -189,9 +198,9 @@ export function SavedView({
   const boardBody = (
     <div className="relative min-h-[calc(100dvh-180px)]">
       {initialBoards.length === 0 ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 pb-12 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 pb-12 text-center">
           <p className="text-body-1 text-neutral-950">공동보드가 없어요</p>
-          <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과 함께 의견을 나눠보세요.</p>
+          <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과<br/>함께 의견을 나눠보세요.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
@@ -207,7 +216,6 @@ export function SavedView({
           ))}
         </div>
       )}
-      {createFab}
     </div>
   );
 
@@ -236,14 +244,15 @@ export function SavedView({
         <AlertDialogFooter className="flex-row">
           <AlertDialogCancel className="flex-1">취소</AlertDialogCancel>
           <AlertDialogAction
-            className="flex-1"
+            className="flex-1 gap-2"
             disabled={busy}
             onClick={(e) => {
               e.preventDefault();
               deleteSelected();
             }}
           >
-            삭제
+            {busy ? <Spinner className="size-5 text-current" label="" /> : null}
+            {busy ? '삭제 중…' : '삭제'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -292,6 +301,7 @@ export function SavedView({
           </div>
         </div>
       </Tabs>
+      {tab === 'board' ? createFab : null}
       {editBar}
       {confirmDialog}
     </div>

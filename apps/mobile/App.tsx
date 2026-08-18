@@ -1,5 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Share, StyleSheet, Text, View } from 'react-native';
+import {
+  AccessibilityInfo,
+  Alert,
+  Animated,
+  BackHandler,
+  Easing,
+  Image,
+  Linking,
+  Platform,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   GoogleSignin,
@@ -29,8 +42,16 @@ import {
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
 import { getInviteWebViewUrl } from './nativeDeepLink';
+import {
+  getAndroidBackAction,
+  parseNativeNavigationState,
+} from './nativeBack';
 import { getSessionWebViewUrl } from './nativeSession';
 import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
+import {
+  createNativeKakaoAvailabilityResultScript,
+  isNativeKakaoAvailabilityRequest,
+} from './nativeKakao';
 import {
   createPushTokenResultScript,
   getPushDeepLinkWebViewUrl,
@@ -44,10 +65,14 @@ const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}' }); true;`;
+const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}', supportsKakaoAvailability: true }); true;`;
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
+const loadingLabelImage = require('./assets/loading-label.png');
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
+const loadingSymbolImage = require('./assets/loading-symbol.png');
 const colors = {
-  brand: 'rgb(124, 92, 255)',
   ink: 'rgb(17, 20, 24)',
+  loading: 'rgb(229, 235, 232)',
   page: 'rgb(255, 255, 255)',
   sub: 'rgb(107, 114, 128)',
 };
@@ -78,6 +103,61 @@ type WebViewHttpLoadErrorEvent = {
     url: string;
   };
 };
+
+function LoadingView() {
+  const rotation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | undefined;
+    let mounted = true;
+
+    void AccessibilityInfo.isReduceMotionEnabled().then((reduceMotionEnabled) => {
+      if (!mounted || reduceMotionEnabled) return;
+
+      animation = Animated.loop(
+        Animated.timing(rotation, {
+          duration: 1000,
+          easing: Easing.linear,
+          toValue: 1,
+          useNativeDriver: true,
+        }),
+      );
+      animation.start();
+    });
+
+    return () => {
+      mounted = false;
+      animation?.stop();
+    };
+  }, [rotation]);
+
+  const rotate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  const symbol = (
+    <Animated.View style={{ transform: [{ rotate }] }}>
+      <Image accessible={false} source={loadingSymbolImage} style={styles.loadingSymbol} />
+    </Animated.View>
+  );
+  const label = (
+    <View style={styles.loadingLabel}>
+      <Image accessible={false} source={loadingLabelImage} style={styles.loadingLabelImage} />
+    </View>
+  );
+
+  return (
+    <View
+      accessibilityLabel="DearBloom 로딩 중"
+      accessibilityRole="progressbar"
+      accessible
+      style={styles.loading}
+    >
+      {symbol}
+      {label}
+    </View>
+  );
+}
 
 function getWebViewUrl() {
   const webViewUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
@@ -257,14 +337,50 @@ async function requestPushToken(): Promise<NativePushTokenResult> {
 export default function App() {
   const initialWebViewUrl = getWebViewUrl();
   const webViewRef = useRef<WebView>(null);
+  const hasAppNavigationBack = useRef(false);
+  const hasWebViewBack = useRef(false);
   const isNativeLoginPending = useRef(false);
   const sessionBootstrapState = useRef<'checking' | 'reading' | 'redirecting' | 'ready'>(
     'checking',
   );
   const [webViewUrl, setWebViewUrl] = useState(initialWebViewUrl);
+  const [webViewKey, setWebViewKey] = useState(0);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [safeAreaColors, setSafeAreaColors] = useState(defaultNativeSafeAreaColors);
+
+  const replaceWebViewRoot = useCallback((url: string) => {
+    hasAppNavigationBack.current = false;
+    hasWebViewBack.current = false;
+    setWebViewUrl(url);
+    setWebViewKey((currentKey) => currentKey + 1);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (
+        getAndroidBackAction(hasAppNavigationBack.current, hasWebViewBack.current) === 'go-back'
+      ) {
+        webViewRef.current?.goBack();
+        return true;
+      }
+
+      Alert.alert(
+        '디어블룸을 종료할까요?',
+        '진행 중인 화면은 그대로 저장되지 않을 수 있어요.',
+        [
+          { style: 'cancel', text: '취소' },
+          { onPress: () => BackHandler.exitApp(), style: 'destructive', text: '종료' },
+        ],
+      );
+
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     const openDeepLink = (url: string | null) => {
@@ -275,14 +391,14 @@ export default function App() {
 
       sessionBootstrapState.current = 'ready';
       setIsSessionReady(true);
-      setWebViewUrl(inviteWebViewUrl);
+      replaceWebViewRoot(inviteWebViewUrl);
     };
 
     void Linking.getInitialURL().then(openDeepLink);
     const subscription = Linking.addEventListener('url', ({ url }) => openDeepLink(url));
 
     return () => subscription.remove();
-  }, [initialWebViewUrl]);
+  }, [initialWebViewUrl, replaceWebViewRoot]);
 
   // 서버는 data.deepLink 에 내부 절대경로만 담는다. 알림 탭과 인앱 배너 탭이 함께 쓴다.
   const openPushDeepLink = useCallback(
@@ -292,9 +408,9 @@ export default function App() {
 
       sessionBootstrapState.current = 'ready';
       setIsSessionReady(true);
-      setWebViewUrl(pushWebViewUrl);
+      replaceWebViewRoot(pushWebViewUrl);
     },
-    [initialWebViewUrl],
+    [initialWebViewUrl, replaceWebViewRoot],
   );
 
   // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다.
@@ -359,7 +475,7 @@ export default function App() {
       const sessionWebViewUrl = getSessionWebViewUrl(initialWebViewUrl, cookies);
       if (sessionWebViewUrl !== initialWebViewUrl) {
         sessionBootstrapState.current = 'redirecting';
-        setWebViewUrl(sessionWebViewUrl);
+        replaceWebViewRoot(sessionWebViewUrl);
         return;
       }
     } catch {
@@ -373,6 +489,12 @@ export default function App() {
     const { data, url } = event.nativeEvent;
 
     if (!isTrustedMessageUrl(url, webViewUrl)) {
+      return;
+    }
+
+    const nativeNavigationState = parseNativeNavigationState(data);
+    if (nativeNavigationState !== undefined) {
+      hasAppNavigationBack.current = nativeNavigationState;
       return;
     }
 
@@ -393,6 +515,12 @@ export default function App() {
       await Share.share(
         getNativeShareContent(shareRequest, Platform.OS === 'ios' ? 'ios' : 'android'),
       );
+      return;
+    }
+
+    if (isNativeKakaoAvailabilityRequest(data)) {
+      const available = await Linking.canOpenURL('kakaolink://').catch(() => false);
+      webViewRef.current?.injectJavaScript(createNativeKakaoAvailabilityResultScript(available));
       return;
     }
 
@@ -417,12 +545,7 @@ export default function App() {
     }
   };
 
-  const loading = (
-    <View style={styles.centered}>
-      <ActivityIndicator color={colors.brand} />
-      <Text style={styles.loadingText}>dearBloom 로딩 중</Text>
-    </View>
-  );
+  const loading = <LoadingView />;
 
   const error = (
     <View style={styles.centered}>
@@ -432,8 +555,12 @@ export default function App() {
     </View>
   );
 
-  const topSafeAreaStyle = { backgroundColor: safeAreaColors.top };
-  const bottomSafeAreaStyle = { backgroundColor: safeAreaColors.bottom };
+  const topSafeAreaStyle = {
+    backgroundColor: isSessionReady ? safeAreaColors.top : colors.loading,
+  };
+  const bottomSafeAreaStyle = {
+    backgroundColor: isSessionReady ? safeAreaColors.bottom : colors.loading,
+  };
   const webViewStyle = [
     styles.webView,
     { backgroundColor: safeAreaColors.top },
@@ -441,6 +568,7 @@ export default function App() {
   ];
   const webView = (
     <WebView
+      key={webViewKey}
       ref={webViewRef}
       allowsBackForwardNavigationGestures={Platform.OS === 'ios'}
       injectedJavaScript={nativeSafeAreaSyncScript}
@@ -454,9 +582,15 @@ export default function App() {
         const { statusCode, url } = event.nativeEvent;
         setLoadError(`HTTP ${statusCode}\n${url}`);
       }}
-      onLoadStart={() => setLoadError(null)}
+      onLoadStart={() => {
+        hasAppNavigationBack.current = false;
+        setLoadError(null);
+      }}
       onLoadEnd={handleWebViewLoadEnd}
       onMessage={handleWebViewMessage}
+      onNavigationStateChange={({ canGoBack, url }) => {
+        hasWebViewBack.current = canGoBack && isTrustedMessageUrl(url, initialWebViewUrl);
+      }}
       pullToRefreshEnabled={Platform.OS === 'ios'}
       renderError={() => error}
       renderLoading={() => loading}
@@ -495,9 +629,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  loadingText: {
-    color: colors.sub,
-    fontSize: 14,
+  loading: {
+    alignItems: 'center',
+    backgroundColor: colors.loading,
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  loadingLabel: {
+    alignItems: 'center',
+    height: 21,
+    justifyContent: 'center',
+    width: 114,
+  },
+  loadingLabelImage: {
+    height: 13,
+    width: 112,
+  },
+  loadingSymbol: {
+    height: 32,
+    width: 31,
   },
   errorTitle: {
     color: colors.ink,

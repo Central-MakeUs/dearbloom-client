@@ -69,7 +69,8 @@ const modalButtonVariants = cva(
       variant: {
         primary: 'bg-primary text-neutral-0 hover:bg-primary-hover',
         danger: 'bg-danger text-neutral-0 hover:opacity-90',
-        cancel: 'bg-neutral-200 text-neutral-800 hover:bg-neutral-300',
+        cancel:
+          'bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus-visible:bg-neutral-300 focus-visible:ring-0',
       },
     },
     defaultVariants: { variant: 'primary' },

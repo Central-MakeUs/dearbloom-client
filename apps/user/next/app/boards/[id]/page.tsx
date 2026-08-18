@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { MoreHorizontal, UserRound } from 'lucide-react';
 import {
-  Header,
   Button,
   Badge,
   BottomButton,
@@ -25,8 +24,12 @@ import {
   DropdownMenuTrigger,
   RegionTag,
   SkeletonImage,
+  Spinner,
+  showToast,
   cn,
 } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { pushApp, replaceApp } from '@/src/lib/appNavigation';
 import type {
   SharedArtwork,
   SharedBoardPage,
@@ -34,10 +37,11 @@ import type {
   SharedComment,
 } from '@dearbloom/shared';
 import { artistRegionLabel } from '@dearbloom/shared';
+import { goLogin } from '@/src/lib/goLogin';
 import { useHydrated } from '@/src/lib/useHydrated';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 import { getNextSharedArtworkLike, getRankedSharedArtworks } from '@/src/lib/sharedArtworkLike';
 import { formatSharedCommentTime, sortSharedCommentsNewestFirst } from '@/src/lib/sharedComments';
-import { showCandidateToast } from './CandidateToast';
 import { ShareBoardSheet } from './ShareBoardSheet';
 import { SharedLikeIcon } from './SharedLikeIcon';
 
@@ -57,7 +61,7 @@ export default function BoardDetailPage() {
   const searchParams = useSearchParams();
   const { id } = useParams<{ id: string }>();
   const hydrated = useHydrated();
-  const candidateUpdated = searchParams.get('candidateUpdated') === '1';
+  const candidateAction = searchParams.get('candidateAction');
   const boardRenamed = searchParams.get('boardRenamed') === '1';
 
   const [board, setBoard] = useState<BoardDetail>();
@@ -79,7 +83,7 @@ export default function BoardDetailPage() {
     fetch(`/app/api/boards/${id}`)
       .then(async (response) => {
         if (response.status === 401) {
-          window.location.href = `/app/login?returnUrl=${encodeURIComponent(`/app/boards/${id}`)}`;
+          goLogin(`/app/boards/${id}`);
           return undefined;
         }
         if (!response.ok) throw new Error('공동보드 조회 실패');
@@ -98,25 +102,33 @@ export default function BoardDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!candidateUpdated) return;
-    showCandidateToast('내 후보가 수정되었어요', 'success');
+    if (candidateAction !== 'added' && candidateAction !== 'updated') return;
+    showToast(candidateAction === 'added' ? '내 후보가 추가되었어요' : '내 후보가 수정되었어요');
     window.history.replaceState(window.history.state, '', window.location.pathname);
-  }, [candidateUpdated]);
+  }, [candidateAction]);
 
   useEffect(() => {
     if (!boardRenamed) return;
-    showCandidateToast('보드 이름이 변경되었어요', 'success');
+    showToast('보드 이름이 변경되었어요');
     window.history.replaceState(window.history.state, '', window.location.pathname);
   }, [boardRenamed]);
 
   if (!hydrated || loading) {
-    return <div className="board-detail-background min-h-dvh bg-neutral-100" />;
+    // 보드는 클라이언트에서 받아오므로 응답 전까지 배경만 남았다 — 화면 중앙에 스피너를 둔다.
+    return (
+      <div
+        className="board-detail-background flex min-h-dvh items-center justify-center bg-neutral-100"
+        aria-busy
+      >
+        <Spinner className="size-8" label="공동보드를 불러오는 중" />
+      </div>
+    );
   }
 
   if (!board) {
     return (
       <div className="board-detail-background mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-        <Header showBack onBack={() => router.replace('/saved?tab=board')} title="공동보드" />
+        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-500">
           보드를 찾을 수 없어요.
         </p>
@@ -277,7 +289,7 @@ export default function BoardDetailPage() {
             >
               {artwork.thumbnailUrl ? (
                 <SkeletonImage
-                  src={artwork.thumbnailUrl}
+                  src={optimizedImageUrl(artwork.thumbnailUrl, ARTWORK_CARD_WIDTH)}
                   alt={artwork.title}
                   loading="lazy"
                   className="h-full w-full"
@@ -334,7 +346,7 @@ export default function BoardDetailPage() {
       <BottomButtonBar leading={<ShareButton onClick={() => setShareOpen(true)} />}>
         <BottomButton
           color={board.hasMySharedArtworks ? 'black' : 'green'}
-          onClick={() => router.push(`/boards/${board.sharedBoardId}/add`)}
+          onClick={() => pushApp(router, `/app/boards/${board.sharedBoardId}/add`)}
         >
           {board.hasMySharedArtworks ? '내 후보 수정하기' : '내 후보 추가하기'}
         </BottomButton>
@@ -532,7 +544,7 @@ export default function BoardDetailPage() {
             <button
               type="button"
               className="h-14 border-b border-neutral-200 text-left text-body-2 text-neutral-950"
-              onClick={() => router.push(`/boards/${board.sharedBoardId}/edit-name`)}
+              onClick={() => pushApp(router, `/app/boards/${board.sharedBoardId}/edit-name`)}
             >
               보드 이름 변경하기
             </button>
@@ -593,8 +605,8 @@ export default function BoardDetailPage() {
                 method: 'DELETE',
               });
               if (!response.ok) return;
-              showCandidateToast('보드가 삭제되었어요', 'success');
-              router.replace('/saved?tab=board');
+              showToast('보드가 삭제되었어요');
+              replaceApp(router, '/app/saved?tab=board');
             }}
           >
             확인
@@ -627,8 +639,8 @@ export default function BoardDetailPage() {
                 method: 'DELETE',
               });
               if (!response.ok) return;
-              showCandidateToast('공동보드에서 나갔어요', 'success');
-              router.replace('/saved?tab=board');
+              showToast('공동보드에서 나갔어요');
+              replaceApp(router, '/app/saved?tab=board');
             }}
           >
             확인
@@ -649,9 +661,9 @@ export default function BoardDetailPage() {
 
   return (
     <div className="board-detail-background relative mx-auto min-h-dvh max-w-md bg-neutral-100">
-      <Header
+      <AppBackHeader
         showBack
-        onBack={() => router.replace('/saved?tab=board')}
+        fallbackHref="/app/saved?tab=board"
         title={board.sharedBoardName}
         right={headerActions}
       />

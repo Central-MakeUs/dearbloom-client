@@ -1,20 +1,37 @@
 import { useEffect, useState } from 'react';
 import { Share } from 'lucide-react';
-import { ShareBottomSheet } from '@dearbloom/ui';
-import { copyText, isMobileShareDevice, isShareCancelled, loadKakaoSdk } from '@dearbloom/shared';
+import { ShareBottomSheet, showToast } from '@dearbloom/ui';
+import {
+  copyText,
+  getKakaoFeedShareOptions,
+  isMobileShareDevice,
+  isShareCancelled,
+  loadKakaoSdk,
+  requestNativeKakaoAvailability,
+} from '@dearbloom/shared';
 
 declare global {
   interface Window {
-    __DEARBLOOM_NATIVE_APP__?: { platform?: string };
+    __DEARBLOOM_NATIVE_APP__?: {
+      platform?: string;
+      supportsKakaoAvailability?: boolean;
+    };
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
 }
 
-export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?: string }) {
+export function SnapShareButton({
+  imageUrl,
+  kakaoKey,
+  title,
+}: {
+  imageUrl?: string;
+  kakaoKey?: string;
+  title: string;
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showKakao, setShowKakao] = useState(false);
-  const [feedback, setFeedback] = useState<{ message: string; status: 'success' | 'error' }>();
 
   useEffect(() => {
     setShowKakao(
@@ -27,10 +44,7 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
   }, []);
 
   const url = () => `${location.origin}${location.pathname}`;
-  const notify = (message: string, status: 'success' | 'error') => {
-    setFeedback({ message, status });
-    window.setTimeout(() => setFeedback(undefined), 2500);
-  };
+  const notify = (message: string, status: 'success' | 'error') => showToast(message, status);
   const run = async (action: () => Promise<void>, failureMessage: string) => {
     if (loading) return;
     setLoading(true);
@@ -46,20 +60,35 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
   const copyLink = () =>
     run(async () => {
       await copyText(url());
-      notify('링크가 복사되었어요', 'success');
+      notify('클립보드에 복사되었습니다', 'success');
       setOpen(false);
     }, '링크를 복사하지 못했어요');
 
   const shareKakao = () =>
     run(async () => {
+      if ((await requestNativeKakaoAvailability()) === false) {
+        notify('카카오톡이 설치되어 있지 않아요', 'error');
+        return;
+      }
       if (!kakaoKey) throw new Error('Kakao key missing');
       const kakao = await loadKakaoSdk();
       if (!kakao.isInitialized()) kakao.init(kakaoKey);
-      kakao.Share.sendDefault({
-        objectType: 'text',
-        text: `디어블룸에서 ${title} 작품을 확인해 보세요.`,
-        link: { mobileWebUrl: url(), webUrl: url() },
-      });
+      const shareUrl = url();
+      kakao.Share.sendDefault(
+        imageUrl
+          ? getKakaoFeedShareOptions({
+              buttonTitle: '작품 자세히 보기',
+              description: '디어블룸에서 졸업스냅 작품을 확인해 보세요.',
+              imageUrl,
+              title,
+              url: shareUrl,
+            })
+          : {
+              objectType: 'text',
+              text: `디어블룸에서 ${title} 작품을 확인해 보세요.`,
+              link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+            },
+      );
     }, '카카오톡 공유를 실행하지 못했어요');
 
   const shareMore = () =>
@@ -79,21 +108,9 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
         return;
       }
       await copyText(shareUrl);
-      notify('링크가 복사되었어요', 'success');
+      notify('클립보드에 복사되었습니다', 'success');
       setOpen(false);
     }, '공유 기능을 실행하지 못했어요');
-
-  const toast = feedback ? (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(129px+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4">
-      <div
-        role="status"
-        className="flex items-center gap-1 rounded-full bg-neutral-800 px-4 py-2 text-body-6 text-neutral-0 shadow-elevation"
-      >
-        <img src={`/images/toast-${feedback.status}.svg`} alt="" className="size-3" />
-        <span>{feedback.message}</span>
-      </div>
-    </div>
-  ) : null;
 
   return (
     <>
@@ -116,7 +133,6 @@ export function SnapShareButton({ title, kakaoKey }: { title: string; kakaoKey?:
         onKakao={shareKakao}
         onMore={shareMore}
       />
-      {toast}
     </>
   );
 }

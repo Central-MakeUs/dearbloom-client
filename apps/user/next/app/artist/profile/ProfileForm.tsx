@@ -2,20 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { replaceApp } from '@/src/lib/appNavigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
 import { nicknameSchema, type ArtistMe, type ArtistRegionCode } from '@dearbloom/shared';
-import { Button, Field, Input, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, Spinner, Textarea, showToast } from '@dearbloom/ui';
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { FileField } from '@/src/components/common/FileField';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { goLogin } from '@/src/lib/goLogin';
+import { optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const schema = z.object({
   nickname: nicknameSchema,
   intro: z.string(),
-  etcInfo: z.string(),
+  travelFee: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -34,13 +35,14 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       nickname: initial.nickname ?? '',
       intro: initial.intro ?? '',
-      etcInfo: initial.etcInfo ?? '',
+      travelFee: initial.travelFee ?? '',
     },
   });
 
@@ -57,7 +59,11 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
     });
     if (!p.ok) throw new Error('이미지 presigned 실패');
     const { presignedUrl, fileUrl } = (await p.json()) as { presignedUrl: string; fileUrl: string };
-    const put = await fetch(presignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+    const put = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: { 'Content-Type': file.type },
+    });
     if (!put.ok) throw new Error('이미지 업로드 실패(S3)');
     return fileUrl;
   }
@@ -76,18 +82,19 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         nickname?: string;
         intro?: string;
         regionList?: ArtistRegionCode[];
-        etcInfo?: string;
+        travelFee?: string;
         artistImageUrl?: string;
       } = {};
       if (dirtyFields.nickname) patch.nickname = values.nickname;
       if (dirtyFields.intro) patch.intro = values.intro;
-      if (dirtyFields.etcInfo) patch.etcInfo = values.etcInfo;
+      if (dirtyFields.travelFee) patch.travelFee = values.travelFee;
       if (!sameRegions(regions, initialRegions)) patch.regionList = regions;
       if (imageFile) patch.artistImageUrl = await uploadImage(imageFile);
 
       // 변경 사항이 없으면 네트워크 호출 생략.
       if (Object.keys(patch).length === 0) {
-        toast.success('저장되었습니다.');
+        showToast('저장되었습니다.');
+        replaceApp(router, '/app/artist/my');
         return;
       }
 
@@ -97,17 +104,21 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         body: JSON.stringify(patch),
       });
       if (res.status === 401) {
-        window.location.href = LOGIN_HREF;
+        goLogin();
         return;
       }
       if (!res.ok) {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
+        if (res.status === 409) {
+          setError('nickname', { type: 'manual', message: '이미 존재하는 프로필 이름입니다' });
+          return;
+        }
         throw new Error(b.error || '저장 실패');
       }
-      toast.success('저장되었습니다.');
-      router.refresh();
+      showToast('저장되었습니다.');
+      replaceApp(router, '/app/artist/my');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : '오류가 발생했어요');
+      showToast(err instanceof Error ? err.message : '오류가 발생했어요', 'error');
     }
   };
 
@@ -115,12 +126,23 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
 
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
-      <Field label="닉네임" htmlFor="nickname" error={errors.nickname?.message}>
-        <Input id="nickname" aria-invalid={!!errors.nickname} {...register('nickname')} />
+      <Field label="프로필 이름" htmlFor="nickname" error={errors.nickname?.message}>
+        <Input
+          id="nickname"
+          aria-invalid={!!errors.nickname}
+          defaultValue={initial.nickname ?? ''}
+          {...register('nickname')}
+        />
       </Field>
 
       <Field label="작가 소개" htmlFor="intro">
-        <Textarea id="intro" rows={4} placeholder="작가님을 소개해주세요" {...register('intro')} />
+        <Textarea
+          id="intro"
+          rows={4}
+          placeholder="작가님을 소개해주세요"
+          defaultValue={initial.intro ?? ''}
+          {...register('intro')}
+        />
       </Field>
 
       <ArtistRegionField
@@ -132,17 +154,36 @@ export function ProfileForm({ initial }: { initial: ArtistMe }) {
         value={regions}
       />
 
-      <Field label="기타 안내" htmlFor="etc">
-        <Textarea id="etc" rows={4} placeholder="예: 우천 시 날짜 변경 가능, 촬영 후 환불 불가 등" {...register('etcInfo')} />
+      <Field label="출장비 안내" htmlFor="travelFee">
+        <Textarea
+          id="travelFee"
+          rows={4}
+          placeholder="예: 서울 전역 무료, 경기권 3만원, 그 외 지역 협의"
+          defaultValue={initial.travelFee ?? ''}
+          {...register('travelFee')}
+        />
       </Field>
 
       <div>
         <span className={label}>대표 이미지</span>
-        {initial.imageUrl && !imageFile && <img src={initial.imageUrl} alt="현재 대표 이미지" className="mb-2 h-20 w-20 rounded-full object-cover" />}
-        <FileField accept="image/*" buttonLabel="사진 선택" emptyText="선택된 파일 없음" onFiles={(files) => setImageFile(files[0] ?? null)} ariaLabel="대표 이미지" />
+        {initial.imageUrl && !imageFile && (
+          <img
+            src={optimizedImageUrl(initial.imageUrl, 80)}
+            alt="현재 대표 이미지"
+            className="mb-2 h-20 w-20 rounded-full object-cover"
+          />
+        )}
+        <FileField
+          accept="image/*"
+          buttonLabel="사진 선택"
+          emptyText="선택된 파일 없음"
+          onFiles={(files) => setImageFile(files[0] ?? null)}
+          ariaLabel="대표 이미지"
+        />
       </div>
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="mt-2 w-full">
+        {isSubmitting ? <Spinner className="text-current" label="" /> : null}
         {isSubmitting ? '저장 중…' : '저장'}
       </Button>
     </form>

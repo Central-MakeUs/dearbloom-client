@@ -1,8 +1,7 @@
 ---
 export const prerender = false; // 서버 렌더 (작품 상세를 요청 시 API 로 가져옴)
 
-import { RegionTag, ScrollFade } from '@dearbloom/ui';
-import { SnapDetailTabs } from '@/components/SnapDetailTabs';
+import { AppToaster, FlashToast, NativeExitDialog, RegionTag } from '@dearbloom/ui';
 import { SnapShareButton } from '@/components/SnapShareButton';
 import { PackageList } from '@/components/PackageList';
 import { SchoolChipsExpander } from '@/components/SchoolChipsExpander';
@@ -20,9 +19,12 @@ import {
 } from '@dearbloom/shared';
 
 const { slug } = Astro.params;
-const token = Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.has('onboardingPending')
+  ? undefined
+  : Astro.cookies.get('accessToken')?.value;
 const backHref = getArtworkBackHref(Astro.url.searchParams.get('returnTo'));
 const returnQuery = backHref === '/snaps' ? '' : `?returnTo=${encodeURIComponent(backHref)}`;
+const imageGalleryHref = `/snaps/${slug}/images${returnQuery}`;
 
 if (token) {
   // 로그인별 isSaved 가 담기므로 CDN 공유 캐시 금지(익명 렌더가 로그인 사용자에게 새는 것 방지).
@@ -46,6 +48,11 @@ try {
 
 const won = (n: number) => `${n.toLocaleString()}원`;
 const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.sortOrder) : [];
+const shareImageUrl = photos.find((photo) => photo.fileType === 'IMAGE')?.fileUrl;
+const shareTitle = `${artwork?.title ?? '작품'} · DearBloom`;
+const shareDescription =
+  artwork?.description?.trim() || '디어블룸에서 졸업스냅 작품을 확인해 보세요.';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 
 // 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
@@ -72,7 +79,19 @@ if (artwork && token) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>{artwork?.title ?? '작품'} · dearBloom</title>
+    <title>{shareTitle}</title>
+    <meta name="description" content={shareDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DearBloom" />
+    <meta property="og:title" content={shareTitle} />
+    <meta property="og:description" content={shareDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={shareTitle} />
+    <meta name="twitter:description" content={shareDescription} />
+    {shareImageUrl && <meta name="twitter:image" content={shareImageUrl} />}
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     {
@@ -91,8 +110,18 @@ if (artwork && token) {
             {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
             <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
             <div class="flex items-center">
-              <SnapShareButton title={artwork.title} kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY} client:idle />
-              <SnapMoreMenu artworkId={artwork.artworkId} initialReported={reported} client:idle />
+              <SnapShareButton
+                title={artwork.title}
+                imageUrl={shareImageUrl}
+                kakaoKey={import.meta.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY}
+                client:idle
+              />
+              <SnapMoreMenu
+                artworkId={artwork.artworkId}
+                initialReported={reported}
+                authenticated={!!token}
+                client:idle
+              />
             </div>
           </header>
 
@@ -108,13 +137,15 @@ if (artwork && token) {
                     <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover" controls />
                   ) : (
                     /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
-                    <img
-                      src={optimizedImageUrl(p.fileUrl, 190)}
-                      alt={artwork.title}
-                      loading={i === 0 ? 'eager' : 'lazy'}
-                      fetchpriority={i === 0 ? 'high' : undefined}
-                      class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover"
-                    />
+                    <a href={imageGalleryHref} class="shrink-0 snap-start">
+                      <img
+                        src={optimizedImageUrl(p.fileUrl, 190)}
+                        alt={artwork.title}
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                        fetchpriority={i === 0 ? 'high' : undefined}
+                        class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover"
+                      />
+                    </a>
                   ),
                 )}
               </div>
@@ -135,8 +166,6 @@ if (artwork && token) {
               <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
 
-            {/* 인페이지 탭 — 상세정보 활성 / 후기는 API 대기라 disabled */}
-            <SnapDetailTabs client:visible />
           </div>
 
           <div class="pb-28 pt-4">
@@ -184,7 +213,7 @@ if (artwork && token) {
             )}
 
             {/* 이용 안내 — 작가 소개 + 작품 안내 통합 카드 (Figma) */}
-            {(artwork.artist.intro || artwork.artist.etcInfo) && (
+            {(artwork.artist.intro || artwork.description) && (
               <section class="mb-8">
                 <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h3>
                 <div class="mx-4 flex flex-col gap-6 rounded-md bg-neutral-0 p-5">
@@ -194,29 +223,30 @@ if (artwork && token) {
                       <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.intro}</p>
                     </div>
                   )}
-                  {artwork.artist.etcInfo && (
+                  {artwork.description && (
                     <div class="flex flex-col gap-3">
                       <p class="text-body-3 text-neutral-900">작품 안내</p>
-                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.etcInfo}</p>
+                      <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.description}</p>
                     </div>
                   )}
                 </div>
               </section>
             )}
 
-            {/* 이 작가의 다른 작품 (Figma: 최하단, CTA 위) */}
+            {/* 이 작가의 다른 작품 (Figma: 최하단 가로 캐러셀, CTA 위) */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-8">
                 <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
-                <div class="grid grid-cols-3 gap-2 px-4">
+                <div class="flex snap-x scroll-pl-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {artwork.otherArtworkList.map((o) => (
-                    <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block">
-                      <div class="aspect-[4/5] overflow-hidden rounded-md bg-neutral-300">
-                        {/* 3열 그리드 — 한 칸 폭 = (448 - 좌우 32 - 간격 16) / 3 ≈ 133 */}
-                        <img src={optimizedImageUrl(o.imageUrl, 133)} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
+                    <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block w-[137px] shrink-0 snap-start">
+                      <div class="h-[177px] overflow-hidden rounded-md bg-neutral-300">
+                        <img src={optimizedImageUrl(o.imageUrl, 137)} alt={o.title ?? ''} loading="lazy" class="h-full w-full object-cover" />
                       </div>
-                      {o.title && <p class="mt-1 truncate text-body-4 text-neutral-900">{o.title}</p>}
-                      {o.artistNickname && <p class="truncate text-caption-1 text-neutral-700">{o.artistNickname}</p>}
+                      <div class="mt-2 px-1">
+                        {o.title && <p class="truncate text-body-4 text-neutral-900">{o.title}</p>}
+                        {o.artistNickname && <p class="mt-0.5 truncate text-caption-1 text-neutral-700">{o.artistNickname}</p>}
+                      </div>
                     </a>
                   ))}
                 </div>
@@ -225,11 +255,8 @@ if (artwork && token) {
           </div>
 
           {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입.
-              offset 85 = CTA 실제 높이(border 1 + padding 16 + 버튼 52 + padding 16). ScrollFade 가
-              여기에 safe-area 를 더하므로 CTA 도 같은 만큼 padding 을 가져야 둘 사이가 벌어지지 않는다.
               CTA 는 이 화면의 주 동작이라 client:load 를 유지한다 — client:idle 은 load 이벤트를
               기다리므로 눌러도 시트가 안 열리는 구간이 생긴다. */}
-          <ScrollFade offset={85} client:idle />
           <SmartInquiryCta
             packages={packages}
             artworkId={artwork.artworkId}
@@ -239,5 +266,9 @@ if (artwork && token) {
         </>
       )
     }
+    <AppToaster client:load />
+    <FlashToast client:load />
+    {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
+    <NativeExitDialog client:native />
   </body>
 </html>

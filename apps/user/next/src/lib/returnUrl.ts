@@ -11,3 +11,26 @@ export function safeReturnUrl(value: string | null | undefined): string | undefi
   if (/[\n\r\t\\]/.test(value)) return undefined;
   return value;
 }
+
+export function getRoleLoginDestination(
+  role: 'CUSTOMER' | 'ARTIST',
+  value: string | null | undefined,
+) {
+  const home = role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard';
+  return getRoleReturnUrl(role, value) ?? home;
+}
+
+export function getRoleReturnUrl(
+  role: 'CUSTOMER' | 'ARTIST',
+  value: string | null | undefined,
+) {
+  const returnUrl = safeReturnUrl(value);
+  if (!returnUrl) return undefined;
+
+  const isArtistPath =
+    returnUrl === '/app/artist' ||
+    returnUrl.startsWith('/app/artist/') ||
+    returnUrl.startsWith('/app/artist?');
+
+  return (role === 'ARTIST') === isArtistPath ? returnUrl : undefined;
+}

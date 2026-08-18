@@ -1,8 +1,17 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useState, type MouseEvent } from 'react';
 import { Heart } from 'lucide-react';
-import { LoginRequiredDialog } from './LoginRequiredDialog';
+import { cn } from '../lib/cn';
+
+/*
+  로그인 모달은 radix AlertDialog 를 끌고 오는데(초기 번들의 무거운 축), 실제로 뜨는 건
+  비로그인·프로필 미생성 사용자가 하트를 눌렀을 때뿐이다. 막힌 순간에 받는다.
+  한 번 받은 뒤에는 계속 마운트해둔다 — 닫는 애니메이션이 살아있어야 하기 때문.
+*/
+const LoginRequiredDialog = lazy(() =>
+  import('./LoginRequiredDialog').then((m) => ({ default: m.LoginRequiredDialog })),
+);
 
 interface SaveHeartProps {
   artworkId: number;
@@ -12,6 +21,13 @@ interface SaveHeartProps {
   strokeWidth?: number;
   /** 어두운 배경 위에 올릴 때 등 색 오버라이드 */
   className?: string;
+  /** 미저장 상태에만 사용할 Figma 아이콘. 저장 상태의 기존 빨간 하트는 유지한다. */
+  unsavedIconSrc?: string;
+  /** 24px 아이콘 컨테이너 안 Figma Vector 실측 위치·크기. */
+  unsavedIconClassName?: string;
+  /** 저장 상태에 사용할 Figma 아이콘. */
+  savedIconSrc?: string;
+  savedIconClassName?: string;
   /** 토글 결과 콜백(낙관적/롤백 포함한 최종 상태). 목록에서 언세이브 시 제거용. */
   onChange?: (saved: boolean) => void;
   /**
@@ -43,6 +59,10 @@ export function SaveHeart({
   size = 24,
   strokeWidth = 1.8,
   className,
+  unsavedIconSrc,
+  unsavedIconClassName,
+  savedIconSrc,
+  savedIconClassName,
   onChange,
   endpoint = '/api/saved',
   loginHref = '/app/login',
@@ -53,6 +73,12 @@ export function SaveHeart({
   const [busy, setBusy] = useState(false);
   // 저장이 막힌 이유. login = 아직 로그인 안 함, customer = 로그인은 했지만 고객 프로필이 없음.
   const [blockedBy, setBlockedBy] = useState<'login' | 'customer' | null>(null);
+  // 한 번이라도 막힌 적이 있으면 모달을 계속 마운트해둔다(닫는 애니메이션 유지).
+  const [dialogNeeded, setDialogNeeded] = useState(false);
+
+  useEffect(() => {
+    if (blockedBy) setDialogNeeded(true);
+  }, [blockedBy]);
 
   async function toggle(e: MouseEvent) {
     e.preventDefault();
@@ -86,6 +112,16 @@ export function SaveHeart({
     }
   }
 
+  const iconSrc = saved ? savedIconSrc : unsavedIconSrc;
+  const iconClassName = saved ? savedIconClassName : unsavedIconClassName;
+  const icon = iconSrc ? (
+    <span className="relative block size-6 overflow-hidden" aria-hidden>
+      <img src={iconSrc} alt="" className={cn('absolute max-w-none', iconClassName)} />
+    </span>
+  ) : (
+    <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
+  );
+
   return (
     <>
       <button
@@ -95,22 +131,26 @@ export function SaveHeart({
         aria-label={saved ? '저장 취소' : '저장'}
         className={className ?? 'shrink-0 text-neutral-800 transition-transform active:scale-90'}
       >
-        <Heart size={size} strokeWidth={strokeWidth} fill={saved ? 'currentColor' : 'none'} aria-hidden />
+        {icon}
       </button>
-      <LoginRequiredDialog
-        open={blockedBy === 'login'}
-        onOpenChange={(open) => !open && setBlockedBy(null)}
-        redirectUri={loginRedirectUri}
-        loginHref={loginHref}
-      />
-      <LoginRequiredDialog
-        open={blockedBy === 'customer'}
-        onOpenChange={(open) => !open && setBlockedBy(null)}
-        redirectUri={loginRedirectUri}
-        loginHref={customerOnboardingHref}
-        title="고객 프로필이 필요합니다"
-        description="프로필을 만들면 작품을 저장할 수 있어요."
-      />
+      {dialogNeeded && (
+        <Suspense fallback={null}>
+          <LoginRequiredDialog
+            open={blockedBy === 'login'}
+            onOpenChange={(open) => !open && setBlockedBy(null)}
+            redirectUri={loginRedirectUri}
+            loginHref={loginHref}
+          />
+          <LoginRequiredDialog
+            open={blockedBy === 'customer'}
+            onOpenChange={(open) => !open && setBlockedBy(null)}
+            redirectUri={loginRedirectUri}
+            loginHref={customerOnboardingHref}
+            title="고객 프로필이 필요합니다"
+            description="프로필을 만들면 작품을 저장할 수 있어요."
+          />
+        </Suspense>
+      )}
     </>
   );
 }

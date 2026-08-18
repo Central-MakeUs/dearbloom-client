@@ -21,7 +21,9 @@ import {
   toSearchParams,
 } from '@/lib/artworkFilter';
 
-const token = Astro.cookies.get('accessToken')?.value;
+const token = Astro.cookies.has('onboardingPending')
+  ? undefined
+  : Astro.cookies.get('accessToken')?.value;
 if (token) {
   // 로그인 시 저장상태(isSaved)를 반영 → per-user 렌더(공유 캐시 금지).
   Astro.response.headers.set('Cache-Control', 'private, no-store');
@@ -52,6 +54,23 @@ try {
   loadFailed = true;
 }
 
+/*
+  아일랜드 props 는 HTML 에 JSON 으로 직렬화된다. 그리드뷰는 카드 썸네일 한 장만 쓰는데
+  작품당 사진 URL 여러 개인 photoList(리스트뷰 전용)까지 실려서, 한 화면에 원본 CDN URL 이
+  89개나 박혀 있었다. 리스트뷰에서만 넘긴다.
+*/
+const islandPage: ArtworkPage =
+  view === 'list'
+    ? page
+    : {
+        ...page,
+        artworkList: page.artworkList.map((artwork) => {
+          const trimmed = { ...artwork };
+          delete trimmed.photoList;
+          return trimmed;
+        }),
+      };
+
 const chips = filterChipLabels(filter);
 const hasFilter = hasActiveFilter(filter);
 const query = toQueryString(filter); // ArtworkFeed 가 다음 페이지 요청에 싣는다(view 는 조회 조건이 아니라 제외)
@@ -68,6 +87,7 @@ const CHIP_CLASS =
   <AppHeader logoHref="/snaps" />
 
   <div class="mx-auto max-w-md">
+    <div class="sticky top-[calc(44px+env(safe-area-inset-top))] z-30 bg-neutral-100">
     {/*
       필터 칩바 — Figma 437:7705. 어느 칩을 눌러도 필터 설정으로 가고, 해시로 해당 섹션에 붙는다.
       세로 위치는 실측(상태바 제외): 헤더 하단 44 → 칩바 52~84 → 정렬행 87~127 → 그리드 129.
@@ -122,6 +142,7 @@ const CHIP_CLASS =
         </div>
       </div>
     )}
+    </div>
 
     {/* 작품 피드 */}
     {loadFailed ? (
@@ -138,7 +159,7 @@ const CHIP_CLASS =
         )}
       </div>
     ) : (
-      <ArtworkFeed initialPage={page} query={query} view={view} client:load />
+      <ArtworkFeed initialPage={islandPage} query={query} view={view} client:load />
     )}
   </div>
 </AppShellLayout>

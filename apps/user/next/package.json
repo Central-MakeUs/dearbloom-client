@@ -8,8 +8,11 @@
     "start": "next start",
     "lint": "eslint .",
     "test:artist-regions": "node --experimental-strip-types --test app/api/members/artist/artistRegions.test.ts",
+    "test:block-ranges": "node --experimental-strip-types --test app/artist/schedule/blockRanges.test.ts",
     "test:auth-cookies": "node --experimental-strip-types --test src/lib/authCookies.test.ts",
     "test:customer-onboarding": "node --experimental-strip-types --test app/api/members/customer/customerPayload.test.ts",
+    "test:flash-toast": "node --experimental-strip-types --test src/lib/flashToast.test.ts",
+    "test:slots": "node --experimental-strip-types --test src/lib/slots.test.ts",
     "test:onboarding-route": "node --experimental-strip-types --test src/lib/onboardingRoute.test.ts",
     "typecheck": "next typegen && tsc --noEmit"
   },

@@ -44,10 +44,11 @@ export function PackageList({ packages }: { packages: Package[] }) {
       <div className="mx-4 flex flex-col gap-3">
         {shown.map((pkg) => (
           <div key={pkg.artworkPackageId} className="rounded-md bg-neutral-0 p-5">
+            <p className="text-body-4 text-neutral-900">{pkg.packageName}</p>
+            <div className="my-4 h-px bg-neutral-200" />
             <dl className="flex flex-col gap-3">
-              {row('항목', pkg.packageName)}
-              {pkg.durationMinutes != null && row('촬영 시간', minutes(pkg.durationMinutes))}
               {row('가격', won(pkg.price))}
+              {pkg.durationMinutes != null && row('촬영 시간', minutes(pkg.durationMinutes))}
               {pkg.finalPhotoCount != null && row('보정본 수', `${pkg.finalPhotoCount}장`)}
               {pkg.extraInfo && row('추가', pkg.extraInfo)}
             </dl>

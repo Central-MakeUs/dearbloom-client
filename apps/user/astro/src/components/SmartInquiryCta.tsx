@@ -46,9 +46,8 @@ export function SmartInquiryCta({
   }
 
   // 높이 = border 1 + padding 16 + 버튼 52 + padding 16 = 85(+safe-area).
-  // ScrollFade offset(85) 이 이 값에 맞물려 있으니 함께 바꿔야 한다. → [slug].astro
   const trigger = (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-100 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       <div className="mx-auto max-w-md">
         <BottomButtonBar
           leading={
@@ -56,6 +55,10 @@ export function SmartInquiryCta({
               artworkId={artworkId}
               initialSaved={initialSaved}
               size={24}
+              unsavedIconSrc="/images/save-heart-detail.svg"
+              unsavedIconClassName="left-[2.1px] top-[3.64px] h-[17.76px] w-[19.8px]"
+              savedIconSrc="/images/save-heart-selected.svg"
+              savedIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
               className={cn(bottomIconButtonClass, 'text-error')}
             />
           }

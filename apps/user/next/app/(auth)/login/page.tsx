@@ -5,10 +5,11 @@ import { redirect } from 'next/navigation';
 import { getMemberMe } from '@dearbloom/shared';
 
 import { shouldForceOnboarding } from '@/src/lib/forceOnboarding';
-import { safeReturnUrl } from '@/src/lib/returnUrl';
+import { getRoleLoginDestination, safeReturnUrl } from '@/src/lib/returnUrl';
 import { DEV_LOGIN_ENABLED } from '@/src/lib/env';
 import { getMemberHome } from '@/src/lib/memberHome';
 
+import { LoginCloseButton } from '../LoginCloseButton';
 import { SocialLoginButtons } from '../SocialLoginButtons';
 
 type LoginPageProps = {
@@ -37,7 +38,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     const proto = h.get('x-forwarded-proto') ?? 'https';
     // 보던 화면이 있으면 그리로 되돌린다. 역할 홈으로 보내면 작가 계정이 탐색에서 저장을 눌렀을 때
     // 엉뚱하게 작가 대시보드로 튄다(hasArtist && !hasCustomer 는 항상 작가 홈이라서).
-    const destination = returnUrl ?? getMemberHome(cookieStore.get('activeRole')?.value, member);
+    const activeRole = getActiveRole(cookieStore.get('activeRole')?.value);
+    const destination = activeRole
+      ? getRoleLoginDestination(activeRole, returnUrl)
+      : getMemberHome(undefined, member);
     redirect(`${proto}://${host}${destination}`);
   }
 
@@ -90,6 +94,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <meta content="rgb(229 235 232)" name="theme-color" />
       <main className="min-h-dvh bg-primary-100">
         <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+          {/* 로그인은 보던 화면 위에 얹히는 단계라 항상 닫고 나갈 길을 둔다. */}
+          <LoginCloseButton fallbackHref={returnUrl ?? '/snaps'} />
           <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>
           <div className="absolute inset-x-2 bottom-[88px]">
             {error}
@@ -107,4 +113,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </main>
     </>
   );
+}
+
+function getActiveRole(value?: string) {
+  return value === 'CUSTOMER' || value === 'ARTIST' ? value : undefined;
 }

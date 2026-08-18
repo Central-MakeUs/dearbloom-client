@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { replaceApp } from '@/src/lib/appNavigation';
+import { goLogin } from '@/src/lib/goLogin';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -102,14 +103,14 @@ export function ArtworkForm() {
         }),
       });
       if (res.status === 401) {
-        window.location.href = LOGIN_HREF;
+        goLogin();
         return;
       }
       if (!res.ok) {
         const b = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(b.error || '작품 등록 실패');
       }
-      router.push('/artist/products');
+      replaceApp(router, '/app/artist/products');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : '오류가 발생했어요');
     } finally {
@@ -137,8 +138,8 @@ export function ArtworkForm() {
         <Input id="title" aria-invalid={!!errors.title} placeholder="작품 제목" {...register('title')} />
       </Field>
 
-      <Field label="작품 설명" htmlFor="description" optional>
-        <Textarea id="description" rows={3} placeholder="작품에 대한 설명을 적어주세요." {...register('description')} />
+      <Field label="작품 안내" htmlFor="description" optional>
+        <Textarea id="description" rows={3} placeholder="예: 빈티지 디카 추가는 모든 패키지에서 제공 가능합니다" {...register('description')} />
       </Field>
 
       <Field label="촬영 인원" error={errors.minHeadCount?.message ?? errors.maxHeadCount?.message}>

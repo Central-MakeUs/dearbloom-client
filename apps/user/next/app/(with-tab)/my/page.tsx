@@ -1,40 +1,31 @@
 import { cookies } from 'next/headers';
 import { getCustomerMe, getMemberMe } from '@dearbloom/shared';
 import { MyMenu } from './MyMenu';
-import { ProfileUpdatedToast } from './ProfileUpdatedToast';
 import { CustomerProfileAvatar, Header } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
-import { LoginSheet } from '../../(auth)/LoginSheet';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 
 export const dynamic = 'force-dynamic';
 
-export default async function MyPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ updated?: string }>;
-}) {
+export default async function MyPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('accessToken')?.value;
-  const { updated } = await searchParams;
 
-  // 탭을 누른 시점에 로그인 필요가 확정이라, 안내만 남기고 로그인 시트를 바로 올린다(QA).
-  const login = (message: string) => (
+  const login = (
     <div className="mx-auto max-w-md">
       <Header showBack={false} title="마이페이지" />
-      <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-        <p className="text-body-5 text-neutral-500">{message}</p>
-        <LoginSheet returnUrl="/app/my" />
-      </div>
+      <LoginRequired returnUrl="/app/my" />
     </div>
   );
 
-  if (!token) return login('로그인이 필요해요.');
+  if (!token) return login;
 
   const [customer, member] = await Promise.all([
     getCustomerMe({ token }).catch(() => null),
     getMemberMe({ token }).catch(() => null),
   ]);
-  if (!customer || !member) return login('로그인이 필요해요.');
+  // 쿠키가 남아 있어도 만료됐으면 조회가 실패한다 — 같은 로그인 안내로 수렴시킨다.
+  if (!customer || !member) return login;
 
   return (
     <div className="mx-auto max-w-md">
@@ -59,8 +50,6 @@ export default async function MyPage({
 
       {/* 메뉴 + 로그아웃 모달 */}
       <MyMenu />
-
-      {updated === '1' ? <ProfileUpdatedToast /> : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Link, MoreHorizontal, X } from 'lucide-react';
 import { BottomSheet } from './BottomSheet';
+import { Spinner } from './Spinner';
 import { Button } from './ui/button';
 
 interface ShareBottomSheetProps {
@@ -28,8 +29,18 @@ export function ShareBottomSheet({
   const optionClass =
     'flex w-20 flex-col items-center gap-2 rounded-xl px-3 py-2 text-body-5 text-neutral-950 disabled:opacity-40';
 
+  // 공유가 도는 동안 버튼은 disabled 로 흐려지기만 해서 눌린 건지 알 수 없었다 — 위에 스피너를 겹쳐 둔다.
+  const overlay = loading ? (
+    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <Spinner className="size-8" label="공유하는 중" />
+    </span>
+  ) : null;
+
   const options = (
-    <div className="flex h-[143px] items-start justify-center gap-4 pt-3.5">
+    <div
+      className="relative flex h-[143px] items-start justify-center gap-4 pt-3.5"
+      aria-busy={loading}
+    >
       <button type="button" className={optionClass} onClick={onCopy} disabled={loading}>
         <span className="flex size-14 items-center justify-center rounded-full bg-primary text-neutral-0">
           <Link className="size-8" strokeWidth={2} aria-hidden />
@@ -48,6 +59,7 @@ export function ShareBottomSheet({
         </span>
         <span>더보기</span>
       </button>
+      {overlay}
     </div>
   );
 

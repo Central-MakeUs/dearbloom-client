@@ -88,8 +88,6 @@ export interface ArtworkArtist {
   regionList: RegionCode[];
   /** 작가 출장비 안내(자유 텍스트). 미등록 시 null */
   travelFee?: string | null;
-  /** 작가 기타 안내(우천 정책 등). 미등록 시 null */
-  etcInfo?: string | null;
 }
 
 export interface OtherArtwork {

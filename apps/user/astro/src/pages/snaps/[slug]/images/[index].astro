@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import { getArtwork, type ArtworkDetail } from '@dearbloom/shared';
+import { ArtworkImageViewer } from '@/components/ArtworkImageViewer';
+import { getInitialImageIndex } from '@/lib/imageViewer';
+
+const { slug, index } = Astro.params;
+const returnTo = Astro.url.searchParams.get('returnTo');
+const school = Astro.url.searchParams.get('school');
+const galleryParams = new URLSearchParams();
+if (returnTo) galleryParams.set('returnTo', returnTo);
+if (school) galleryParams.set('school', school);
+const galleryQuery = galleryParams.size > 0 ? `?${galleryParams.toString()}` : '';
+let artwork: ArtworkDetail | null = null;
+
+try {
+  artwork = await getArtwork(slug!);
+} catch (error) {
+  console.error('[snaps/:id/images/:index] getArtwork 실패', slug, error);
+}
+
+const images = artwork?.photoList
+  .filter((photo) => photo.fileType === 'IMAGE')
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((photo) => ({ url: photo.fileUrl, universityName: photo.universityName })) ?? [];
+const initialIndex = getInitialImageIndex(index, images.length);
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{artwork?.title ?? '작품'} 이미지 · dearBloom</title>
+  </head>
+  <body class="overflow-hidden bg-neutral-100 font-sans text-neutral-950">
+    {
+      images.length > 0 ? (
+        <ArtworkImageViewer
+          backHref={`/snaps/${slug}/images${galleryQuery}`}
+          images={images}
+          initialIndex={initialIndex}
+          title={artwork?.title ?? '작품'}
+          client:load
+        />
+      ) : (
+        <main class="flex min-h-dvh items-center justify-center px-6 text-center text-body-5 text-neutral-600">
+          이미지가 없어요.
+        </main>
+      )
+    }
+  </body>
+</html>

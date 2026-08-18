@@ -1,15 +1,52 @@
+import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Button, Header } from '@dearbloom/ui';
+import { Button } from '@dearbloom/ui';
 import {
   fetchPublicWithAuthFallback,
   getSharedBoardInvite,
   type SharedBoardInvite,
 } from '@dearbloom/shared';
+import { loginHref } from '@/src/lib/env';
 import { getInviteView } from './inviteView';
 import { JoinBoardButton } from './JoinBoardButton';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
+
+const inviteDescription = '친구들과 함께 졸업스냅 작품 후보를 모으고 의견을 나눠 보세요.';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ inviteCode: string }>;
+}): Promise<Metadata> {
+  const { inviteCode } = await params;
+  const invite = await getSharedBoardInvite(inviteCode).catch(() => undefined);
+  const title = invite ? `${invite.boardName} 공동보드에 초대되었어요` : '공동보드 초대';
+  const origin = process.env.NEXT_PUBLIC_ASTRO_URL ?? 'http://localhost:4321';
+  const url = new URL(`/app/invite/${encodeURIComponent(inviteCode)}`, origin);
+  const image = new URL('/app/images/kakao-board-invite.png', origin);
+
+  return {
+    title: `${title} · DearBloom`,
+    description: inviteDescription,
+    openGraph: {
+      type: 'website',
+      siteName: 'DearBloom',
+      title,
+      description: inviteDescription,
+      url,
+      images: [{ url: image, width: 428, height: 214, alt: 'DearBloom 공동보드 초대' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: inviteDescription,
+      images: [image],
+    },
+  };
+}
 
 export default async function InvitePage({
   params,
@@ -34,7 +71,7 @@ export default async function InvitePage({
   if (!invite) {
     return (
       <main className="mx-auto min-h-dvh max-w-md bg-neutral-100">
-        <Header showBack backHref="/app/saved?tab=board" title="공동보드 초대" />
+        <AppBackHeader showBack fallbackHref="/app/saved?tab=board" title="공동보드 초대" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-600">
           유효하지 않은 초대 링크예요.
         </p>
@@ -76,12 +113,6 @@ export default async function InvitePage({
                 inviteCode={inviteCode}
                 joinedBoardId={invite.alreadyJoined ? invite.sharedBoardId : undefined}
               />
-              <a
-                className="mt-3 flex h-10 items-center justify-center text-body-1 text-neutral-800"
-                href="/snaps"
-              >
-                기능 둘러보기
-              </a>
             </div>
           </div>
         </main>
@@ -93,11 +124,7 @@ export default async function InvitePage({
     <JoinBoardButton inviteCode={inviteCode} />
   ) : (
     <Button asChild className="h-[52px] w-full rounded-md text-body-1">
-      <a
-        href={`/app/login?returnUrl=${encodeURIComponent(`/app/invite/${inviteCode}?loginComplete=1`)}`}
-      >
-        로그인 하러 가기
-      </a>
+      <a href={loginHref(`/app/invite/${inviteCode}?loginComplete=1`)}>로그인 하러 가기</a>
     </Button>
   );
 

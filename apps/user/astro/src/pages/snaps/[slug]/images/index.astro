@@ -1,0 +1,126 @@
+---
+export const prerender = false;
+
+import { getArtwork, type ArtworkDetail } from '@dearbloom/shared';
+import { ArtworkImageHeader } from '@/components/ArtworkImageHeader';
+import { matchesImageSchool } from '@/lib/imageViewer';
+import { optimizedImageUrl } from '@/lib/imageUrl';
+
+const { slug } = Astro.params;
+const returnTo = Astro.url.searchParams.get('returnTo');
+const returnQuery = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : '';
+const requestedSchool = Astro.url.searchParams.get('school') ?? '';
+let artwork: ArtworkDetail | null = null;
+
+try {
+  artwork = await getArtwork(slug!);
+} catch (error) {
+  console.error('[snaps/:id/images] getArtwork 실패', slug, error);
+}
+
+const images = artwork?.photoList
+  .filter((photo) => photo.fileType === 'IMAGE')
+  .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
+const schools = [...new Set(images.map((photo) => photo.universityName).filter((school): school is string => !!school))];
+const selectedSchool = schools.includes(requestedSchool) ? requestedSchool : '';
+const filteredImages = images
+  .map((photo, index) => ({ photo, index }))
+  .filter(({ photo }) => matchesImageSchool(photo.universityName ?? undefined, selectedSchool));
+
+const galleryQuery = (school = selectedSchool) => {
+  const params = new URLSearchParams();
+  if (returnTo) params.set('returnTo', returnTo);
+  if (school) params.set('school', school);
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>이미지 상세 · dearBloom</title>
+  </head>
+  <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
+    <main class="mx-auto min-h-screen max-w-md bg-neutral-100">
+      <ArtworkImageHeader backHref={`/snaps/${slug}${returnQuery}`} title="이미지 상세" client:load />
+      {
+        images.length > 0 ? (
+          <>
+            {schools.length > 0 ? (
+              <nav
+                aria-label="촬영 학교 필터"
+                class="flex gap-1.5 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {['', ...schools].map((school) => {
+                  const selected = selectedSchool === school;
+                  return (
+                    <a
+                      href={`/snaps/${slug}/images${galleryQuery(school)}`}
+                      data-history-replace
+                      aria-current={selected ? 'page' : undefined}
+                      class:list={[
+                        'shrink-0 rounded-[20px] border px-3 py-1.5 text-body-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                        selected
+                          ? 'border-primary bg-primary text-neutral-0'
+                          : 'border-neutral-400 text-neutral-700',
+                      ]}
+                    >
+                      {school || '전체'}
+                    </a>
+                  );
+                })}
+              </nav>
+            ) : null}
+            <div class="mt-3 grid grid-cols-2 gap-2 px-4 pb-2">
+              {filteredImages.map(({ photo, index }) => (
+                <a
+                  href={`/snaps/${slug}/images/${index + 1}${galleryQuery()}`}
+                  aria-label={`${index + 1}번 이미지 크게 보기`}
+                >
+                  <img
+                    src={optimizedImageUrl(photo.fileUrl, 210)}
+                    alt={`${artwork?.title ?? '작품'} ${index + 1}번 사진`}
+                    loading={index < 4 ? 'eager' : 'lazy'}
+                    class="aspect-[4/5] w-full rounded-lg bg-neutral-200 object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p class="px-6 py-24 text-center text-body-5 text-neutral-600">이미지가 없어요.</p>
+        )
+      }
+    </main>
+    <script>
+      document.addEventListener('click', (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        const target = event.target;
+        const link = target instanceof Element ? target.closest<HTMLAnchorElement>('a[data-history-replace]') : null;
+        if (!link) return;
+
+        event.preventDefault();
+        window.history.replaceState(
+          { ...window.history.state, dearbloomBackHref: `/snaps/${slug}${returnQuery}` },
+          '',
+          link.href,
+        );
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>

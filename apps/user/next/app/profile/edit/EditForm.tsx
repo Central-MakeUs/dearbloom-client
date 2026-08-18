@@ -3,14 +3,17 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
-import { BottomButton, Spinner, TextField } from '@dearbloom/ui';
+import { BottomButton, Spinner, TextField, showToast } from '@dearbloom/ui';
 import { customerNameSchema, CUSTOMER_NAME_MAX_LENGTH } from '@dearbloom/shared';
+import { withFlashToast } from '@/src/lib/flashToast';
+import { useRouter } from 'next/navigation';
+import { replaceApp } from '@/src/lib/appNavigation';
 
 const schema = z.object({ name: customerNameSchema });
 type FormValues = z.infer<typeof schema>;
 
 export function EditForm({ initialName }: { initialName: string }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -34,12 +37,12 @@ export function EditForm({ initialName }: { initialName: string }) {
 
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      toast.error(body.error || '저장에 실패했어요.');
+      showToast(body.error || '저장에 실패했어요.', 'error');
       return;
     }
 
     // 완료 토스트는 이동한 마이페이지에서 띄운다(이 화면에서 띄우면 화면 전환에 묻힌다).
-    window.location.href = '/app/my?updated=1';
+    replaceApp(router, withFlashToast('/app/my', 'profile'));
   };
 
   const field = (

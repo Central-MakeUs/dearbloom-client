@@ -7,14 +7,16 @@ import {
   ArtworkCard,
   BottomButton,
   Button,
-  Header,
   Popover,
   PopoverContent,
   PopoverTrigger,
   Spinner,
+  showToast,
 } from '@dearbloom/ui';
 import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
-import { showCandidateToast } from '../CandidateToast';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { replaceApp } from '@/src/lib/appNavigation';
+import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
   left.size === right.size && [...left].every((id) => right.has(id));
@@ -62,7 +64,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id);
     else if (next.size >= 3) {
-      showCandidateToast('작품 후보는 인당 3개까지 추가 가능해요', 'error');
+      showToast('작품 후보는 인당 3개까지 추가 가능해요', 'error');
       return;
     } else next.add(id);
     setSelected(next);
@@ -79,9 +81,10 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       });
       if (!response.ok) throw new Error('공동보드 저장 실패');
 
-      router.replace(`/boards/${boardId}?candidateUpdated=1`);
+      const candidateAction = initialSelected.size === 0 ? 'added' : 'updated';
+      replaceApp(router, `/app/boards/${boardId}?candidateAction=${candidateAction}`);
     } catch {
-      showCandidateToast('작품 후보를 저장하지 못했어요', 'error');
+      showToast('작품 후보를 저장하지 못했어요', 'error');
       setSubmitting(false);
     }
   };
@@ -103,7 +106,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
             title={a.title}
             artistNickname={a.artistNickname}
             price={a.lowestPrice}
-            thumbnailUrl={a.thumbnailUrl}
+            thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, ARTWORK_CARD_WIDTH)}
             regions={a.artistRegionList?.map(artistRegionLabel)}
             selectable
             selected={selectedIds.has(a.artworkId)}
@@ -115,7 +118,12 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-neutral-100">
-      <Header showBack onBack={() => router.back()} title="내 후보 추가하기" right={infoButton} />
+      <AppBackHeader
+        fallbackHref={`/app/boards/${boardId}`}
+        showBack
+        title="내 후보 추가하기"
+        right={infoButton}
+      />
       {body}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
         <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>

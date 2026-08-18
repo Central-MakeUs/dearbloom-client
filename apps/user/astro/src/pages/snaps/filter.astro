@@ -1,7 +1,7 @@
 ---
 export const prerender = false; // 진입 시 URL 의 현재 필터를 그대로 읽어 초기값으로 씁니다.
 
-import { Header } from '@dearbloom/ui';
+import { Header, NativeExitDialog } from '@dearbloom/ui';
 import { FilterSettingsView } from '@/components/FilterSettingsView';
 import { parseFilterParams, toQueryString } from '@/lib/artworkFilter';
 
@@ -21,11 +21,13 @@ const backHref = `/snaps${toQueryString(params)}`;
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
-    <title>필터 설정 · dearBloom</title>
+    <title>필터 설정 · DearBloom</title>
   </head>
   <!-- 하단 탭 대신 적용/초기화 CTA 가 깔리는 화면이라 AppShellLayout 을 쓰지 않습니다. -->
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     <Header title="필터 설정" backHref={backHref} client:load />
     <FilterSettingsView initial={params} client:load />
+    {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
+    <NativeExitDialog client:native />
   </body>
 </html>

@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { replaceApp } from '@/src/lib/appNavigation';
+import { goLogin } from '@/src/lib/goLogin';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
-import { Button, Field, Input, Spinner, Textarea } from '@dearbloom/ui';
+import { Button, Field, Input, Spinner, Textarea, showToast } from '@dearbloom/ui';
 import type { ArtworkPackage, ArtworkPhoto } from '@dearbloom/shared';
 import { PhotoGridField, photoFromUrl, type PhotoItem } from '../../_components/PhotoGridField';
 import {
@@ -88,7 +88,7 @@ export function EditForm({
         body: JSON.stringify({ title: values.title.trim(), description: values.description ?? '' }),
       });
       if (r1.status === 401) {
-        window.location.href = LOGIN_HREF;
+        goLogin();
         return;
       }
       if (!r1.ok) throw new Error('기본 정보 수정에 실패했어요.');
@@ -106,8 +106,8 @@ export function EditForm({
         body: JSON.stringify({ packageList: toPackagePayload(values.packageList) }),
       });
       if (!r3.ok) throw new Error('패키지 수정에 실패했어요.');
-      toast.success('저장되었습니다.');
-      router.push('/artist/products');
+      showToast('저장되었습니다.');
+      replaceApp(router, '/app/artist/products');
       router.refresh();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : '오류가 발생했어요');
@@ -117,11 +117,23 @@ export function EditForm({
   return (
     <form onSubmit={handleSubmit(onValid)} className="flex flex-col gap-5 px-4 py-5" noValidate>
       <Field label="작품명" htmlFor="title" error={errors.title?.message}>
-        <Input id="title" aria-invalid={!!errors.title} placeholder="작품 제목" {...register('title')} />
+        <Input
+          id="title"
+          aria-invalid={!!errors.title}
+          placeholder="작품 제목"
+          defaultValue={initTitle}
+          {...register('title')}
+        />
       </Field>
 
-      <Field label="작품 설명" htmlFor="description" optional>
-        <Textarea id="description" rows={4} placeholder="작품을 소개해주세요" {...register('description')} />
+      <Field label="작품 안내" htmlFor="description" optional>
+        <Textarea
+          id="description"
+          rows={4}
+          placeholder="예: 빈티지 디카 추가는 모든 패키지에서 제공 가능합니다"
+          defaultValue={initDesc}
+          {...register('description')}
+        />
       </Field>
 
       <Field label="사진" helper="사진마다 촬영 학교를 지정할 수 있어요 (선택)" error={errors.photos?.message}>

@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers';
 import { ApiError, getChatMessages, getChatRooms } from '@dearbloom/shared';
 import { ChatRoomView } from '@dearbloom/features-chat';
-import { Button, Header } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { Header } from '@dearbloom/ui';
+import { LoginRequired } from '../../../(auth)/LoginRequired';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,12 +24,10 @@ export default async function ArtistChatDetailPage({ params }: { params: Promise
     return (
       <div className="mx-auto max-w-md">
         <Header title="채팅" showBack={false} />
-        <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-          <p className="text-body-5 text-neutral-500">로그인이 필요해요.</p>
-          <Button asChild size="sm">
-            <a href={LOGIN_HREF}>로그인</a>
-          </Button>
-        </div>
+        <LoginRequired
+          description="작가 계정으로 로그인하면 대화를 이어갈 수 있어요."
+          returnUrl={`/app/artist/chats/${id}`}
+        />
       </div>
     );
   }
@@ -44,6 +43,7 @@ export default async function ArtistChatDetailPage({ params }: { params: Promise
       peerName={room?.peerName ?? '채팅'}
       initialMessages={messages}
       backHref="/app/artist/chats"
+      header={<AppBackHeader fallbackHref="/app/artist/chats" title={room?.peerName ?? '채팅'} />}
     />
   );
 }

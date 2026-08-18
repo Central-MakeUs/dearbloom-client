@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { Button, Header } from '@dearbloom/ui';
 import { AppLink } from '@/src/components/common/AppLink';
 import { MyArtworkList } from './MyArtworkList';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,10 +32,10 @@ export default async function ArtistProductsPage() {
   const header = <Header showBack={false} title="내 작품" right={registerButton} />;
 
   const body = needLogin ? (
-    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-      <p className="text-body-5 text-neutral-500">작가 계정으로 로그인해주세요.</p>
-      <a href={LOGIN_HREF} className="rounded-md bg-primary px-5 py-2.5 text-body-5 text-neutral-0">로그인</a>
-    </div>
+    <LoginRequired
+      description="작가 계정으로 로그인하면 내 작품을 관리할 수 있어요."
+      returnUrl="/app/artist/products"
+    />
   ) : items.length === 0 ? (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
       <p className="text-body-5 text-neutral-500">아직 등록한 작품이 없어요.</p>

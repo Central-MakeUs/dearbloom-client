@@ -3,10 +3,13 @@ import { MoreHorizontal } from 'lucide-react';
 import {
   BottomButton,
   BottomSheet,
+  LoginRequiredDialog,
   RadioGroup,
   RadioGroupItem,
+  Spinner,
   Textarea,
   cn,
+  showToast,
 } from '@dearbloom/ui';
 import { ARTWORK_REPORT_CONTENT_MAX } from '@dearbloom/shared';
 
@@ -31,9 +34,11 @@ interface SnapMoreMenuProps {
   artworkId: number;
   /** 서버 렌더 시점의 신고 여부. 비로그인이면 false. */
   initialReported?: boolean;
+  /** 서버 렌더 시점의 로그인 여부. */
+  authenticated?: boolean;
   /** 신고 프록시 엔드포인트. astro(루트) 기본값. */
   endpoint?: string;
-  /** 비로그인(401) 시 이동할 로그인 경로. 현재 경로를 returnUrl 로 붙인다. */
+  /** 로그인 확인 모달에서 확인 시 이동할 로그인 경로. */
   loginHref?: string;
 }
 
@@ -46,6 +51,7 @@ interface SnapMoreMenuProps {
 export function SnapMoreMenu({
   artworkId,
   initialReported = false,
+  authenticated = false,
   endpoint = '/api/artwork-report',
   loginHref = '/app/login',
 }: SnapMoreMenuProps) {
@@ -56,6 +62,7 @@ export function SnapMoreMenu({
   const [detail, setDetail] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const needsDetail = reason === OTHER;
   const canSubmit = !!reason && (!needsDetail || detail.trim().length > 0);
@@ -68,6 +75,21 @@ export function SnapMoreMenu({
       setDetail('');
       setError(null);
     }
+  }
+
+  function completeReport() {
+    setReported(true);
+    close(false);
+    showToast('신고가 완료되었습니다');
+  }
+
+  function startReport() {
+    if (!authenticated) {
+      close(false);
+      setLoginOpen(true);
+      return;
+    }
+    setView('report');
   }
 
   async function submit() {
@@ -83,20 +105,18 @@ export function SnapMoreMenu({
       });
 
       if (res.status === 401) {
-        const returnUrl = window.location.pathname + window.location.search;
-        window.location.href = `${loginHref}?returnUrl=${encodeURIComponent(returnUrl)}`;
+        close(false);
+        setLoginOpen(true);
         return;
       }
       // 이미 신고한 작품 — 실패가 아니라 '접수됨' 상태로 수렴시킨다.
       if (res.status === 409) {
-        setReported(true);
-        close(false);
+        completeReport();
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
 
-      setReported(true);
-      close(false);
+      completeReport();
     } catch {
       setError('신고를 접수하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
@@ -125,7 +145,7 @@ export function SnapMoreMenu({
       ) : (
         <button
           type="button"
-          onClick={() => setView('report')}
+          onClick={startReport}
           className="w-full py-4 text-left text-body-5 text-neutral-950"
         >
           이 작품 신고하기
@@ -181,6 +201,7 @@ export function SnapMoreMenu({
         disabled={!canSubmit || busy}
         className={cn('mt-1', busy && 'opacity-70')}
       >
+        {busy ? <Spinner className="size-5 text-current" label="" /> : null}
         {busy ? '접수 중…' : '신고하기'}
       </BottomButton>
     </div>
@@ -196,6 +217,11 @@ export function SnapMoreMenu({
       >
         {view === 'menu' ? menuView : reportView}
       </BottomSheet>
+      <LoginRequiredDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        loginHref={loginHref}
+      />
     </>
   );
 }

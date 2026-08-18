@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Check } from 'lucide-react';
-import { toast } from 'sonner';
-import { BottomButton, cn } from '@dearbloom/ui';
+import { BottomButton, cn, Spinner, showToast } from '@dearbloom/ui';
 
 /**
  * 탈퇴 동의 체크 + 하단 CTA.
@@ -25,9 +24,9 @@ export function WithdrawForm() {
       }
 
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
-      toast.error(body?.error ?? '회원 탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      showToast(body?.error ?? '회원 탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.', 'error');
     } catch {
-      toast.error('네트워크 연결을 확인하고 다시 시도해 주세요.');
+      showToast('네트워크 연결을 확인하고 다시 시도해 주세요.', 'error');
     } finally {
       setIsWithdrawing(false);
     }
@@ -63,6 +62,7 @@ export function WithdrawForm() {
         disabled={!isAgreed || isWithdrawing}
         onClick={() => void withdraw()}
       >
+        {isWithdrawing ? <Spinner className="size-5 text-current" label="" /> : null}
         {isWithdrawing ? '처리 중…' : '탈퇴하기'}
       </BottomButton>
     </div>

@@ -5,11 +5,14 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import type { AuthRole, OAuthProvider } from '@dearbloom/features-auth';
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, Card, cn, Header, Spinner } from '@dearbloom/ui';
+import { BottomButton, Card, cn, Spinner } from '@dearbloom/ui';
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 
 import artistRoleIcon from '../../public/images/role-artist.svg';
 import customerRoleIcon from '../../public/images/role-customer.svg';
+import { withFlashToast } from '@/src/lib/flashToast';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
+import { getRoleLoginDestination, getRoleReturnUrl } from '@/src/lib/returnUrl';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -104,7 +107,10 @@ export function RoleSelectionForm({
         }
 
         const roleCookieResponse = await fetch('/app/api/auth/active-role', {
-          body: JSON.stringify({ role: body.data.selectedRole }),
+          body: JSON.stringify({
+            onboardingPending: body.data.needsOnboarding,
+            role: body.data.selectedRole,
+          }),
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
         });
@@ -172,8 +178,8 @@ export function RoleSelectionForm({
     >
       <Card
         className={cn(
-          'relative h-[145px] w-full overflow-hidden border-0 bg-primary-100 px-7 py-6 shadow-elevation',
-          role === value && 'ring-2 ring-primary',
+          'relative h-[145px] w-full overflow-hidden border-[1.5px] border-transparent bg-primary-100 px-7 py-6 shadow-[0_3px_6px_0_rgba(0,0,0,0.1)]',
+          role === value && 'border-primary-400',
         )}
       >
         <span className="block text-head-2 text-neutral-950">{title}</span>
@@ -249,7 +255,7 @@ export function RoleSelectionForm({
   return (
     <main className="min-h-dvh bg-neutral-100">
       <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-20">
-        <Header onBack={() => window.history.back()} />
+        <AppBackHeader fallbackHref="/snaps" />
         <section className="px-4 pt-2">
           <h1 className="px-1 py-3 text-head-1 text-neutral-950">
             디어블룸 이용 방식을 선택해 주세요.
@@ -269,8 +275,8 @@ function getLoginDestination(
   returnUrl?: string,
 ) {
   if (needsOnboarding) {
-    return getOnboardingTermsPath(role, forceOnboarding, returnUrl);
+    return getOnboardingTermsPath(role, forceOnboarding, getRoleReturnUrl(role, returnUrl));
   }
 
-  return returnUrl ?? (role === 'CUSTOMER' ? '/snaps' : '/app/artist/dashboard');
+  return withFlashToast(getRoleLoginDestination(role, returnUrl), 'login');
 }

@@ -4,8 +4,10 @@ import { useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 import type { MemberRole } from '@dearbloom/shared';
-import { BottomButton, Checkbox, cn, Header } from '@dearbloom/ui';
+import { BottomButton, Checkbox, cn } from '@dearbloom/ui';
 
+import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
 
 export function TermsAgreementForm({
@@ -152,8 +154,9 @@ export function TermsAgreementForm({
   return (
     <main className="min-h-dvh bg-neutral-100">
       <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
-        <Header onBack={() => window.location.replace('/app/role')} />
-        <section className="px-5 pt-2">
+        <AppBackHeader fallbackHref="/app/api/auth/cancel-onboarding" />
+        <OnboardingProgress step={1} total={role === 'CUSTOMER' ? 4 : 3} />
+        <section className="px-5 pt-4">
           <div className="py-3">
             <h1 className="text-head-1 text-neutral-900">서비스 이용을 위해 동의해 주세요.</h1>
             <p className="mt-2 w-[292px] text-body-2 text-neutral-800">

@@ -16,8 +16,8 @@ export interface ArtistMe {
   /** 조회는 imageUrl, 수정은 artistImageUrl 로 백엔드 필드명이 다름에 유의. */
   imageUrl: string | null;
   regionList: ArtistRegionCode[];
-  /** 작가 기타 안내(우천 정책 등) */
-  etcInfo: string | null;
+  /** 작가 출장비 안내(지역별 금액 등 자유 텍스트) */
+  travelFee: string | null;
 }
 
 /** 작품 등록/사진교체 시 넘기는 사진 1건 (업로드 완료된 fileUrl 참조) */
@@ -80,16 +80,16 @@ export function updateArtistRegions(regionList: ArtistRegionCode[], opts: Reques
   return apiPut<void>('/api/artists/me/regions', { regionList }, opts);
 }
 
-/** 작가 기타 안내(우천 정책 등) 수정. (기존 출장비/패키지는 작품 패키지로 이동됨) */
-export function updateArtistEtcInfo(etcInfo: string, opts: RequestOptions): Promise<void> {
-  return apiPatch<void>('/api/artists/me/etc-info', { etcInfo }, opts);
+/** 작가 출장비 안내 수정. 빈 문자열을 보내면 비운다. */
+export function updateArtistTravelFee(travelFee: string, opts: RequestOptions): Promise<void> {
+  return apiPatch<void>('/api/artists/me/travel-fee', { travelFee }, opts);
 }
 
 // ---- 작가 본인 작품 ----
 
 /**
  * GET /api/artists/me/artworks 목록 아이템. 공개 목록(ArtworkListItem)과 달리
- * `price`(단일 대표가), `savedCount`/`viewCount`(작가 통계)를 주며 `isSaved`가 없음.
+ * `price`(단일 대표가)를 주며 `isSaved`가 없음.
  */
 export interface MyArtworkListItem {
   artworkId: number;
@@ -100,10 +100,6 @@ export interface MyArtworkListItem {
   artistNickname: string;
   artistRegionList: ArtistRegionCode[];
   thumbnailUrl: string;
-  /** 저장(찜)된 횟수 */
-  savedCount: number;
-  /** 조회수 */
-  viewCount: number;
 }
 
 export function getMyArtworks(opts: RequestOptions): Promise<MyArtworkListItem[]> {

@@ -2,21 +2,30 @@
 
 import Image, { type StaticImageData } from 'next/image';
 import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
-import { BottomButton, cn, DeleteButton, Header, TextField } from '@dearbloom/ui';
+import {
+  ARTIST_REGION_OPTIONS,
+  CUSTOMER_NAME_MAX_LENGTH,
+  customerNameSchema,
+  type ArtistRegionCode,
+  type University,
+} from '@dearbloom/shared';
+import { BottomButton, cn, DeleteButton, Header, Spinner, TextField } from '@dearbloom/ui';
 import {
   getUniversityLabel,
   UniversitySearchScreen,
 } from '@/src/components/common/UniversitySearchScreen';
+import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import completeIcon from '../../public/images/onboarding-complete.svg';
+import { navigateAppBack } from '@/src/lib/appNavigation';
+import { getOnboardingCompletionPath } from '@/src/lib/onboardingRoute';
 import boardTourImage from '../../public/images/onboarding-tour-board.png';
 import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
 import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
 
-type OnboardingStep = 'complete' | 'region' | 'school' | 'tour';
+type OnboardingStep = 'complete' | 'name' | 'region' | 'school' | 'tour';
 
 const tourSlides: Array<{ description: string; image: StaticImageData; title: string }> = [
   {
@@ -36,25 +45,12 @@ const tourSlides: Array<{ description: string; image: StaticImageData; title: st
   },
 ];
 
-function OnboardingComplete({
-  onExploreFeatures,
-  onFinish,
-}: {
-  onExploreFeatures: () => void;
-  onFinish: () => void;
-}) {
+function OnboardingComplete({ onExploreFeatures }: { onExploreFeatures: () => void }) {
   const actions = (
-    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-      <BottomButton color="green" onClick={onFinish}>
-        디어블룸 시작하기
-      </BottomButton>
-      <button
-        className="h-10 text-body-1 text-neutral-800"
-        onClick={onExploreFeatures}
-        type="button"
-      >
+    <div className="absolute inset-x-0 bottom-0 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
+      <BottomButton color="green" onClick={onExploreFeatures}>
         기능 둘러보기
-      </button>
+      </BottomButton>
     </div>
   );
 
@@ -147,7 +143,7 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
           )}
         >
           <h1 className="text-head-1 text-primary">{slide.title}</h1>
-          <p className={cn('text-body-1 text-neutral-700', index === 2 && 'w-[201px]')}>
+          <p className={cn('text-body-2 text-neutral-700', index === 2 && 'w-[201px]')}>
             {slide.description}
           </p>
         </div>
@@ -164,27 +160,14 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
     </section>
   ));
 
-  const desktopArrows = (
-    <>
-      <button
-        aria-label="이전 기능"
-        className="absolute left-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-0 text-neutral-800 shadow-elevation [@media(hover:hover)_and_(pointer:fine)]:flex disabled:pointer-events-none disabled:opacity-0"
-        disabled={slideIndex === 0}
-        onClick={() => moveTo(slideIndex - 1)}
-        type="button"
-      >
-        <ChevronLeft aria-hidden />
-      </button>
-      <button
-        aria-label="다음 기능"
-        className="absolute right-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-neutral-0 text-neutral-800 shadow-elevation [@media(hover:hover)_and_(pointer:fine)]:flex disabled:pointer-events-none disabled:opacity-0"
-        disabled={slideIndex === tourSlides.length - 1}
-        onClick={() => moveTo(slideIndex + 1)}
-        type="button"
-      >
-        <ChevronRight aria-hidden />
-      </button>
-    </>
+  const isLastSlide = slideIndex === tourSlides.length - 1;
+  const actionButton = (
+    <BottomButton
+      color={isLastSlide ? 'green' : 'black'}
+      onClick={() => (isLastSlide ? onFinish() : moveTo(slideIndex + 1))}
+    >
+      {isLastSlide ? '디어블룸 시작하기' : '다음'}
+    </BottomButton>
   );
 
   return (
@@ -207,12 +190,9 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
         >
           {slides}
         </div>
-        {desktopArrows}
-        <div className="fixed inset-x-0 bottom-0 z-20 bg-neutral-0">
+        <div className="fixed inset-x-0 bottom-0 z-20 bg-primary-100">
           <div className="mx-auto max-w-[375px] px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
-            <BottomButton color="green" onClick={onFinish}>
-              디어블룸 시작하기
-            </BottomButton>
+            {actionButton}
           </div>
         </div>
       </div>
@@ -220,27 +200,7 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
   );
 }
 
-const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) =>
-  region.label
-    .replace('경기북부', '경기 북부')
-    .replace('경기남부', '경기 남부')
-    .replace('대전·세종', '대전/세종');
-
-function StepProgress({ step }: { step: 1 | 2 }) {
-  const bars = [1, 2].map((index) => (
-    <span
-      aria-hidden
-      className={cn('h-1 flex-1 rounded-full', index <= step ? 'bg-primary-400' : 'bg-neutral-200')}
-      key={index}
-    />
-  ));
-
-  return (
-    <div aria-label={`${step}/3 단계`} className="flex gap-1 px-4">
-      {bars}
-    </div>
-  );
-}
+const regionLabel = (region: (typeof ARTIST_REGION_OPTIONS)[number]) => region.label;
 
 function StepHeader({
   onBack,
@@ -249,10 +209,10 @@ function StepHeader({
 }: {
   onBack: () => void;
   onSkip?: () => void;
-  step: 1 | 2;
+  step: 2 | 3 | 4;
 }) {
   const skipButton = onSkip ? (
-    <button className="px-2 text-caption-1 text-neutral-600" onClick={onSkip} type="button">
+    <button className="px-2 text-body-5 text-neutral-600" onClick={onSkip} type="button">
       건너뛰기
     </button>
   ) : null;
@@ -260,7 +220,7 @@ function StepHeader({
   return (
     <div>
       <Header onBack={onBack} right={skipButton} />
-      <StepProgress step={step} />
+      <OnboardingProgress step={step} total={4} />
     </div>
   );
 }
@@ -273,7 +233,9 @@ export function CustomerOnboardingForm({
   returnUrl?: string;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<OnboardingStep>('school');
+  const [step, setStep] = useState<OnboardingStep>('name');
+  const [name, setName] = useState('');
+  const [isNameTouched, setIsNameTouched] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
   const [manualUniversityName, setManualUniversityName] = useState('');
   const [isManualUniversityInputVisible, setIsManualUniversityInputVisible] = useState(false);
@@ -281,9 +243,16 @@ export function CustomerOnboardingForm({
   const [isSearchingSchool, setIsSearchingSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  const trimmedName = name.trim();
+  const parsedName = customerNameSchema.safeParse(trimmedName);
+  const isNameValid = parsedName.success;
+  const nameError =
+    (isNameTouched || name.length > 0) && !parsedName.success
+      ? parsedName.error.issues[0]?.message
+      : undefined;
 
   const submit = async () => {
-    if (isSubmitting) return;
+    if (!isNameValid || isSubmitting) return;
 
     setIsSubmitting(true);
     setError(undefined);
@@ -297,6 +266,7 @@ export function CustomerOnboardingForm({
     try {
       const response = await fetch('/app/api/members/customer', {
         body: JSON.stringify({
+          name: trimmedName,
           region,
           universityId: selectedUniversity?.universityId,
           // ponytail: API는 universityId만 지원한다. 자율입력 필드는 backend 지원 시 전송한다.
@@ -357,10 +327,51 @@ export function CustomerOnboardingForm({
         </p>
       ) : null}
       <BottomButton color="black" disabled={disabled || isSubmitting} onClick={onClick}>
+        {isSubmitting ? <Spinner className="size-5 text-current" label="" /> : null}
         {isSubmitting ? '저장 중...' : label}
       </BottomButton>
     </div>
   );
+
+  if (step === 'name') {
+    const content = (
+      <section className="pt-7">
+        <div className="px-5">
+          <h1 className="text-head-1 text-neutral-900">프로필 이름을 입력해 주세요.</h1>
+          <p className="mt-2 text-body-2 text-neutral-800">
+            작가님과 원활하게 소통할 수 있도록
+            <br />
+            설정한 프로필 이름이 작가님께 표시돼요.
+          </p>
+        </div>
+        <div className="mt-8 px-4">
+          <TextField
+            autoComplete="name"
+            counter={`${name.length}/${CUSTOMER_NAME_MAX_LENGTH}`}
+            error={!!nameError}
+            helper={nameError ?? `최대 ${CUSTOMER_NAME_MAX_LENGTH}자까지 입력할 수 있어요`}
+            id="customer-name"
+            label="프로필 이름"
+            maxLength={CUSTOMER_NAME_MAX_LENGTH}
+            minLength={2}
+            onBlur={() => setIsNameTouched(true)}
+            onChange={(event) => setName(event.target.value)}
+            onClear={() => setName('')}
+            pattern="[A-Za-z가-힣]{2,5}"
+            placeholder="프로필에 표시될 이름을 입력해주세요"
+            required
+            value={name}
+          />
+        </div>
+      </section>
+    );
+
+    return pageShell(
+      <StepHeader onBack={() => navigateAppBack(router, '/app/role')} step={2} />,
+      content,
+      footer('다음', () => setStep('school'), !isNameValid),
+    );
+  }
 
   if (step === 'school') {
     const schoolButton = (
@@ -393,8 +404,8 @@ export function CustomerOnboardingForm({
 
     const content = (
       <section className="px-4 pt-7">
-        <h1 className="text-head-3 text-neutral-950">학교를 선택해 주세요.</h1>
-        <p className="mt-3 text-body-6 text-neutral-700">
+        <h1 className="text-head-1 text-neutral-900">학교를 선택해 주세요.</h1>
+        <p className="mt-2 text-body-2 text-neutral-800">
           학교 위치에 따라 출장비가 달라질 수 있어요.
           <br />
           학교명과 구체적인 캠퍼스명을 함께 적어 주세요.
@@ -417,7 +428,7 @@ export function CustomerOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => router.back()} onSkip={() => setStep('region')} step={1} />,
+      <StepHeader onBack={() => setStep('name')} onSkip={() => setStep('region')} step={3} />,
       content,
       footer('다음', () => setStep('region')),
     );
@@ -429,10 +440,10 @@ export function CustomerOnboardingForm({
         aria-pressed={region === option.value}
         // 선택 상태에 테두리가 없어 배경만으로는 구분이 잘 안 됐다(QA). 필터 설정 칩과 같은 규칙으로 맞춘다.
         className={cn(
-          'rounded-full border-[1.2px] px-3 py-2 text-caption-1 transition-colors',
+          'rounded-full px-3 py-1.5 text-body-5 transition-colors',
           region === option.value
-            ? 'border-primary bg-primary-200 font-semibold text-primary'
-            : 'border-transparent bg-neutral-200 text-neutral-700',
+            ? 'border-[1.2px] border-primary bg-primary-200 font-semibold text-primary'
+            : 'bg-neutral-200 text-neutral-700',
         )}
         key={option.value}
         onClick={() => setRegion(region === option.value ? undefined : option.value)}
@@ -443,29 +454,27 @@ export function CustomerOnboardingForm({
     ));
 
     const content = (
-      <section className="px-4 pt-7">
-        <h1 className="text-head-3 text-neutral-950">촬영 희망 지역을 선택해 주세요.</h1>
-        <p className="mt-3 text-body-6 text-neutral-700">
-          학교 위치에 따라 출장비가 달라질 수 있어요.
+      <section className="px-5 pt-7">
+        <h1 className="text-head-1 text-neutral-900">촬영 희망 지역을 선택해 주세요.</h1>
+        <p className="mt-2 text-body-2 text-neutral-800">
+          촬영을 원하는 학교의 지역을 골라 주세요.
           <br />
-          학교명과 구체적인 캠퍼스명을 함께 적어 주세요.
+          이후 작가 추천과 일정 조율에 활용돼요.
         </p>
-        <div className="mt-8 flex flex-wrap gap-2">{regionOptions}</div>
+        <div className="-mx-1 mt-8 flex flex-wrap gap-2">{regionOptions}</div>
       </section>
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={2} />,
+      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={4} />,
       content,
       footer('완료', submit),
     );
   }
 
-  const finishOnboarding = () => window.location.replace(returnUrl ?? '/snaps');
+  const finishOnboarding = () => window.location.replace(getOnboardingCompletionPath(returnUrl));
 
   if (step === 'tour') return <OnboardingTour onFinish={finishOnboarding} />;
 
-  return (
-    <OnboardingComplete onExploreFeatures={() => setStep('tour')} onFinish={finishOnboarding} />
-  );
+  return <OnboardingComplete onExploreFeatures={() => setStep('tour')} />;
 }

@@ -37,7 +37,8 @@ const googleSignInPlugins: NonNullable<ExpoConfig['plugins']> = googleIosUrlSche
  * 쓰지도 않을 개인정보를 모으지 않는다.
  */
 const googleServicesFile = environment.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.dev.plist';
-const isPushEnabled = environment.PUSH_ENABLED === '1';
+const isPushEnabled =
+  environment.PUSH_ENABLED === '1' && environment.EAS_BUILD_PLATFORM !== 'android';
 
 const firebasePlugins: NonNullable<ExpoConfig['plugins']> = isPushEnabled
   ? [
@@ -49,7 +50,7 @@ const firebasePlugins: NonNullable<ExpoConfig['plugins']> = isPushEnabled
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? 'dearBloom',
+  name: config.name ?? 'DearBloom',
   slug: config.slug ?? 'dearbloom-mobile',
   ios: {
     ...config.ios,
@@ -62,11 +63,22 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     infoPlist: {
       ...config.ios?.infoPlist,
+      LSApplicationQueriesSchemes: ['kakaolink'],
       // 알림 권한은 사용자가 수락한 뒤에만 요청하므로 백그라운드 모드는 remote-notification 만 켠다.
       UIBackgroundModes: ['remote-notification'],
     },
   },
   plugins: [
+    [
+      'expo-splash-screen',
+      {
+        // eslint-disable-next-line no-restricted-syntax -- Expo 네이티브 스플래시 설정은 hex 색상을 요구한다.
+        backgroundColor: '#E5EBE8',
+        image: './assets/loading-content.png',
+        imageWidth: 114,
+        resizeMode: 'contain',
+      },
+    ],
     [
       'expo-build-properties',
       {
@@ -83,6 +95,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     ...googleSignInPlugins,
     ...firebasePlugins,
+    './plugins/withKakaoTalkQuery',
     'expo-apple-authentication',
   ],
 });

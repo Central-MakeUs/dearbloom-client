@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { getReceivedInquiries } from '@dearbloom/shared';
-import { Button, Header } from '@dearbloom/ui';
-import { LOGIN_HREF } from '@/src/lib/env';
+import { Header } from '@dearbloom/ui';
+import { LoginRequired } from '../../(auth)/LoginRequired';
 import { RequestList } from './RequestList';
 
 export const dynamic = 'force-dynamic';
@@ -15,12 +15,10 @@ export default async function ArtistRequestsPage() {
     return (
       <div className="mx-auto max-w-md">
         {header}
-        <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-          <p className="text-body-5 text-neutral-500">작가 계정으로 로그인해주세요.</p>
-          <Button asChild size="sm">
-            <a href={LOGIN_HREF}>로그인</a>
-          </Button>
-        </div>
+        <LoginRequired
+          description="작가 계정으로 로그인하면 받은 문의를 볼 수 있어요."
+          returnUrl="/app/artist/requests"
+        />
       </div>
     );
   }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports, no-undef -- Expo config plugin runs as CommonJS. */
+
 const fs = require('node:fs');
 const path = require('node:path');
 

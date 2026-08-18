@@ -1,5 +1,7 @@
 import type { ArtistRegionCode, CreateCustomerPayload } from '@dearbloom/shared';
 
+const namePattern = /^[A-Za-z가-힣]{2,5}$/;
+
 const regionCodes = new Set<ArtistRegionCode>([
   'SEOUL',
   'GYEONGGI_NORTH',
@@ -23,8 +25,13 @@ const regionCodes = new Set<ArtistRegionCode>([
 export function parseCustomerPayload(body: unknown): CreateCustomerPayload | undefined {
   if (!body || typeof body !== 'object') return undefined;
 
-  const { region, universityId } = body as Record<string, unknown>;
-  if (universityId !== undefined && (!Number.isInteger(universityId) || Number(universityId) <= 0)) {
+  const { name, region, universityId } = body as Record<string, unknown>;
+  const trimmedName = typeof name === 'string' ? name.trim() : '';
+  if (!namePattern.test(trimmedName)) return undefined;
+  if (
+    universityId !== undefined &&
+    (!Number.isInteger(universityId) || Number(universityId) <= 0)
+  ) {
     return undefined;
   }
   if (
@@ -35,6 +42,7 @@ export function parseCustomerPayload(body: unknown): CreateCustomerPayload | und
   }
 
   return {
+    name: trimmedName,
     ...(region === undefined ? {} : { region: region as ArtistRegionCode }),
     ...(universityId === undefined ? {} : { universityId: Number(universityId) }),
   };
