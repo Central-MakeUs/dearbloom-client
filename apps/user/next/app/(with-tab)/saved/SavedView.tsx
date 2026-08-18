@@ -158,6 +158,10 @@ export function SavedView({
           regions={a.artistRegionList?.map(artistRegionLabel)}
           initialSaved
           saveEndpoint={SAVED_ENDPOINT}
+          unsavedHeartIconSrc="/app/images/save-heart-grid.svg"
+          unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+          savedHeartIconSrc="/app/images/save-heart-selected.svg"
+          savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
           onSavedChange={(saved) => {
             if (!saved) setItems((prev) => prev.filter((x) => x.artworkId !== a.artworkId));
           }}
@@ -191,7 +195,7 @@ export function SavedView({
   const boardBody = (
     <div className="relative min-h-[calc(100dvh-180px)]">
       {initialBoards.length === 0 ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 pb-12 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 pb-12 text-center">
           <p className="text-body-1 text-neutral-950">공동보드가 없어요</p>
           <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과<br/>함께 의견을 나눠보세요.</p>
         </div>
