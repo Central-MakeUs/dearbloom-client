@@ -49,6 +49,10 @@ try {
 const won = (n: number) => `${n.toLocaleString()}원`;
 const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.sortOrder) : [];
 const shareImageUrl = photos.find((photo) => photo.fileType === 'IMAGE')?.fileUrl;
+const shareTitle = `${artwork?.title ?? '작품'} · DearBloom`;
+const shareDescription =
+  artwork?.description?.trim() || '디어블룸에서 졸업스냅 작품을 확인해 보세요.';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 
 // 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
@@ -75,7 +79,19 @@ if (artwork && token) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>{artwork?.title ?? '작품'} · DearBloom</title>
+    <title>{shareTitle}</title>
+    <meta name="description" content={shareDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DearBloom" />
+    <meta property="og:title" content={shareTitle} />
+    <meta property="og:description" content={shareDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={shareTitle} />
+    <meta name="twitter:description" content={shareDescription} />
+    {shareImageUrl && <meta name="twitter:image" content={shareImageUrl} />}
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     {
