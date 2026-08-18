@@ -24,6 +24,7 @@ export interface MemberMe {
 }
 
 export interface CreateCustomerPayload {
+  name: string;
   region?: ArtistRegionCode;
   universityId?: number;
 }
@@ -44,6 +45,7 @@ export interface CreateCustomerResult {
 }
 
 export interface CreateArtistPayload {
+  nickname: string;
   imageUrl: string;
   regionList: ArtistRegionCode[];
 }
@@ -54,6 +56,10 @@ export interface CreateArtistResult {
     artistId: number;
     nickname: string;
   };
+}
+
+export interface ArtistNicknameAvailability {
+  available: boolean;
 }
 
 export interface RefreshTokenPayload {
@@ -69,6 +75,17 @@ export interface RefreshTokenResult {
 /** 내 계정 정보 조회 */
 export function getMemberMe(opts: RequestOptions): Promise<MemberMe> {
   return apiGet<MemberMe>('/api/members/me', opts);
+}
+
+/** 작가 프로필 이름 사용 가능 여부 조회. 최종 생성 시 409 처리도 유지해야 합니다. */
+export function getArtistNicknameAvailability(
+  nickname: string,
+  opts: RequestOptions,
+): Promise<ArtistNicknameAvailability> {
+  return apiGet<ArtistNicknameAvailability>(
+    `/api/members/artist/nickname/availability?nickname=${encodeURIComponent(nickname)}`,
+    opts,
+  );
 }
 
 /** 고객 프로필 생성. 반환 accessToken 으로 기존 쿠키를 즉시 교체해야 합니다. */
