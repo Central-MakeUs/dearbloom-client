@@ -5,13 +5,7 @@ import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 're
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import {
-  ARTIST_REGION_OPTIONS,
-  CUSTOMER_NAME_MAX_LENGTH,
-  customerNameSchema,
-  type ArtistRegionCode,
-  type University,
-} from '@dearbloom/shared';
+import { ARTIST_REGION_OPTIONS, type ArtistRegionCode, type University } from '@dearbloom/shared';
 import { BottomButton, cn, DeleteButton, Header, Spinner, TextField } from '@dearbloom/ui';
 import {
   getUniversityLabel,
@@ -25,7 +19,7 @@ import boardTourImage from '../../public/images/onboarding-tour-board.png';
 import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
 import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
 
-type OnboardingStep = 'complete' | 'name' | 'region' | 'school' | 'tour';
+type OnboardingStep = 'complete' | 'region' | 'school' | 'tour';
 
 const tourSlides: Array<{ description: string; image: StaticImageData; title: string }> = [
   {
@@ -209,7 +203,7 @@ function StepHeader({
 }: {
   onBack: () => void;
   onSkip?: () => void;
-  step: 2 | 3 | 4;
+  step: 2 | 3;
 }) {
   const skipButton = onSkip ? (
     <button className="px-2 text-body-5 text-neutral-600" onClick={onSkip} type="button">
@@ -220,7 +214,7 @@ function StepHeader({
   return (
     <div>
       <Header onBack={onBack} right={skipButton} />
-      <OnboardingProgress step={step} total={4} />
+      <OnboardingProgress step={step} total={3} />
     </div>
   );
 }
@@ -233,9 +227,7 @@ export function CustomerOnboardingForm({
   returnUrl?: string;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<OnboardingStep>('name');
-  const [name, setName] = useState('');
-  const [isNameTouched, setIsNameTouched] = useState(false);
+  const [step, setStep] = useState<OnboardingStep>('school');
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
   const [manualUniversityName, setManualUniversityName] = useState('');
   const [isManualUniversityInputVisible, setIsManualUniversityInputVisible] = useState(false);
@@ -243,16 +235,8 @@ export function CustomerOnboardingForm({
   const [isSearchingSchool, setIsSearchingSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
-  const trimmedName = name.trim();
-  const parsedName = customerNameSchema.safeParse(trimmedName);
-  const isNameValid = parsedName.success;
-  const nameError =
-    (isNameTouched || name.length > 0) && !parsedName.success
-      ? parsedName.error.issues[0]?.message
-      : undefined;
-
   const submit = async () => {
-    if (!isNameValid || isSubmitting) return;
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     setError(undefined);
@@ -266,7 +250,6 @@ export function CustomerOnboardingForm({
     try {
       const response = await fetch('/app/api/members/customer', {
         body: JSON.stringify({
-          name: trimmedName,
           region,
           universityId: selectedUniversity?.universityId,
           // ponytail: API는 universityId만 지원한다. 자율입력 필드는 backend 지원 시 전송한다.
@@ -333,46 +316,6 @@ export function CustomerOnboardingForm({
     </div>
   );
 
-  if (step === 'name') {
-    const content = (
-      <section className="pt-7">
-        <div className="px-5">
-          <h1 className="text-head-1 text-neutral-900">프로필 이름을 입력해 주세요.</h1>
-          <p className="mt-2 text-body-2 text-neutral-800">
-            작가님과 원활하게 소통할 수 있도록
-            <br />
-            설정한 프로필 이름이 작가님께 표시돼요.
-          </p>
-        </div>
-        <div className="mt-8 px-4">
-          <TextField
-            autoComplete="name"
-            counter={`${name.length}/${CUSTOMER_NAME_MAX_LENGTH}`}
-            error={!!nameError}
-            helper={nameError ?? `최대 ${CUSTOMER_NAME_MAX_LENGTH}자까지 입력할 수 있어요`}
-            id="customer-name"
-            label="프로필 이름"
-            maxLength={CUSTOMER_NAME_MAX_LENGTH}
-            minLength={2}
-            onBlur={() => setIsNameTouched(true)}
-            onChange={(event) => setName(event.target.value)}
-            onClear={() => setName('')}
-            pattern="[A-Za-z가-힣]{2,5}"
-            placeholder="프로필에 표시될 이름을 입력해주세요"
-            required
-            value={name}
-          />
-        </div>
-      </section>
-    );
-
-    return pageShell(
-      <StepHeader onBack={() => navigateAppBack(router, '/app/role')} step={2} />,
-      content,
-      footer('다음', () => setStep('school'), !isNameValid),
-    );
-  }
-
   if (step === 'school') {
     const schoolButton = (
       <div className="flex w-full flex-col gap-2">
@@ -428,7 +371,11 @@ export function CustomerOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('name')} onSkip={() => setStep('region')} step={3} />,
+      <StepHeader
+        onBack={() => navigateAppBack(router, '/app/role')}
+        onSkip={() => setStep('region')}
+        step={2}
+      />,
       content,
       footer('다음', () => setStep('region')),
     );
@@ -466,7 +413,7 @@ export function CustomerOnboardingForm({
     );
 
     return pageShell(
-      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={4} />,
+      <StepHeader onBack={() => setStep('school')} onSkip={submit} step={3} />,
       content,
       footer('완료', submit),
     );

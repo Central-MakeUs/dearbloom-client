@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ApiError, ARTIST_REGION_OPTIONS, createArtist, nicknameSchema } from '@dearbloom/shared';
+import { ApiError, ARTIST_REGION_OPTIONS, createArtist } from '@dearbloom/shared';
 
 import { LOGIN_HREF } from '@/src/lib/env';
 import { setAuthCookie, setOnboardingPendingCookie } from '@/src/lib/authCookies';
@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
   if (!token) return redirectRelative(request, LOGIN_HREF);
 
   const formData = await request.formData();
-  const nickname = String(formData.get('nickname') ?? '').trim();
   const imageUrl = String(formData.get('imageUrl') ?? '').trim();
   const regions = parseArtistRegions(formData.getAll('region'), ARTIST_REGION_OPTIONS);
 
@@ -21,18 +20,10 @@ export async function POST(request: NextRequest) {
     return redirectRelative(request, '/app/onboarding/artist?error=invalid');
   }
 
-  const parsedNickname = nicknameSchema.safeParse(nickname);
-  if (!parsedNickname.success) {
-    return redirectRelative(request, '/app/onboarding/artist?error=invalid');
-  }
-
   let result;
   try {
-    result = await createArtist({ nickname, imageUrl, regionList: regions }, { token });
+    result = await createArtist({ imageUrl, regionList: regions }, { token });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 409) {
-      return NextResponse.json({ message: '중복된 닉네임' }, { status: 409 });
-    }
     const reason = error instanceof ApiError ? (error.code ?? 'api') : 'failed';
     return redirectRelative(request, `/app/onboarding/artist?error=${encodeURIComponent(reason)}`);
   }
