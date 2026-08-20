@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "919444004288",
+    "project_id": "dearbloom-dev-dea45",
+    "storage_bucket": "dearbloom-dev-dea45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919444004288:android:168964c186d3f01fa4bc25",
+        "android_client_info": {
+          "package_name": "kr.co.dearbloom.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChtdGLpIN2iHXIbmd5wpN10872m4VGiwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "57.0.3",
+    "@notifee/react-native": "^9.1.8",
     "@preeternal/react-native-cookie-manager": "^6.4.0",
     "@react-native-firebase/app": "^26.2.0",
     "@react-native-firebase/messaging": "^26.2.0",
