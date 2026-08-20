@@ -9,11 +9,11 @@ export default function SavedLoading() {
     <div className="mx-auto max-w-md" aria-busy>
       <Header showBack={false} title="저장 목록" />
 
-      <div className="flex w-full border-b border-neutral-400">
-        <span className="-mb-px flex-1 border-b border-primary py-3 text-center text-body-1 font-semibold text-primary">
+      <div className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 flex w-full border-b border-neutral-200 bg-neutral-100">
+        <span className="-mb-px flex-1 border-b-2 border-primary py-3 text-center text-body-1 font-semibold text-primary">
           내 저장
         </span>
-        <span className="-mb-px flex-1 border-b border-transparent py-3 text-center text-body-1 text-neutral-700">
+        <span className="-mb-px flex-1 border-b-2 border-transparent py-3 text-center text-body-1 text-neutral-700">
           공동보드
         </span>
       </div>

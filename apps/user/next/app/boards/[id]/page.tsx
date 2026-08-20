@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { MoreHorizontal, UserRound } from 'lucide-react';
 import {
   Button,
   Badge,
@@ -238,7 +237,13 @@ export default function BoardDetailPage() {
       className="h-11 w-11 text-neutral-950"
       onClick={() => setManageOpen(true)}
     >
-      <MoreHorizontal className="size-6" />
+      <span aria-hidden className="relative size-6 overflow-clip">
+        <img
+          src="/app/images/board-menu.svg"
+          alt=""
+          className="absolute left-1 top-2.5 h-1 w-4 max-w-none"
+        />
+      </span>
     </Button>
   );
 
@@ -252,7 +257,13 @@ export default function BoardDetailPage() {
   const members = (
     <div className="flex items-center gap-2 px-4 py-2">
       <div className="flex items-center gap-1 text-body-1 text-neutral-800">
-        <UserRound className="size-4" fill="currentColor" aria-hidden />
+        <span aria-hidden className="relative size-5 overflow-clip">
+          <img
+            src="/app/images/board-member.svg"
+            alt=""
+            className="absolute left-0.5 top-0.5 size-4 max-w-none"
+          />
+        </span>
         <span className="font-semibold">
           멤버 <span className="text-primary">{board.sharedMemberCount}</span>
         </span>
