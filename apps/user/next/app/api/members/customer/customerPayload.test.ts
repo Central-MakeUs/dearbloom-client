@@ -3,12 +3,15 @@ import test from 'node:test';
 
 import { parseCustomerPayload } from './customerPayload.ts';
 
-test('고객 onboarding payload의 학교와 지역을 검증한다', () => {
-  assert.deepEqual(parseCustomerPayload({ region: 'SEOUL', universityId: 1 }), {
+test('고객 onboarding payload의 이름, 학교, 지역을 검증한다', () => {
+  assert.deepEqual(parseCustomerPayload({ name: ' 김디어 ', region: 'SEOUL', universityId: 1 }), {
+    name: '김디어',
     region: 'SEOUL',
     universityId: 1,
   });
-  assert.deepEqual(parseCustomerPayload({}), {});
-  assert.equal(parseCustomerPayload({ region: 'UNKNOWN' }), undefined);
-  assert.equal(parseCustomerPayload({ universityId: 0 }), undefined);
+  assert.deepEqual(parseCustomerPayload({ name: '디어' }), { name: '디어' });
+  assert.equal(parseCustomerPayload({}), undefined);
+  assert.equal(parseCustomerPayload({ name: '김1', region: 'SEOUL' }), undefined);
+  assert.equal(parseCustomerPayload({ name: '김디어', region: 'UNKNOWN' }), undefined);
+  assert.equal(parseCustomerPayload({ name: '김디어', universityId: 0 }), undefined);
 });
