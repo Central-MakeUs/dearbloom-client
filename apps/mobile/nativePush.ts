@@ -3,6 +3,16 @@ export const NATIVE_PUSH_TOKEN_RESULT = 'NATIVE_PUSH_TOKEN_RESULT';
 
 export type NativePushPlatform = 'ANDROID' | 'IOS';
 
+/**
+ * Android 알림 채널 ID·이름.
+ *
+ * Android 8+ 는 채널이 있어야 알림을 표시하고, 사용자 알림 설정에도 채널 단위로 노출된다.
+ * 서버가 보내는 `android.notification.channel_id` 와 <b>반드시 같아야 한다</b> —
+ * 어긋나면 알림이 에러 없이 누락되고 발송 로그는 SUCCESS 로 남아 원인을 찾기 어렵다.
+ */
+export const ANDROID_CHANNEL_ID = 'dearbloom-default';
+export const ANDROID_CHANNEL_NAME = '디어블룸 알림';
+
 export interface NativePushTokenResult {
   type: typeof NATIVE_PUSH_TOKEN_RESULT;
   status: 'denied' | 'error' | 'granted' | 'unsupported';
@@ -27,6 +37,39 @@ export function createPushTokenResultScript(result: NativePushTokenResult) {
   const serialized = JSON.stringify(result).replace(/</g, '\\u003c');
 
   return `window.dispatchEvent(new CustomEvent('${NATIVE_PUSH_TOKEN_RESULT}', { detail: ${serialized} })); true;`;
+}
+
+export interface PushBannerContent {
+  title: string;
+  body: string;
+  deepLink?: string;
+}
+
+/**
+ * 포그라운드로 도착한 알림에서 인앱 배너에 띄울 내용을 뽑는다. <b>Android 전용</b>이다.
+ *
+ * iOS 는 `firebase.json` 의 `messaging_ios_foreground_presentation_options` 로 시스템이 직접
+ * 표시하지만, Android 에는 대응 옵션이 없어 앱이 떠 있는 동안 온 알림이 그냥 사라진다.
+ * 작가가 작업 중일 때가 오히려 새 문의를 놓치면 안 되는 상황이라 셸이 직접 배너를 그린다.
+ *
+ * title 이 없으면(데이터 전용 메시지 등) 띄우지 않는다.
+ */
+export function getPushBannerContent(message: unknown): PushBannerContent | undefined {
+  if (!message || typeof message !== 'object') return undefined;
+
+  const { data, notification } = message as { data?: unknown; notification?: unknown };
+  if (!notification || typeof notification !== 'object') return undefined;
+
+  const { body, title } = notification as { body?: unknown; title?: unknown };
+  if (typeof title !== 'string' || !title) return undefined;
+
+  const deepLink = (data as Record<string, unknown> | undefined)?.deepLink;
+
+  return {
+    body: typeof body === 'string' ? body : '',
+    deepLink: typeof deepLink === 'string' ? deepLink : undefined,
+    title,
+  };
 }
 
 /**

@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   createPushTokenResultScript,
+  getPushBannerContent,
   getPushDeepLinkWebViewUrl,
   isNativePushRegisterRequest,
 } from './nativePush.ts';
@@ -47,4 +48,25 @@ test('외부 주소나 우회 경로는 열지 않는다', () => {
   assert.equal(getPushDeepLinkWebViewUrl('/app\\evil', webViewUrl), undefined);
   assert.equal(getPushDeepLinkWebViewUrl(undefined, webViewUrl), undefined);
   assert.equal(getPushDeepLinkWebViewUrl(123, webViewUrl), undefined);
+});
+
+test('Android 포그라운드 알림에서 배너 내용을 뽑는다', () => {
+  assert.deepEqual(
+    getPushBannerContent({
+      notification: { title: '새 문의가 도착했어요', body: '[작품] 8/27 16:30 촬영 문의예요.' },
+      data: { deepLink: '/app/artist/requests/5' },
+    }),
+    {
+      title: '새 문의가 도착했어요',
+      body: '[작품] 8/27 16:30 촬영 문의예요.',
+      deepLink: '/app/artist/requests/5',
+    },
+  );
+});
+
+test('title 이 없는 메시지는 배너를 띄우지 않는다', () => {
+  assert.equal(getPushBannerContent({ data: { deepLink: '/app/artist/requests/5' } }), undefined);
+  assert.equal(getPushBannerContent({ notification: { body: '본문만 있음' } }), undefined);
+  assert.equal(getPushBannerContent(null), undefined);
+  assert.equal(getPushBannerContent('문자열'), undefined);
 });
