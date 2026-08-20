@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@dearbloom/ui';
 
 /**
@@ -33,12 +32,16 @@ export function SchoolChipsExpander({ schools }: { schools: string[] }) {
               +{extra}
             </span>
           )}
-          <ChevronDown
-            size={16}
-            strokeWidth={2}
-            aria-hidden
-            className={cn('text-neutral-800 transition-transform', open && 'rotate-180')}
-          />
+          <span className="flex size-6 items-center justify-center" aria-hidden>
+            <img
+              src="/images/artwork-school-chevron.svg"
+              alt=""
+              className={cn(
+                'h-[5.8px] w-[9.8px] transition-transform',
+                open ? 'rotate-0' : '-rotate-90',
+              )}
+            />
+          </span>
         </button>
       )}
     </div>
