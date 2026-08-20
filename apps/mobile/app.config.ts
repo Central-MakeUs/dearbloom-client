@@ -33,18 +33,19 @@ const googleSignInPlugins: NonNullable<ExpoConfig['plugins']> = googleIosUrlSche
  * plist 는 앱 바이너리에 그대로 박혀 배포되므로 비밀이 아니다 — Google OAuth client ID 와 같은
  * 성격이라 레포에 커밋한다.
  *
- * Android 는 의도적으로 제외한다(`google-services.json` 을 만들지 않는다). 토큰 요청 자체가 일어나지 않아
- * 쓰지도 않을 개인정보를 모으지 않는다.
+ * Android 도 같은 방식이다 — `GOOGLE_SERVICES_JSON` 으로 dev/prod 를 고르고, plist 와 마찬가지로
+ * `google-services.json` 도 앱 바이너리에 박혀 배포되므로 비밀이 아니라 커밋한다.
  */
 const googleServicesFile = environment.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.dev.plist';
-const isPushEnabled =
-  environment.PUSH_ENABLED === '1' && environment.EAS_BUILD_PLATFORM !== 'android';
+const googleServicesJson = environment.GOOGLE_SERVICES_JSON ?? './google-services.dev.json';
+const isPushEnabled = environment.PUSH_ENABLED === '1';
 
 const firebasePlugins: NonNullable<ExpoConfig['plugins']> = isPushEnabled
   ? [
       '@react-native-firebase/app',
       '@react-native-firebase/messaging',
       './plugins/withRNFirebaseDisableSPM',
+      './plugins/withNotifeeMavenRepo',
     ]
   : [];
 
@@ -67,6 +68,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       // 알림 권한은 사용자가 수락한 뒤에만 요청하므로 백그라운드 모드는 remote-notification 만 켠다.
       UIBackgroundModes: ['remote-notification'],
     },
+  },
+  android: {
+    ...config.android,
+    ...(isPushEnabled ? { googleServicesFile: googleServicesJson } : {}),
+    // Android 13+ 는 알림 표시에 런타임 권한이 필요하다. 선언이 없으면 요청 자체가 불가능하다.
+    permissions: [...(config.android?.permissions ?? []), 'POST_NOTIFICATIONS'],
   },
   plugins: [
     [

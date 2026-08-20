@@ -26,11 +26,17 @@ import {
 } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import CookieManager from '@preeternal/react-native-cookie-manager';
+import notifee, {
+  AndroidImportance,
+  AuthorizationStatus as NotifeeAuthorizationStatus,
+  EventType,
+} from '@notifee/react-native';
 import {
   AuthorizationStatus,
   getInitialNotification,
   getMessaging,
   getToken,
+  onMessage,
   onNotificationOpenedApp,
   onTokenRefresh,
   requestPermission,
@@ -42,10 +48,7 @@ import {
   parseNativeSafeAreaColors,
 } from './nativeSafeArea';
 import { getInviteWebViewUrl } from './nativeDeepLink';
-import {
-  getAndroidBackAction,
-  parseNativeNavigationState,
-} from './nativeBack';
+import { getAndroidBackAction, parseNativeNavigationState } from './nativeBack';
 import { getSessionWebViewUrl } from './nativeSession';
 import { getNativeShareContent, parseNativeShareRequest } from './nativeShare';
 import {
@@ -56,7 +59,11 @@ import {
   createPushTokenResultScript,
   getPushDeepLinkWebViewUrl,
   isNativePushRegisterRequest,
+  ANDROID_CHANNEL_ID,
+  ANDROID_CHANNEL_NAME,
+  getPushBannerContent,
   NATIVE_PUSH_TOKEN_RESULT,
+  type NativePushPlatform,
   type NativePushTokenResult,
 } from './nativePush';
 
@@ -65,6 +72,9 @@ const NATIVE_APPLE_LOGIN = 'NATIVE_APPLE_LOGIN';
 const NATIVE_SOCIAL_LOGIN_RESULT = 'NATIVE_SOCIAL_LOGIN_RESULT';
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+// 푸시는 iOS·Android 만 지원한다(웹 프리뷰 등 그 외 플랫폼에서는 Firebase 모듈이 없다).
+const isPushSupported = Platform.OS === 'ios' || Platform.OS === 'android';
+const pushPlatform: NativePushPlatform = Platform.OS === 'android' ? 'ANDROID' : 'IOS';
 const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}', supportsKakaoAvailability: true }); true;`;
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
 const loadingLabelImage = require('./assets/loading-label.png');
@@ -301,26 +311,41 @@ async function signInWithApple(): Promise<NativeLoginResult> {
  * 알림 권한을 요청하고 FCM 토큰을 얻는다. 요청 시점은 웹이 정한다(로그인 이후) —
  * 첫 실행에 맥락 없이 OS 팝업을 띄우면 심사에서 지적받고, iOS 는 한 번 거부하면 다시 띄울 수 없다.
  *
- * 1차 범위가 iOS 뿐이라 Android 에서는 토큰을 아예 요청하지 않는다(Firebase 설정 파일도 넣지 않는다).
+ * <b>플랫폼마다 권한 요청 주체가 다르다.</b> RNFirebase 의 requestPermission 은 Android 에서
+ * 아무 일도 하지 않고 무조건 AUTHORIZED 를 돌려준다(네이티브 구현이 `promise.resolve(1)` 뿐).
+ * 그대로 쓰면 POST_NOTIFICATIONS 팝업 없이 허용된 것으로 착각해, 사용자가 설정에서 직접 켜기 전에는
+ * 알림이 오지 않는다. Android 13+ 의 런타임 권한은 notifee 가 요청한다.
  */
+/** iOS 알림 권한. RNFirebase 가 UNUserNotificationCenter 로 시스템 팝업을 띄운다. */
+async function requestIosPermission() {
+  const authorizationStatus = await requestPermission(getMessaging());
+
+  return (
+    authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+    authorizationStatus === AuthorizationStatus.PROVISIONAL
+  );
+}
+
 async function requestPushToken(): Promise<NativePushTokenResult> {
-  if (Platform.OS !== 'ios') {
+  if (!isPushSupported) {
     return { status: 'unsupported', type: NATIVE_PUSH_TOKEN_RESULT };
   }
 
   try {
-    const messaging = getMessaging();
-    const authorizationStatus = await requestPermission(messaging);
     const isGranted =
-      authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-      authorizationStatus === AuthorizationStatus.PROVISIONAL;
+      Platform.OS === 'android'
+        ? (await notifee.requestPermission()).authorizationStatus >=
+          NotifeeAuthorizationStatus.AUTHORIZED
+        : await requestIosPermission();
 
     if (!isGranted) {
       return { status: 'denied', type: NATIVE_PUSH_TOKEN_RESULT };
     }
 
+    const messaging = getMessaging();
+
     return {
-      platform: 'IOS',
+      platform: pushPlatform,
       status: 'granted',
       token: await getToken(messaging),
       type: NATIVE_PUSH_TOKEN_RESULT,
@@ -367,14 +392,10 @@ export default function App() {
         return true;
       }
 
-      Alert.alert(
-        '디어블룸을 종료할까요?',
-        '진행 중인 화면은 그대로 저장되지 않을 수 있어요.',
-        [
-          { style: 'cancel', text: '취소' },
-          { onPress: () => BackHandler.exitApp(), style: 'destructive', text: '종료' },
-        ],
-      );
+      Alert.alert('디어블룸을 종료할까요?', '진행 중인 화면은 그대로 저장되지 않을 수 있어요.', [
+        { style: 'cancel', text: '취소' },
+        { onPress: () => BackHandler.exitApp(), style: 'destructive', text: '종료' },
+      ]);
 
       return true;
     });
@@ -415,7 +436,7 @@ export default function App() {
 
   // 알림을 탭해 들어온 경우 해당 화면으로 바로 보낸다.
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
+    if (!isPushSupported) return;
 
     const openFromNotification = (remoteMessage: { data?: Record<string, unknown> } | null) =>
       openPushDeepLink(remoteMessage?.data?.deepLink);
@@ -428,14 +449,54 @@ export default function App() {
     return onNotificationOpenedApp(messaging, openFromNotification);
   }, [openPushDeepLink]);
 
+  // Android 알림 채널 생성. 채널이 없으면 Android 8+ 는 알림을 표시하지 않는다.
+  // 서버가 보내는 channel_id 와 같은 ID 여야 한다(ANDROID_CHANNEL_ID).
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    void notifee.createChannel({
+      id: ANDROID_CHANNEL_ID,
+      importance: AndroidImportance.HIGH,
+      name: ANDROID_CHANNEL_NAME,
+    });
+  }, []);
+
+  // notifee 로 띄운 알림을 탭했을 때. FCM 이 직접 띄운 알림은 onNotificationOpenedApp 이 받는다.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    return notifee.onForegroundEvent(({ detail, type }) => {
+      if (type !== EventType.PRESS) return;
+      openPushDeepLink(detail.notification?.data?.deepLink);
+    });
+  }, [openPushDeepLink]);
+
+  // Android 포그라운드 수신. iOS 는 firebase.json 의 presentation options 로 시스템이 표시하지만,
+  // Android 에는 대응 옵션이 없어 앱이 떠 있는 동안 온 알림이 그냥 사라진다 — 셸이 직접 배너를 그린다.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    return onMessage(getMessaging(), (remoteMessage: unknown) => {
+      const content = getPushBannerContent(remoteMessage);
+      if (!content) return;
+
+      void notifee.displayNotification({
+        android: { channelId: ANDROID_CHANNEL_ID, pressAction: { id: 'default' } },
+        body: content.body,
+        data: content.deepLink ? { deepLink: content.deepLink } : undefined,
+        title: content.title,
+      });
+    });
+  }, []);
+
   // 토큰은 재설치·복원 등으로 갱신된다. 갱신되면 웹에 알려 서버 등록을 최신으로 유지한다.
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
+    if (!isPushSupported) return;
 
     return onTokenRefresh(getMessaging(), (token: string) => {
       webViewRef.current?.injectJavaScript(
         createPushTokenResultScript({
-          platform: 'IOS',
+          platform: pushPlatform,
           status: 'granted',
           token,
           type: NATIVE_PUSH_TOKEN_RESULT,
