@@ -77,8 +77,6 @@ const isPushSupported = Platform.OS === 'ios' || Platform.OS === 'android';
 const pushPlatform: NativePushPlatform = Platform.OS === 'android' ? 'ANDROID' : 'IOS';
 const nativeAppBootstrapScript = `window.__DEARBLOOM_NATIVE_APP__ = Object.freeze({ platform: '${Platform.OS}', supportsKakaoAvailability: true }); true;`;
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
-const loadingLabelImage = require('./assets/loading-label.png');
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro 정적 이미지 에셋은 require로 해석한다.
 const loadingSymbolImage = require('./assets/loading-symbol.png');
 const colors = {
   ink: 'rgb(17, 20, 24)',
@@ -150,11 +148,7 @@ function LoadingView() {
       <Image accessible={false} source={loadingSymbolImage} style={styles.loadingSymbol} />
     </Animated.View>
   );
-  const label = (
-    <View style={styles.loadingLabel}>
-      <Image accessible={false} source={loadingLabelImage} style={styles.loadingLabelImage} />
-    </View>
-  );
+  const label = <Text style={styles.loadingLabel}>DearBloom 로딩 중</Text>;
 
   return (
     <View
@@ -698,14 +692,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingLabel: {
-    alignItems: 'center',
-    height: 21,
-    justifyContent: 'center',
-    width: 114,
-  },
-  loadingLabelImage: {
-    height: 13,
-    width: 112,
+    color: 'rgb(63, 63, 63)',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 21,
   },
   loadingSymbol: {
     height: 32,
