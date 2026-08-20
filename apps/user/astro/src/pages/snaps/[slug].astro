@@ -63,6 +63,14 @@ const shootPlaces = artwork
 
 const packages = artwork?.packageList ?? [];
 const lowestPrice = packages.length > 0 ? Math.min(...packages.map((p) => p.price)) : null;
+const headCountLabel =
+  artwork?.minHeadCount == null
+    ? null
+    : artwork.maxHeadCount == null
+      ? `${artwork.minHeadCount}인 이상`
+      : artwork.minHeadCount === artwork.maxHeadCount
+        ? `${artwork.minHeadCount}인`
+        : `${artwork.minHeadCount}~${artwork.maxHeadCount}인`;
 
 // 신고 여부 — 로그인 상태에서만 조회(실패해도 상세 노출을 막지 않는다).
 let reported = false;
@@ -151,10 +159,11 @@ if (artwork && token) {
               </div>
             )}
 
-            {/* 제목 + 지역칩 + 작가 — Figma: 제목↔칩그룹 12, 칩끼리 4 */}
-            <div class="px-4 pt-4">
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
+            {/* 제목 아래 작가명·지역 — Figma 2817:14892 */}
+            <div class="px-5 pt-4">
+              <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
+              <div class="mt-2 flex flex-wrap items-center gap-3">
+                <p class="text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
                 {artwork.artist.regionList?.length > 0 && (
                   <div class="flex flex-wrap items-center gap-1">
                     {artwork.artist.regionList.map((code) => (
@@ -163,14 +172,13 @@ if (artwork && token) {
                   </div>
                 )}
               </div>
-              <p class="mt-1 text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
             </div>
-
+            <div class="mt-9 border-t border-neutral-200" aria-hidden="true"></div>
           </div>
 
           <div class="pb-28 pt-4">
-            {/* 작품 정보 — 기본 가격 + 촬영 경험 학교 (Figma) */}
-            {(lowestPrice != null || shootPlaces.length > 0) && (
+            {/* 작품 정보 — 기본 가격 + 촬영 인원 + 촬영 경험 학교 (Figma) */}
+            {(lowestPrice != null || headCountLabel || shootPlaces.length > 0) && (
               <section class="mb-8">
                 <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">작품 정보</h3>
                 <div class="mx-4 rounded-md bg-neutral-0 p-5">
@@ -181,8 +189,14 @@ if (artwork && token) {
                         <dd class="text-body-4 text-neutral-900">{won(lowestPrice)}</dd>
                       </div>
                     )}
+                    {headCountLabel && (
+                      <div class="flex items-center justify-between gap-4">
+                        <dt class="text-body-5 text-neutral-800">촬영 인원</dt>
+                        <dd class="text-body-4 text-neutral-900">{headCountLabel}</dd>
+                      </div>
+                    )}
                     {shootPlaces.length > 0 && (
-                      <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-center justify-between gap-4">
                         <dt class="shrink-0 text-body-5 text-neutral-800">촬영 경험 학교</dt>
                         <dd class="min-w-0 flex-1">
                           <SchoolChipsExpander schools={shootPlaces} client:visible />

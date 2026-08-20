@@ -18,7 +18,14 @@ interface ChatRoomListProps {
  */
 export function ChatRoomList({ rooms, roomHref, linkComponent }: ChatRoomListProps) {
   if (rooms.length === 0) {
-    return <p className="px-6 py-24 text-center text-body-5 text-neutral-500">아직 채팅이 없어요.</p>;
+    return (
+      <div className="flex flex-col items-center gap-2 pt-[172px] text-center">
+        <p className="text-body-1 text-neutral-950">채팅 목록이 없어요</p>
+        <p className="w-[154px] text-body-6 text-neutral-800">
+          작품을 탐색하고 작가님께 문의를 시작해 보세요.
+        </p>
+      </div>
+    );
   }
 
   const Anchor = linkComponent ?? 'a';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import {
   BottomButton,
   BottomButtonBar,
@@ -72,15 +72,20 @@ export function SmartInquiryCta({
   );
 
   const sheetHeader = (
-    <div className="relative flex items-center justify-center px-4 pb-4">
+    <div className="relative flex h-[57px] items-center justify-center px-4">
       <h2 className="text-head-3 text-neutral-950">패키지 선택</h2>
       <button
         type="button"
         aria-label="닫기"
         onClick={() => setOpen(false)}
-        className="absolute right-4 flex h-8 w-8 items-center justify-center text-neutral-950"
+        className="absolute right-1 flex size-11 items-center justify-center"
       >
-        <X size={24} strokeWidth={2} aria-hidden />
+        <img
+          src="/images/inquiry-package-close.svg"
+          alt=""
+          aria-hidden
+          className="h-[13.8px] w-[13.8px]"
+        />
       </button>
     </div>
   );
@@ -98,15 +103,22 @@ export function SmartInquiryCta({
         type="button"
         aria-expanded={listOpen}
         onClick={() => setListOpen((v) => !v)}
-        className="flex h-[56px] items-center justify-between rounded-md bg-neutral-100 px-4 text-body-3 text-neutral-950"
+        className="flex h-[56px] items-center justify-between rounded-md bg-neutral-100 pl-4 pr-1 text-body-2 text-neutral-950"
       >
         <span className={cn(!selected && 'text-neutral-500')}>{selected?.packageName ?? '선택 안 함'}</span>
-        <ChevronDown
-          size={20}
-          strokeWidth={2}
+        <span
+          className={cn(
+            'flex size-11 shrink-0 items-center justify-center transition-transform',
+            listOpen && 'rotate-180',
+          )}
           aria-hidden
-          className={cn('shrink-0 text-neutral-500 transition-transform', listOpen && 'rotate-180')}
-        />
+        >
+          <img
+            src="/images/inquiry-package-arrow-down.svg"
+            alt=""
+            className="h-[4.833px] w-[8.167px]"
+          />
+        </span>
       </button>
 
       {listOpen && (
