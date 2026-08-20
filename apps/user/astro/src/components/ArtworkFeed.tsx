@@ -5,15 +5,19 @@ import { optimizedImageUrl } from '@/lib/imageUrl';
 import {
   ARTWORK_PAGE_SIZE,
   artistRegionLabel,
+  type ArtistRegionCode,
   type ArtworkListItem,
   type ArtworkPage,
 } from '@dearbloom/shared';
+import { summarizeExploreRegions } from '@/lib/artistRegion';
 
 interface Props {
   /** SSR 로 이미 그린 첫 페이지. 하이드레이션 후 이 상태에서 이어갑니다. */
   initialPage: ArtworkPage;
   /** 현재 필터·정렬 쿼리스트링('?region=SEOUL' 또는 ''). 다음 페이지 요청에 그대로 실립니다. */
   query: string;
+  /** 선택 지역. 응답에 실제 포함된 경우에만 지역 칩 첫 번째로 보입니다. */
+  selectedRegion?: ArtistRegionCode;
   /** 보기 방식. 격자 버튼으로 grid(2열 카드) ↔ list(작품별 사진 가로 스크롤)를 오갑니다. */
   view?: 'grid' | 'list';
 }
@@ -24,7 +28,7 @@ interface Props {
  * 필터/정렬이 바뀌면 URL 이 바뀌면서 페이지가 통째로 다시 그려지므로, 이 컴포넌트는
  * "고정된 필터 안에서 커서를 이어받는" 일만 합니다. 커서 도중에 조건이 바뀔 일이 없습니다.
  */
-export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
+export function ArtworkFeed({ initialPage, query, selectedRegion, view = 'grid' }: Props) {
   const [items, setItems] = useState<ArtworkListItem[]>(initialPage.artworkList);
   const [cursor, setCursor] = useState<string | null>(initialPage.nextCursor);
   const [hasNext, setHasNext] = useState(initialPage.hasNext);
@@ -75,7 +79,7 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
     // 아이템 간 20(시안). 사진 스트립이 화면 끝까지 흐르도록 좌우 패딩은 각 행이 처리한다.
     <div className="flex flex-col gap-5 px-4 pb-6">
       {items.map((a) => (
-        <ArtworkListRow key={a.artworkId} artwork={a} />
+        <ArtworkListRow key={a.artworkId} artwork={a} selectedRegion={selectedRegion} />
       ))}
     </div>
   );
@@ -85,22 +89,27 @@ export function ArtworkFeed({ initialPage, query, view = 'grid' }: Props) {
 
   const grid = (
     <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
-      {items.map((a) => (
-        <ArtworkCard
-          key={a.artworkId}
-          artworkId={a.artworkId}
-          title={a.title}
-          artistNickname={a.artistNickname}
-          price={a.lowestPrice}
-          thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, CARD_WIDTH)}
-          regions={a.artistRegionList?.map(artistRegionLabel)}
-          initialSaved={!!a.isSaved}
-          unsavedHeartIconSrc="/images/save-heart-grid.svg"
-          unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
-          savedHeartIconSrc="/images/save-heart-selected.svg"
-          savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
-        />
-      ))}
+      {items.map((a) => {
+        const { shownRegions, hiddenRegionCount } = summarizeExploreRegions(a.artistRegionList, selectedRegion);
+
+        return (
+          <ArtworkCard
+            key={a.artworkId}
+            artworkId={a.artworkId}
+            title={a.title}
+            artistNickname={a.artistNickname}
+            price={a.lowestPrice}
+            thumbnailUrl={optimizedImageUrl(a.thumbnailUrl, CARD_WIDTH)}
+            regions={shownRegions.map(artistRegionLabel)}
+            regionOverflowCount={hiddenRegionCount}
+            initialSaved={!!a.isSaved}
+            unsavedHeartIconSrc="/images/save-heart-grid.svg"
+            unsavedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+            savedHeartIconSrc="/images/save-heart-selected.svg"
+            savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
+          />
+        );
+      })}
     </div>
   );
 

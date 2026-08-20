@@ -13,6 +13,8 @@ export interface ArtworkCardProps {
   thumbnailUrl?: string | null;
   /** 이미 한글로 변환된 지역 라벨 목록(칩으로 렌더). 예: ['서울','경기'] */
   regions?: string[];
+  /** 탐색 화면처럼 이미 접은 지역의 남은 개수. */
+  regionOverflowCount?: number;
   /** 상세 링크. 기본 `/snaps/{artworkId}`. */
   href?: string;
 
@@ -48,6 +50,7 @@ export function ArtworkCard({
   price,
   thumbnailUrl,
   regions,
+  regionOverflowCount = 0,
   href,
   initialSaved = false,
   saveEndpoint,
@@ -86,6 +89,7 @@ export function ArtworkCard({
                 {r}
               </RegionTag>
             ))}
+            {regionOverflowCount > 0 && <span className="text-body-5 text-neutral-600">+{regionOverflowCount}</span>}
           </div>
         )}
       </div>

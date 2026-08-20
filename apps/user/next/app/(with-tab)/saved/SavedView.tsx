@@ -122,10 +122,19 @@ export function SavedView({
   }
 
   const editIcon = (
-    <Button type="button" variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="편집" className="h-11 w-11 text-neutral-950">
-      <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M10.0002 4H7.2002C6.08009 4 5.51962 4 5.0918 4.21799C4.71547 4.40973 4.40973 4.71547 4.21799 5.0918C4 5.51962 4 6.08009 4 7.2002V16.8002C4 17.9203 4 18.4801 4.21799 18.9079C4.40973 19.2842 4.71547 19.5905 5.0918 19.7822C5.5192 20 6.07899 20 7.19691 20H16.8031C17.921 20 18.48 20 18.9074 19.7822C19.2837 19.5905 19.5905 19.2839 19.7822 18.9076C20 18.4802 20 17.921 20 16.8031V14M16 5L10 11V14H13L19 8M16 5L19 2L22 5L19 8M16 5L19 8" />
-      </svg>
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      onClick={() => setEditing(true)}
+      aria-label="편집"
+      className="relative h-11 w-11 p-0"
+    >
+      <span aria-hidden className="absolute left-2.5 top-[10px] size-6 overflow-clip">
+        <span className="absolute inset-[8.33%_8.33%_16.67%_16.67%]">
+          <img src="/app/images/saved-edit.svg" alt="" className="absolute inset-[-4.17%] size-full" />
+        </span>
+      </span>
     </Button>
   );
 
@@ -148,7 +157,7 @@ export function SavedView({
 
   const grid = (
     <>
-    {!editing && <p className="px-4 pb-3 pt-3 text-caption-1 text-neutral-600">전체 {items.length}</p>}
+    {!editing && <p className="px-4 pb-3 pt-3 text-body-5 text-neutral-600">전체 {items.length}</p>}
     <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
       {items.map((a) => (
         <ArtworkCard
@@ -219,6 +228,9 @@ export function SavedView({
     </div>
   );
 
+  // 비활성 탭을 DOM 에 남기면 긴 저장 목록 높이가 공동보드에도 남는다.
+  const activeBody = tab === 'saved' ? savedBody : boardBody;
+
   const editBar = editing ? (
     <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md border-t border-neutral-200 bg-neutral-0 px-4 pb-4 pt-3">
       {selected.size > 0 && (
@@ -264,41 +276,20 @@ export function SavedView({
       {header}
       <Tabs value={tab} onValueChange={changeTab}>
         {!editing && (
-          <TabsList>
-            <TabsTrigger value="saved">내 저장</TabsTrigger>
-            <TabsTrigger value="board">공동보드</TabsTrigger>
+          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 border-neutral-200 bg-neutral-100">
+            <TabsTrigger value="saved" className="border-b-2">내 저장</TabsTrigger>
+            <TabsTrigger value="board" className="border-b-2">공동보드</TabsTrigger>
           </TabsList>
         )}
         <div
-          className="relative overflow-x-clip touch-pan-y"
+          className="touch-pan-y"
           onTouchStart={startSwipe}
           onTouchEnd={endSwipe}
           onTouchCancel={() => {
             swipeStart.current = null;
           }}
         >
-          <div
-            aria-hidden={tab !== 'saved'}
-            inert={tab !== 'saved'}
-            className={`transition-transform duration-200 ease-out motion-reduce:transition-none ${
-              tab === 'saved'
-                ? 'relative translate-x-0'
-                : 'pointer-events-none absolute inset-x-0 top-0 -translate-x-full'
-            }`}
-          >
-            {savedBody}
-          </div>
-          <div
-            aria-hidden={tab !== 'board'}
-            inert={tab !== 'board'}
-            className={`transition-transform duration-200 ease-out motion-reduce:transition-none ${
-              tab === 'board'
-                ? 'relative translate-x-0'
-                : 'pointer-events-none absolute inset-x-0 top-0 translate-x-full'
-            }`}
-          >
-            {boardBody}
-          </div>
+          {activeBody}
         </div>
       </Tabs>
       {tab === 'board' ? createFab : null}

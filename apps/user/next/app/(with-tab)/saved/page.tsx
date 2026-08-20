@@ -25,9 +25,9 @@ export default async function SavedPage({
       <div className="mx-auto max-w-md">
         <Header showBack={false} title="저장 목록" />
         <Tabs defaultValue={tab === 'board' ? 'board' : 'saved'}>
-          <TabsList>
-            <TabsTrigger value="saved">내 저장</TabsTrigger>
-            <TabsTrigger value="board">공동보드</TabsTrigger>
+          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 border-neutral-200 bg-neutral-100">
+            <TabsTrigger value="saved" className="border-b-2">내 저장</TabsTrigger>
+            <TabsTrigger value="board" className="border-b-2">공동보드</TabsTrigger>
           </TabsList>
         </Tabs>
         <LoginRequired
