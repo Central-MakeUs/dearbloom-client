@@ -22,6 +22,7 @@ export interface CustomerMe {
 /** 프로필 수정 payload. 미전송 필드는 미변경, region: null 은 지역 해제. */
 export interface CustomerProfilePatch {
   name?: string;
+  universityId?: number | null;
   region?: ArtistRegionCode | null;
 }
 
@@ -30,7 +31,7 @@ export function getCustomerMe(opts: RequestOptions): Promise<CustomerMe> {
   return apiGet<CustomerMe>('/api/customers/me', opts);
 }
 
-/** 고객 프로필(이름·지역) 수정. PATCH /api/customers/me */
+/** 고객 프로필(이름·학교·지역) 수정. PATCH /api/customers/me */
 export function updateCustomerProfile(
   patch: CustomerProfilePatch,
   opts: RequestOptions,
