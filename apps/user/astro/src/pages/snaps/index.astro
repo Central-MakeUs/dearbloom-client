@@ -159,7 +159,7 @@ const CHIP_CLASS =
         )}
       </div>
     ) : (
-      <ArtworkFeed initialPage={islandPage} query={query} view={view} client:load />
+      <ArtworkFeed initialPage={islandPage} query={query} selectedRegion={filter.region} view={view} client:load />
     )}
   </div>
 </AppShellLayout>

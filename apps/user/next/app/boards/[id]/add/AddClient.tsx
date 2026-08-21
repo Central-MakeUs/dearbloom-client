@@ -17,6 +17,7 @@ import { artistRegionLabel, type SharedSavedArtwork } from '@dearbloom/shared';
 import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 import { replaceApp } from '@/src/lib/appNavigation';
 import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
+import { SHARED_BOARDS_REFRESH_KEY } from '@/src/lib/sharedBoardsRefresh';
 
 const sameIds = (left: Set<number>, right: Set<number>) =>
   left.size === right.size && [...left].every((id) => right.has(id));
@@ -82,6 +83,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
       if (!response.ok) throw new Error('공동보드 저장 실패');
 
       const candidateAction = initialSelected.size === 0 ? 'added' : 'updated';
+      sessionStorage.setItem(SHARED_BOARDS_REFRESH_KEY, '1');
       replaceApp(router, `/app/boards/${boardId}?candidateAction=${candidateAction}`);
     } catch {
       showToast('작품 후보를 저장하지 못했어요', 'error');

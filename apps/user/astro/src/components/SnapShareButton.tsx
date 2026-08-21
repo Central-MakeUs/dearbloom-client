@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Share } from 'lucide-react';
-import { ShareBottomSheet, showToast } from '@dearbloom/ui';
+import { ShareBottomSheet, ShareButton, showToast } from '@dearbloom/ui';
 import {
   copyText,
   getKakaoFeedShareOptions,
@@ -114,15 +113,10 @@ export function SnapShareButton({
 
   return (
     <>
-      <button
-        type="button"
+      <ShareButton
         onClick={() => setOpen(true)}
-        aria-label="공유"
-        className="flex h-11 w-11 items-center justify-center text-neutral-800"
-      >
-        {/* Figma icons/44/Share — 44 컨테이너 안 24px, neutral/n800 */}
-        <Share size={24} strokeWidth={1.8} aria-hidden />
-      </button>
+        className="h-11 w-11 border-0 bg-transparent p-0 hover:bg-neutral-200"
+      />
       <ShareBottomSheet
         open={open}
         onOpenChange={setOpen}

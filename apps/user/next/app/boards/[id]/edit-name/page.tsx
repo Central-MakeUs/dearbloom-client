@@ -105,26 +105,28 @@ export default function EditBoardNamePage() {
   );
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        submit();
-      }}
-      className="mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100"
-    >
-      <AppBackHeader fallbackHref={`/app/boards/${id}`} showBack title="보드 이름 변경하기" />
-      {nameField}
-      <div className="flex-1" />
-      <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
-        <BottomButton
-          type="submit"
-          color="black"
-          disabled={!loaded || !valid || !changed || submitting}
-        >
-          {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
-          완료
-        </BottomButton>
-      </div>
-    </form>
+    <div className="min-h-dvh bg-neutral-100">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
+        }}
+        className="mx-auto flex min-h-dvh max-w-md flex-col"
+      >
+        <AppBackHeader fallbackHref={`/app/boards/${id}`} showBack title="보드 이름 변경하기" />
+        {nameField}
+        <div className="flex-1" />
+        <div className="sticky bottom-0 bg-neutral-100 px-4 pb-6 pt-2">
+          <BottomButton
+            type="submit"
+            color="black"
+            disabled={!loaded || !valid || !changed || submitting}
+          >
+            {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
+            완료
+          </BottomButton>
+        </div>
+      </form>
+    </div>
   );
 }

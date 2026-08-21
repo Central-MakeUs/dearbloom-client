@@ -13,6 +13,8 @@ export interface ArtworkCardProps {
   thumbnailUrl?: string | null;
   /** 이미 한글로 변환된 지역 라벨 목록(칩으로 렌더). 예: ['서울','경기'] */
   regions?: string[];
+  /** 탐색 화면처럼 이미 접은 지역의 남은 개수. */
+  regionOverflowCount?: number;
   /** 상세 링크. 기본 `/snaps/{artworkId}`. */
   href?: string;
 
@@ -48,6 +50,7 @@ export function ArtworkCard({
   price,
   thumbnailUrl,
   regions,
+  regionOverflowCount = 0,
   href,
   initialSaved = false,
   saveEndpoint,
@@ -62,6 +65,9 @@ export function ArtworkCard({
   className,
 }: ArtworkCardProps) {
   const detailHref = href ?? `/snaps/${artworkId}`;
+  const shownRegions = regions?.slice(0, 2) ?? [];
+  const hiddenRegionCount =
+    regionOverflowCount + (regions?.length ?? 0) - shownRegions.length;
 
   const image = (
     <SkeletonImage
@@ -79,13 +85,14 @@ export function ArtworkCard({
       <div className="truncate text-body-6 text-neutral-900">{artistNickname}</div>
       <div className="mt-1 flex flex-wrap items-center gap-2">
         <span className="text-body-3 text-primary">{formatPrice(price)}</span>
-        {!!regions?.length && (
+        {shownRegions.length > 0 && (
           <div className="flex flex-wrap items-center gap-1">
-            {regions.map((r) => (
+            {shownRegions.map((r) => (
               <RegionTag key={r} size="sm">
                 {r}
               </RegionTag>
             ))}
+            {hiddenRegionCount > 0 && <span className="text-body-5 text-neutral-600">+{hiddenRegionCount}</span>}
           </div>
         )}
       </div>

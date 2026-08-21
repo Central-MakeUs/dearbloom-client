@@ -73,15 +73,17 @@ export function InquiryHistoryList({ items }: { items: CustomerInquiryListItem[]
   }
 
   const tabBar = (
-    <div className="flex border-b border-neutral-200">
+    <div className="flex border-b border-neutral-400">
       {TABS.map((t) => (
         <button
           key={t.key}
           type="button"
           onClick={() => selectTab(t.key)}
           className={cn(
-            'flex-1 border-b-2 py-3 text-body-3 transition-colors',
-            t.key === tabKey ? 'border-primary text-primary' : 'border-transparent text-neutral-600',
+            '-mb-px flex-1 py-3 text-center transition-colors',
+            t.key === tabKey
+              ? 'border-b-2 border-primary text-head-3 tracking-[-0.01em] text-primary'
+              : 'border-b border-neutral-400 text-body-1 text-neutral-700',
           )}
         >
           {t.label}

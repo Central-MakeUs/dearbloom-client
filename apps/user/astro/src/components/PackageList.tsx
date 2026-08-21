@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@dearbloom/ui';
 
 interface Package {
@@ -41,12 +40,12 @@ export function PackageList({ packages }: { packages: Package[] }) {
 
   return (
     <div>
-      <div className="mx-4 flex flex-col gap-3">
+      <div className="mx-4 flex flex-col gap-2">
         {shown.map((pkg) => (
           <div key={pkg.artworkPackageId} className="rounded-md bg-neutral-0 p-5">
             <p className="text-body-4 text-neutral-900">{pkg.packageName}</p>
             <div className="my-4 h-px bg-neutral-200" />
-            <dl className="flex flex-col gap-3">
+            <dl className="flex flex-col gap-4">
               {row('가격', won(pkg.price))}
               {pkg.durationMinutes != null && row('촬영 시간', minutes(pkg.durationMinutes))}
               {pkg.finalPhotoCount != null && row('보정본 수', `${pkg.finalPhotoCount}장`)}
@@ -59,15 +58,22 @@ export function PackageList({ packages }: { packages: Package[] }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-md bg-neutral-200 py-3 text-body-4 text-neutral-800"
+          className="mx-4 mt-2 flex h-12 w-[calc(100%-2rem)] items-center justify-center gap-1 rounded-[6px] bg-neutral-200 px-4 py-[14px] text-body-4 text-neutral-800"
         >
           {open ? '패키지 접기' : `패키지 ${hiddenCount}개 더보기`}
-          <ChevronDown
-            size={20}
-            strokeWidth={2}
+          <span
+            className={cn(
+              'flex size-5 items-center justify-center transition-transform',
+              open && 'rotate-180',
+            )}
             aria-hidden
-            className={cn('transition-transform', open && 'rotate-180')}
-          />
+          >
+            <img
+              src="/images/package-list-chevron.svg"
+              alt=""
+              className="h-[6.5px] w-[11.5px]"
+            />
+          </span>
         </button>
       )}
     </div>

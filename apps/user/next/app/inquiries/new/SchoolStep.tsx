@@ -91,10 +91,6 @@ export function SchoolStep({ value, onChange, onNext }: SchoolStepProps) {
                 className="w-full px-4 py-3 text-left hover:bg-neutral-100"
               >
                 <span className="block text-body-5 text-neutral-950">{university.name}</span>
-                {/* 같은 이름의 캠퍼스가 여럿이라(예: 홍익대 본교/제2캠퍼스) 이름만으론 고를 수 없다. */}
-                <span className="mt-0.5 block text-caption-2 text-neutral-500">
-                  {[university.campusType, university.region].filter(Boolean).join(' · ')}
-                </span>
               </button>
             </li>
           ))}
