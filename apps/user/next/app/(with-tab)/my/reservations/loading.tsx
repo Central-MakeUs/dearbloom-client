@@ -10,11 +10,11 @@ export default function ReservationsLoading() {
     <div className="mx-auto max-w-md" aria-busy>
       <AppBackHeader fallbackHref="/app/my" title="문의 내역" />
 
-      <div className="flex border-b border-neutral-200">
-        <span className="flex-1 border-b-2 border-primary py-3 text-center text-body-3 text-primary">
+      <div className="flex border-b border-neutral-400">
+        <span className="-mb-px flex-1 border-b-2 border-primary py-3 text-center text-head-3 tracking-[-0.01em] text-primary">
           문의내역
         </span>
-        <span className="flex-1 border-b-2 border-transparent py-3 text-center text-body-3 text-neutral-600">
+        <span className="-mb-px flex-1 border-b border-neutral-400 py-3 text-center text-body-1 text-neutral-700">
           취소내역
         </span>
       </div>
