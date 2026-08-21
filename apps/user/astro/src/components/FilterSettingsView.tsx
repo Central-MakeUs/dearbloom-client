@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RotateCw } from 'lucide-react';
 import {
   ARTIST_REGION_OPTIONS,
@@ -50,6 +50,7 @@ export function FilterSettingsView({ initial }: Props) {
     return new Date(base.getFullYear(), base.getMonth(), 1);
   });
   const [activeTab, setActiveTab] = useState<TabKey>('date');
+  const clickedTab = useRef<TabKey | null>(null);
 
   /**
    * 스크롤에 따라 탭이 따라오게 — 판정선(상단 100px, 헤더+탭바에 가리는 높이)을 지난
@@ -61,6 +62,7 @@ export function FilterSettingsView({ initial }: Props) {
    */
   useEffect(() => {
     const sync = () => {
+      if (clickedTab.current) return;
       // 더 스크롤할 곳이 없으면 마지막 섹션을 보고 있는 것으로 봅니다.
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
         setActiveTab(TABS[TABS.length - 1]!.key);
@@ -73,13 +75,22 @@ export function FilterSettingsView({ initial }: Props) {
       }
       setActiveTab(current);
     };
+    const releaseClickedTab = () => {
+      clickedTab.current = null;
+    };
 
     sync();
     window.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync);
+    window.addEventListener('wheel', releaseClickedTab, { passive: true });
+    window.addEventListener('touchmove', releaseClickedTab, { passive: true });
+    window.addEventListener('keydown', releaseClickedTab);
     return () => {
       window.removeEventListener('scroll', sync);
       window.removeEventListener('resize', sync);
+      window.removeEventListener('wheel', releaseClickedTab);
+      window.removeEventListener('touchmove', releaseClickedTab);
+      window.removeEventListener('keydown', releaseClickedTab);
     };
   }, []);
 
@@ -122,6 +133,7 @@ export function FilterSettingsView({ initial }: Props) {
   };
 
   const scrollToSection = (key: TabKey) => {
+    clickedTab.current = key;
     setActiveTab(key);
     // 첫 섹션은 맨 위로 — 위에 아무것도 없는데 탭바 높이만큼 내려가면 어중간해 보인다.
     if (key === TABS[0].key) {
@@ -149,7 +161,7 @@ export function FilterSettingsView({ initial }: Props) {
             type="button"
             onClick={() => scrollToSection(tab.key)}
             className={`flex-1 border-b ${
-              active ? 'border-primary text-head-3 text-primary' : 'border-neutral-400 text-body-1 text-neutral-700'
+              active ? 'border-b-2 border-primary text-head-3 text-primary' : 'border-neutral-400 text-body-1 text-neutral-700'
             }`}
           >
             {tab.label}
