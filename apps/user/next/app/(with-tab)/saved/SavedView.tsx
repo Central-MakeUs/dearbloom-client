@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type TouchEvent } from 'react';
+import { useEffect, useRef, useState, type TouchEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import {
@@ -19,6 +19,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  showToast,
 } from '@dearbloom/ui';
 import {
   artistRegionLabel,
@@ -29,6 +30,7 @@ import { AppLink } from '@/src/components/common/AppLink';
 import { BoardCollage } from '@/src/components/common/BoardCollage';
 import { ARTWORK_CARD_WIDTH, optimizedImageUrl } from '@/src/lib/imageUrl';
 import { replaceApp } from '@/src/lib/appNavigation';
+import { SHARED_BOARDS_REFRESH_KEY } from '@/src/lib/sharedBoardsRefresh';
 import { getSwipedTab, type SavedTab } from './savedSwipe';
 
 /** next basePath('/app') 대응 — 저장 프록시 라우트 실제 경로. */
@@ -54,6 +56,22 @@ export function SavedView({
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const refreshSharedBoards = () => {
+      if (tab !== 'board' || sessionStorage.getItem(SHARED_BOARDS_REFRESH_KEY) !== '1') return;
+      sessionStorage.removeItem(SHARED_BOARDS_REFRESH_KEY);
+      router.refresh();
+    };
+
+    refreshSharedBoards();
+    window.addEventListener('pageshow', refreshSharedBoards);
+    window.addEventListener('popstate', refreshSharedBoards);
+    return () => {
+      window.removeEventListener('pageshow', refreshSharedBoards);
+      window.removeEventListener('popstate', refreshSharedBoards);
+    };
+  }, [router, tab]);
 
   const changeTab = (value: string) => {
     const nextTab = value as SavedTab;
@@ -112,8 +130,10 @@ export function SavedView({
       }
       if (!res.ok) throw new Error(String(res.status));
       setItems((prev) => prev.filter((x) => !selected.has(x.artworkId)));
+      sessionStorage.setItem(SHARED_BOARDS_REFRESH_KEY, '1');
       setConfirmOpen(false);
       exitEdit();
+      showToast('저장 목록이 수정되었어요');
     } catch {
       // 실패 시 목록/선택 유지 — 사용자가 재시도 가능.
     } finally {
@@ -147,9 +167,12 @@ export function SavedView({
   );
 
   const emptySaved = (
-    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-      <p className="text-body-5 text-neutral-500">아직 저장한 작품이 없어요.</p>
-      <Button asChild size="sm">
+    <div className="flex min-h-[calc(100dvh-160px)] flex-col items-center justify-center gap-4 px-6 pb-24 text-center">
+      <div className="flex w-[154px] flex-col gap-1.5">
+        <p className="text-head-3 text-neutral-950">저장한 작품이 없어요</p>
+        <p className="text-body-6 text-neutral-800">탐색 탭에서 원하는 작품을 저장해 보세요.</p>
+      </div>
+      <Button asChild size="sm" className="h-10 rounded-[6px] px-5">
         <a href="/snaps">작품 탐색하기</a>
       </Button>
     </div>
@@ -175,7 +198,10 @@ export function SavedView({
           savedHeartIconSrc="/app/images/save-heart-selected.svg"
           savedHeartIconClassName="left-[2.25px] top-[3.79px] h-[17.46px] w-[19.5px]"
           onSavedChange={(saved) => {
-            if (!saved) setItems((prev) => prev.filter((x) => x.artworkId !== a.artworkId));
+            if (!saved) {
+              setItems((prev) => prev.filter((x) => x.artworkId !== a.artworkId));
+              sessionStorage.setItem(SHARED_BOARDS_REFRESH_KEY, '1');
+            }
           }}
           selectable={editing}
           selected={selected.has(a.artworkId)}
@@ -276,9 +302,19 @@ export function SavedView({
       {header}
       <Tabs value={tab} onValueChange={changeTab}>
         {!editing && (
-          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 border-neutral-200 bg-neutral-100">
-            <TabsTrigger value="saved" className="border-b-2">내 저장</TabsTrigger>
-            <TabsTrigger value="board" className="border-b-2">공동보드</TabsTrigger>
+          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 border-neutral-400 bg-neutral-100">
+            <TabsTrigger
+              value="saved"
+              className="data-[state=inactive]:border-neutral-400 data-[state=active]:border-b-2 data-[state=active]:tracking-[-0.01em]"
+            >
+              내 저장
+            </TabsTrigger>
+            <TabsTrigger
+              value="board"
+              className="data-[state=inactive]:border-neutral-400 data-[state=active]:border-b-2 data-[state=active]:tracking-[-0.01em]"
+            >
+              공동보드
+            </TabsTrigger>
           </TabsList>
         )}
         <div
