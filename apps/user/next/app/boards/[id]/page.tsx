@@ -341,9 +341,12 @@ export default function BoardDetailPage() {
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span className="text-body-3 text-primary">{formatPrice(artwork.lowestPrice)}</span>
               <div className="flex flex-wrap items-center gap-1">
-                {artwork.artistRegionList.map((region) => (
+                {artwork.artistRegionList.slice(0, 2).map((region) => (
                   <RegionTag key={region}>{artistRegionLabel(region)}</RegionTag>
                 ))}
+                {artwork.artistRegionList.length > 2 && (
+                  <span className="text-body-5 text-neutral-600">+{artwork.artistRegionList.length - 2}</span>
+                )}
               </div>
             </div>
           </a>
@@ -547,7 +550,7 @@ export default function BoardDetailPage() {
 
   const managementSheet = (
     <BottomSheet open={manageOpen} onOpenChange={setManageOpen} title="공동보드 관리">
-      <h2 className="px-5 pb-4 pt-2 text-head-2 text-neutral-950 text-center">공동보드 관리</h2>
+      <h2 className="px-5 pb-4 pt-2 text-head-3 tracking-[-0.01em] text-neutral-950 text-center">공동보드 관리</h2>
 
       <div className="flex flex-col px-5">
         {board.isOwner ? (
