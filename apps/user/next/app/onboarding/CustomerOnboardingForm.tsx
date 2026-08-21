@@ -237,8 +237,6 @@ export function CustomerOnboardingForm({
   const [name, setName] = useState('');
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<University>();
-  const [manualUniversityName, setManualUniversityName] = useState('');
-  const [isManualUniversityInputVisible, setIsManualUniversityInputVisible] = useState(false);
   const [region, setRegion] = useState<ArtistRegionCode>();
   const [isSearchingSchool, setIsSearchingSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -291,18 +289,10 @@ export function CustomerOnboardingForm({
   if (isSearchingSchool) {
     return (
       <UniversitySearchScreen
-        initialKeyword={selectedUniversity?.name ?? manualUniversityName}
+        initialKeyword={selectedUniversity?.name ?? ''}
         onBack={() => setIsSearchingSchool(false)}
-        onManualInput={(keyword) => {
-          setSelectedUniversity(undefined);
-          setManualUniversityName(keyword);
-          setIsManualUniversityInputVisible(true);
-          setIsSearchingSchool(false);
-        }}
         onSelect={(university) => {
           setSelectedUniversity(university);
-          setManualUniversityName('');
-          setIsManualUniversityInputVisible(false);
           setIsSearchingSchool(false);
         }}
       />
@@ -410,20 +400,7 @@ export function CustomerOnboardingForm({
           <br />
           학교명과 구체적인 캠퍼스명을 함께 적어 주세요.
         </p>
-        <div className="mt-8 flex flex-col gap-6">
-          {schoolButton}
-          {isManualUniversityInputVisible ? (
-            <TextField
-              autoFocus
-              id="manual-university-name"
-              label="학교명 직접 입력"
-              onChange={(event) => setManualUniversityName(event.target.value)}
-              onClear={() => setManualUniversityName('')}
-              placeholder="학교명과 캠퍼스명을 입력하세요"
-              value={manualUniversityName}
-            />
-          ) : null}
-        </div>
+        <div className="mt-8">{schoolButton}</div>
       </section>
     );
 

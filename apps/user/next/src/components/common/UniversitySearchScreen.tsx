@@ -10,7 +10,7 @@ export const getUniversityLabel = (university: University) => university.name;
 interface UniversitySearchScreenProps {
   initialKeyword: string;
   onBack: () => void;
-  onManualInput: (keyword: string) => void;
+  onManualInput?: (keyword: string) => void;
   onSelect: (university: University) => void;
 }
 
@@ -86,7 +86,7 @@ export function UniversitySearchScreen({
     <Search aria-hidden className="text-neutral-500" size={20} strokeWidth={1.8} />
   );
 
-  const manualInputButton = hasSearched ? (
+  const manualInputButton = hasSearched && onManualInput ? (
     <div className="mt-3 flex w-full justify-center px-4">
       <button
         className="flex h-[72px] w-full flex-col items-center justify-center rounded-md border border-neutral-200 bg-neutral-0 text-center"

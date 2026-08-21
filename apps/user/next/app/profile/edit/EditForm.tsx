@@ -41,7 +41,6 @@ interface EditFormProps {
 export function EditForm({ initialName, initialRegion, initialUniversity }: EditFormProps) {
   const [isSearchingSchool, setIsSearchingSchool] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState(initialUniversity);
-  const [manualUniversityName, setManualUniversityName] = useState('');
   const [region, setRegion] = useState<ArtistRegionCode | ''>(initialRegion ?? '');
   const {
     register,
@@ -82,16 +81,10 @@ export function EditForm({ initialName, initialRegion, initialUniversity }: Edit
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <UniversitySearchScreen
-          initialKeyword={selectedUniversity?.name ?? manualUniversityName}
+          initialKeyword={selectedUniversity?.name ?? ''}
           onBack={() => setIsSearchingSchool(false)}
-          onManualInput={(keyword) => {
-            setSelectedUniversity(null);
-            setManualUniversityName(keyword);
-            setIsSearchingSchool(false);
-          }}
           onSelect={(university) => {
             setSelectedUniversity(university);
-            setManualUniversityName('');
             setIsSearchingSchool(false);
           }}
         />
@@ -117,7 +110,6 @@ export function EditForm({ initialName, initialRegion, initialUniversity }: Edit
     </div>
   );
 
-  const schoolName = selectedUniversity?.name ?? manualUniversityName;
   const schoolSearchField = (
     <div className="flex flex-col gap-2 pb-6">
       <span className="text-body-4 text-neutral-950">학교명</span>
@@ -128,15 +120,10 @@ export function EditForm({ initialName, initialRegion, initialUniversity }: Edit
           onClick={() => setIsSearchingSchool(true)}
           type="button"
         >
-          {schoolName || '학교명을 검색하세요'}
+          {selectedUniversity?.name ?? '학교명을 검색하세요'}
         </button>
-        {schoolName ? (
-          <DeleteButton
-            onClick={() => {
-              setSelectedUniversity(null);
-              setManualUniversityName('');
-            }}
-          />
+        {selectedUniversity ? (
+          <DeleteButton onClick={() => setSelectedUniversity(null)} />
         ) : null}
       </div>
     </div>
