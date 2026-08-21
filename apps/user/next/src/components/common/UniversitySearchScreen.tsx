@@ -5,8 +5,7 @@ import { Search } from 'lucide-react';
 import type { University } from '@dearbloom/shared';
 import { DeleteButton, Header, TextField } from '@dearbloom/ui';
 
-export const getUniversityLabel = (university: University) =>
-  `${university.name} ${university.region}캠퍼스`;
+export const getUniversityLabel = (university: University) => university.name;
 
 interface UniversitySearchScreenProps {
   initialKeyword: string;

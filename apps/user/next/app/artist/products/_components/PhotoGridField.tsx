@@ -169,13 +169,10 @@ export function PhotoGridField({ value, onChange }: { value: PhotoItem[]; onChan
             <li key={u.universityId}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-neutral-100"
+                className="w-full px-3 py-2 text-left hover:bg-neutral-100"
                 onClick={() => assign(u)}
               >
                 <span className="truncate text-body-5 text-neutral-950">{u.name}</span>
-                {/* 같은 이름의 캠퍼스가 여럿이라(예: 홍익대 본교/제2캠퍼스) 이름만으론 고를 수 없다.
-                    다만 작가는 캠퍼스만 구분하면 되고 지역까지 보이면 '해당 지역 작품만' 으로 오해해서 지역은 뺀다. */}
-                <span className="shrink-0 text-caption-2 text-neutral-500">{u.campusType}</span>
               </button>
             </li>
           ))}
