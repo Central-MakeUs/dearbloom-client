@@ -5,7 +5,11 @@ import {
   unsaveArtworks,
   ApiError,
   getMemberMe,
+  getSharedBoards,
+  getSharedBoardSavedArtworks,
+  updateSharedBoardArtworks,
 } from '@dearbloom/shared';
+import { remainingSharedArtworkIds } from '@/src/lib/savedArtworkCascade';
 
 /**
  * 저장 프록시 — 클라이언트 island 는 httpOnly accessToken 쿠키를 못 읽으므로,
@@ -38,6 +42,21 @@ async function classifyFailure(token: string, error: unknown): Promise<'unauthor
 
 function failureResponse(reason: 'unauthorized' | 'customer_required') {
   return NextResponse.json({ error: reason }, { status: reason === 'unauthorized' ? 401 : 403 });
+}
+
+async function removeFromSharedBoards(artworkIds: number[], token: string) {
+  const removedIds = new Set(artworkIds);
+  const boards = await getSharedBoards({ token });
+
+  await Promise.all(
+    boards.map(async (board) => {
+      const artworks = await getSharedBoardSavedArtworks(board.sharedBoardId, { token });
+      const remainingIds = remainingSharedArtworkIds(artworks, removedIds);
+      if (remainingIds) {
+        await updateSharedBoardArtworks(board.sharedBoardId, remainingIds, { token });
+      }
+    }),
+  );
 }
 
 /** 작품 저장 */
@@ -76,6 +95,7 @@ export async function DELETE(request: NextRequest) {
     const ids = body.artworkIdList.map(Number).filter((n) => Number.isFinite(n));
     if (ids.length === 0) return NextResponse.json({ error: 'empty artworkIdList' }, { status: 400 });
     try {
+      await removeFromSharedBoards(ids, token);
       await unsaveArtworks(ids, { token });
       return new NextResponse(null, { status: 204 });
     } catch (e) {
@@ -89,6 +109,7 @@ export async function DELETE(request: NextRequest) {
   const id = Number(body.artworkId);
   if (!Number.isFinite(id)) return NextResponse.json({ error: 'invalid artworkId' }, { status: 400 });
   try {
+    await removeFromSharedBoards([id], token);
     await unsaveArtwork(id, { token });
     return new NextResponse(null, { status: 204 });
   } catch (e) {
