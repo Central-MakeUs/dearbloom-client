@@ -255,8 +255,8 @@ export default function BoardDetailPage() {
   );
 
   const members = (
-    <div className="flex items-center gap-2 px-4 py-2">
-      <div className="flex items-center gap-1 text-body-1 text-neutral-800">
+    <div className="flex items-center gap-2 overflow-x-auto px-4 py-2">
+      <div className="flex shrink-0 items-center gap-1 text-body-1 text-neutral-800">
         <span aria-hidden className="relative size-5 overflow-clip">
           <img
             src="/app/images/board-member.svg"
@@ -271,7 +271,7 @@ export default function BoardDetailPage() {
       {board.sharedMemberList.map((member) => (
         <span
           key={member.customerId}
-          className="rounded-md bg-neutral-200 px-3 py-1.5 text-body-5 text-neutral-800"
+          className="shrink-0 whitespace-nowrap rounded-md bg-neutral-200 px-3 py-1.5 text-body-5 text-neutral-800"
         >
           {member.sharedMemberName}
         </span>
