@@ -28,5 +28,12 @@
       "source": "/app/:path*",
       "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app/:path*"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "missing": [{ "type": "host", "value": "dearbloom.co.kr" }],
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
   ]
 }
