@@ -7,8 +7,11 @@ import { SITE_URL } from '@/lib/site';
  * 운영 도메인에서만 크롤링을 허용합니다. dev.dearbloom.co.kr·*.vercel.app 프리뷰는 전부 막습니다.
  * /app(Next 로그인 영역)·/api·필터 화면은 검색 결과로 쓸 내용이 없어 제외합니다.
  */
-export const GET: APIRoute = ({ url }) => {
-  const isProductionHost = url.origin === SITE_URL;
+export const GET: APIRoute = ({ request, url }) => {
+  // Vercel 함수 안의 request.url 은 실제 접속 도메인이 아니어서 x-forwarded-host 로 판별합니다(middleware.ts 와 같은 방식).
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
+  const hostname = (forwardedHost?.split(':')[0] ?? url.hostname).toLowerCase();
+  const isProductionHost = hostname === new URL(SITE_URL).hostname;
   const lines = isProductionHost
     ? [
         'User-agent: *',
