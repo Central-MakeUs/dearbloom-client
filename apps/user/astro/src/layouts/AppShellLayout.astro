@@ -1,11 +1,14 @@
 ---
+import SeoHead from '@/components/SeoHead.astro';
 import { AppToaster, BottomTab, NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
+  /** 검색 결과·공유 미리보기 설명. 비우면 사이트 기본 설명 */
+  description?: string;
   navVariant?: 'light' | 'dark';
 }
-const { title, navVariant = 'light' } = Astro.props;
+const { title, description, navVariant = 'light' } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 <!doctype html>
@@ -28,7 +31,7 @@ const currentPath = Astro.url.pathname;
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
-    <title>{title} · DearBloom</title>
+    <SeoHead title={title} description={description} />
   </head>
   <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
     <slot />

@@ -1,0 +1,24 @@
+---
+/*
+  레이아웃 공통 SEO 태그 — title·description·canonical·OG.
+  작품 상세(/snaps/[slug])는 작품별 OG 이미지가 있어 자체 <head> 를 씁니다.
+*/
+import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
+const fullTitle = `${title} · ${SITE_NAME}`;
+const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).toString();
+---
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta name="twitter:card" content="summary" />
