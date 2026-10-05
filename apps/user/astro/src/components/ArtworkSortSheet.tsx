@@ -8,20 +8,22 @@ interface Props {
   current: ArtworkSortOrder;
   /** 정렬을 뺀 현재 필터 쿼리('region=SEOUL' 형태, 앞의 ? 없음). */
   filterQuery: string;
+  /** 정렬 후 돌아갈 목록 경로. 지역 랜딩(/region/서울)은 자기 경로에 머뭅니다. */
+  basePath?: string;
 }
 
 /**
  * 정렬 선택 — 트리거(추천순 ▾) + 바텀시트. Figma 1062:18147 실측.
  * 고른 값은 URL 로 반영해 페이지를 다시 받습니다. 커서가 초기화돼야 정렬이 섞이지 않습니다.
  */
-export function ArtworkSortSheet({ current, filterQuery }: Props) {
+export function ArtworkSortSheet({ current, filterQuery, basePath = '/snaps' }: Props) {
   const [open, setOpen] = useState(false);
 
   const apply = (sort: ArtworkSortOrder) => {
     const q = new URLSearchParams(filterQuery);
     if (sort === 'LATEST') q.delete('sort');
     else q.set('sort', sort);
-    window.location.href = `/snaps${q.size > 0 ? `?${q}` : ''}`;
+    window.location.href = `${basePath}${q.size > 0 ? `?${q}` : ''}`;
   };
 
   const trigger = (

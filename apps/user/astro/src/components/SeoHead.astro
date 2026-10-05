@@ -8,9 +8,13 @@ import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 interface Props {
   title: string;
   description?: string;
+  /** 구조화 데이터(schema.org). 검색 결과에 사이트명·이동경로 등을 붙이는 데 씁니다. */
+  jsonLd?: Record<string, unknown>;
 }
-const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
+const { title, description = DEFAULT_DESCRIPTION, jsonLd } = Astro.props;
 const fullTitle = `${title} · ${SITE_NAME}`;
+// JSON 안의 '<' 를 이스케이프해 문자열 값이 </script> 로 태그를 닫지 못하게 한다.
+const jsonLdHtml = jsonLd && JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).toString();
 ---
 <title>{fullTitle}</title>
@@ -22,3 +26,4 @@ const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).toString();
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalUrl} />
 <meta name="twitter:card" content="summary" />
+{jsonLdHtml && <script type="application/ld+json" set:html={jsonLdHtml} />}

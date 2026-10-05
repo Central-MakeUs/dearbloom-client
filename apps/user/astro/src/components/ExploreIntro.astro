@@ -1,0 +1,77 @@
+---
+/*
+  검색 랜딩(홈·지역) 상단 — H1·소개 한 줄·지역 링크.
+  시안 없이 검색엔진이 페이지 주제를 읽을 최소 텍스트만 둡니다. 지역 링크는 지역 랜딩끼리의 내부 링크 허브입니다.
+*/
+import type { ArtistRegionCode } from '@dearbloom/shared';
+import { REGION_LINKS } from '@/lib/regionSlug';
+
+interface Props {
+  heading: string;
+  description: string;
+  /** 지역 랜딩이면 현재 지역 칩을 강조합니다. */
+  currentRegion?: ArtistRegionCode;
+}
+const { heading, description, currentRegion } = Astro.props;
+
+const CHIP_CLASS = 'flex h-8 shrink-0 items-center rounded-[6px] border px-2.5 text-body-5';
+---
+
+<section class="px-4 pt-4">
+  <h1 class="text-body-2 font-semibold text-neutral-950">{heading}</h1>
+  <p class="mt-1 text-body-5 text-neutral-600">{description}</p>
+  {/* 가로 스크롤 — 스크롤바는 숨기고, 넘길 칩이 남은 쪽에만 페이드를 띄워 더 있다는 걸 보여준다. */}
+  <div class="relative -mx-4 mt-3" data-region-scroller>
+    <nav
+      aria-label="지역별 졸업스냅 작가"
+      class="flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {REGION_LINKS.map((region) => (
+        <a
+          href={region.href}
+          aria-current={region.code === currentRegion ? 'page' : undefined}
+          class:list={[
+            CHIP_CLASS,
+            region.code === currentRegion
+              ? 'border-neutral-950 font-semibold text-neutral-950'
+              : 'border-neutral-400 text-neutral-700',
+          ]}
+        >
+          {region.label}
+        </a>
+      ))}
+    </nav>
+    <span
+      data-fade="start"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-neutral-100 opacity-0 transition-opacity"
+    ></span>
+    <span
+      data-fade="end"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-neutral-100 transition-opacity"
+    ></span>
+  </div>
+</section>
+
+<script>
+  for (const scroller of document.querySelectorAll<HTMLElement>('[data-region-scroller]')) {
+    const nav = scroller.querySelector('nav');
+    const startFade = scroller.querySelector<HTMLElement>('[data-fade="start"]');
+    const endFade = scroller.querySelector<HTMLElement>('[data-fade="end"]');
+    if (!nav || !startFade || !endFade) continue;
+
+    // 지역 랜딩에선 현재 지역 칩이 화면 밖(제주 등)이어도 보이도록 가운데로 당긴다. 페이지 세로 스크롤은 건드리지 않는다.
+    const current = nav.querySelector<HTMLElement>('[aria-current="page"]');
+    if (current) nav.scrollLeft = current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2;
+
+    const update = () => {
+      const maxScroll = nav.scrollWidth - nav.clientWidth;
+      startFade.style.opacity = nav.scrollLeft > 4 ? '1' : '0';
+      endFade.style.opacity = nav.scrollLeft < maxScroll - 4 ? '1' : '0';
+    };
+    update();
+    nav.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  }
+</script>
