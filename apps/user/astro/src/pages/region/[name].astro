@@ -1,13 +1,45 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-const { name } = Astro.params;
+export const prerender = false; // 서버 렌더 (지역 작품 목록을 요청 시 API 로 가져옴)
 
-export function getStaticPaths() {
-  return [];
-}
+/*
+  지역 검색 랜딩 — /snaps 의 지역 필터와 같은 목록을 "서울 졸업스냅" 같은 검색어로 색인되는 주소에 엽니다.
+  /snaps?region=SEOUL 은 canonical 이 /snaps 라 검색엔진이 따로 색인하지 않습니다.
+*/
+import AppShellLayout from '@/layouts/AppShellLayout.astro';
+import { AppHeader } from '@dearbloom/ui';
+import { ARTIST_REGION_LABELS } from '@dearbloom/shared';
+import ArtworkExplore from '@/components/ArtworkExplore.astro';
+import ExploreIntro from '@/components/ExploreIntro.astro';
+import { loadFirstArtworkPage } from '@/lib/artworkExplore';
+import { parseFilterParams, parseView } from '@/lib/artworkFilter';
+import { regionCodeFromSlug, regionPath } from '@/lib/regionSlug';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
+
+const region = regionCodeFromSlug(Astro.params.name);
+if (!region) return new Response(null, { status: 404 });
+
+const label = ARTIST_REGION_LABELS[region];
+const basePath = regionPath(region);
+// 날짜·인원·정렬은 쿼리로 함께 받고, 지역은 경로가 정한다.
+const filter = { ...parseFilterParams(Astro.url), region };
+const view = parseView(Astro.url);
+const { page, loadFailed } = await loadFirstArtworkPage(Astro, filter);
+
+const heading = `${label} 졸업스냅·졸업사진 작가`;
+const description = `${label}에서 활동하는 졸업스냅 작가의 작품과 가격을 한눈에 비교하고 바로 문의해 보세요.`;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: `${SITE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: heading, item: new URL(basePath, SITE_URL).toString() },
+  ],
+};
 ---
-<BaseLayout title={`${name} 스냅`}>
-  <h1>지역별 페이지</h1>
-  <p>route: /region/[name]</p>
-  <p>region: {name}</p>
-</BaseLayout>
+
+<AppShellLayout title={heading} description={description} jsonLd={jsonLd} navVariant="light">
+  <AppHeader logoHref="/snaps" />
+  <ArtworkExplore page={page} loadFailed={loadFailed} filter={filter} view={view} basePath={basePath}>
+    <ExploreIntro heading={heading} description={description} currentRegion={region} />
+  </ArtworkExplore>
+</AppShellLayout>
