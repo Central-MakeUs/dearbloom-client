@@ -1,8 +1,10 @@
 ---
 export const prerender = false;
 
-import { getArtwork, type ArtworkDetail } from '@dearbloom/shared';
+import { ApiError, getArtwork, type ArtworkDetail } from '@dearbloom/shared';
 import { ArtworkImageHeader } from '@/components/ArtworkImageHeader';
+import SeoHead from '@/components/SeoHead.astro';
+import { pageStatusForFetchError } from '@/lib/fetchErrorStatus';
 import { matchesImageSchool } from '@/lib/imageViewer';
 import { optimizedImageUrl } from '@/lib/imageUrl';
 
@@ -16,6 +18,7 @@ try {
   artwork = await getArtwork(slug!);
 } catch (error) {
   console.error('[snaps/:id/images] getArtwork 실패', slug, error);
+  Astro.response.status = pageStatusForFetchError(error instanceof ApiError ? error.status : undefined);
 }
 
 const images = artwork?.photoList
@@ -42,7 +45,8 @@ const galleryQuery = (school = selectedSchool) => {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>이미지 상세 · dearBloom</title>
+    {/* 작품 상세와 같은 사진만 모아 둔 화면이라 색인은 상세에 맡기고, 링크만 따라가게 한다. */}
+    <SeoHead title="이미지 상세" noindex />
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     <main class="mx-auto min-h-screen max-w-md bg-neutral-100">
