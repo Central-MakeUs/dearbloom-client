@@ -17,7 +17,7 @@ const { heading, description, currentRegion } = Astro.props;
 const CHIP_CLASS = 'flex h-8 shrink-0 items-center rounded-[6px] border px-2.5 text-body-5';
 ---
 
-<section class="px-4 pt-4">
+<section class="px-4 pt-4 lg:px-0 lg:pt-0">
   <h1 class="text-body-2 font-semibold text-neutral-950">{heading}</h1>
   <p class="mt-1 text-body-5 text-neutral-600">{description}</p>
   {/* 가로 스크롤 — 스크롤바는 숨기고, 넘길 칩이 남은 쪽에만 페이드를 띄워 더 있다는 걸 보여준다. */}
