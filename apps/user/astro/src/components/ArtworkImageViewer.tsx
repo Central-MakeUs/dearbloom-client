@@ -21,7 +21,7 @@ export function ArtworkImageViewer({ backHref, images, initialIndex, title }: Pr
   }, [initialIndex]);
 
   const photoFrame = (image: Props['images'][number], index: number) => (
-    <div className="relative aspect-[375/494] max-h-full w-full max-w-md overflow-hidden">
+    <div className="relative aspect-[375/494] max-h-full w-full max-w-md overflow-hidden lg:max-w-2xl">
       <img
         src={image.url}
         alt={`${title} ${index + 1}번 사진`}

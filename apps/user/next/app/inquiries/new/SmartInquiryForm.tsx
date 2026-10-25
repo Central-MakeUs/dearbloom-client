@@ -25,6 +25,7 @@ import {
 import { ampmTimeLabel, durationLabel } from '@/src/lib/inquiry';
 import { getSlotTimes, getStartTimes } from '@/src/lib/inquirySlots';
 import { buildSlotGrid } from '@/src/lib/slots';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 const dateKey = (year: number, month: number, day: number) =>
@@ -412,9 +413,10 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
   );
 
   return (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="mx-auto min-h-dvh max-w-[375px]">
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('mx-auto min-h-dvh max-w-[375px]', PC_FLOW_CARD, 'lg:overflow-clip lg:bg-neutral-100')}>
         <Header
+          staticOnPc
           title="스마트 문의하기"
           onBack={() =>
             step === 'details'
@@ -431,26 +433,27 @@ export function SmartInquiryForm({ preparation }: { preparation: InquiryPreparat
               ? schoolContent
               : detailsContent}
         </div>
-      </div>
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
-        {step === 'schedule' ? (
-          <BottomButton color="black" disabled={!canContinue} onClick={() => setStep('school')}>
-            다음
-          </BottomButton>
-        ) : step === 'school' ? (
-          <BottomButton
-            color="black"
-            disabled={!canContinueSchool}
-            onClick={() => setStep('details')}
-          >
-            다음
-          </BottomButton>
-        ) : (
-          <BottomButton color="green" disabled={submitting} onClick={submit}>
-            {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
-            {submitting ? '전송 중...' : '문의 보내기'}
-          </BottomButton>
-        )}
+        {/* 모바일은 화면 하단 고정. PC 는 카드 안 sticky — 내용이 카드보다 길어도 버튼이 화면 바닥에 따라온다. */}
+        <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 lg:sticky lg:rounded-b-xl">
+          {step === 'schedule' ? (
+            <BottomButton color="black" disabled={!canContinue} onClick={() => setStep('school')}>
+              다음
+            </BottomButton>
+          ) : step === 'school' ? (
+            <BottomButton
+              color="black"
+              disabled={!canContinueSchool}
+              onClick={() => setStep('details')}
+            >
+              다음
+            </BottomButton>
+          ) : (
+            <BottomButton color="green" disabled={submitting} onClick={submit}>
+              {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
+              {submitting ? '전송 중...' : '문의 보내기'}
+            </BottomButton>
+          )}
+        </div>
       </div>
     </main>
   );
@@ -461,8 +464,14 @@ function InquirySentView({ chatRoomId }: { chatRoomId?: number }) {
   const chatHref = chatRoomId ? `/app/chats/${chatRoomId}` : '/app/chats';
 
   return (
-    <main className="min-h-dvh bg-primary-100">
-      <div className="mx-auto flex min-h-dvh max-w-[375px] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-28">
+    <main className={cn('min-h-dvh bg-primary-100', PC_FLOW_BACKDROP)}>
+      <div
+        className={cn(
+          'mx-auto flex min-h-dvh max-w-[375px] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-28',
+          PC_FLOW_CARD,
+          'lg:bg-primary-100',
+        )}
+      >
         <div className="flex flex-col items-center gap-6 text-center">
           <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-primary-400 text-neutral-0">
             <Check size={40} strokeWidth={3.5} aria-hidden />

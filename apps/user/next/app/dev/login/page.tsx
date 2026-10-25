@@ -117,7 +117,7 @@ export default async function DevLoginPage({
   );
 
   return (
-    <main className="mx-auto max-w-md px-4 py-6">
+    <main className="mx-auto max-w-md px-4 py-6 lg:max-w-2xl">
       <h1 className="text-head-2 text-neutral-950">개발용 로그인</h1>
       <p className="mt-1 text-caption-1 text-neutral-600">
         테스트 계정으로 로그인한 뒤 사용할 역할을 선택합니다.

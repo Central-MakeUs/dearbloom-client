@@ -24,7 +24,7 @@ export default async function ArtistMyPage() {
   const token = cookieStore.get('accessToken')?.value;
 
   const login = (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       <Header showBack={false} title="마이페이지" />
       <LoginRequired
         description="작가 계정으로 로그인해 주세요."
@@ -76,7 +76,7 @@ export default async function ArtistMyPage() {
   );
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       <Header showBack={false} title="마이페이지" />
       {profile}
       {nav}

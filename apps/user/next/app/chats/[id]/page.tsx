@@ -23,7 +23,7 @@ export default async function ChatDetailPage({ params }: { params: Promise<{ id:
 
   if (!token || expired) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header title="채팅" showBack={false} />
         <LoginRequired
           description="로그인하고 작가님과 대화를 이어가 보세요."

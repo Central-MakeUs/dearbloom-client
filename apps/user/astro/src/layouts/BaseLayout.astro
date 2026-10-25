@@ -1,6 +1,6 @@
 ---
 import SeoHead from '@/components/SeoHead.astro';
-import { NativeExitDialog } from '@dearbloom/ui';
+import { MainTopNav, NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -26,8 +26,12 @@ const { title, description } = Astro.props;
     />
     <SeoHead title={title} description={description} />
   </head>
-  <body class="font-sans text-ink p-10">
-    <slot />
+  <body class="font-sans text-ink">
+    {/* PC(lg 이상) 상단 GNB — 약관·안내 페이지에서도 서비스로 돌아갈 길을 둔다. */}
+    <MainTopNav currentPath={Astro.url.pathname} />
+    <div class="p-10">
+      <slot />
+    </div>
     {/* 앱 종료 확인 — RN WebView 안에서만 의미가 있어 client:native (브라우저엔 JS 를 안 보냄). */}
     <NativeExitDialog client:native />
   </body>

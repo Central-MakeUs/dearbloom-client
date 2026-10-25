@@ -20,7 +20,7 @@ export interface BottomSheetProps {
  * vaul 은 초기 번들을 무겁게 하므로 여기서 직접 쓰지 말고 지연 로드 래퍼인 `BottomSheet` 를
  * 쓸 것(같은 폴더). 그쪽 주석에 이유가 있다.
  * 드래그 핸들 + 드래그로 닫기 + 스크림.
- * 화면 하단에 max-w-md 로 중앙 정렬되어 모바일 앱처럼 올라온다.
+ * 화면 하단에 max-w-md 로 중앙 정렬되어 모바일 앱처럼 올라온다. PC 에선 바닥에서 조금 띄운 카드.
  */
 export function BottomSheetImpl({
   open,
@@ -37,6 +37,8 @@ export function BottomSheetImpl({
         <Drawer.Content
           className={cn(
             'fixed inset-x-0 bottom-0 z-[70] mx-auto flex max-h-[85vh] max-w-md flex-col rounded-t-xl bg-neutral-0 pb-8 outline-none',
+            // PC(lg 이상)는 화면 바닥에 붙이지 않고 살짝 띄운 카드로 — 넓은 화면에서 시트가 바닥에 묻히지 않게.
+            'lg:bottom-6 lg:rounded-xl lg:pb-6',
             className,
           )}
         >

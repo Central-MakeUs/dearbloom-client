@@ -20,7 +20,7 @@ export default async function ArtistSchedulePage() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header />
         <LoginRequired
           description="작가 계정으로 로그인하면 일정을 관리할 수 있어요."
@@ -42,7 +42,7 @@ export default async function ArtistSchedulePage() {
   const loadFailed = weekly === null || recurring === null || dates === null;
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       <Header />
       <ScheduleManager
         weekly={weekly ?? ([] as ScheduleRule[])}

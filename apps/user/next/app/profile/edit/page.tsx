@@ -14,7 +14,7 @@ export default async function ProfileEditPage() {
   if (!token) {
     return (
       <main className="min-h-screen bg-neutral-100">
-        <div className="mx-auto flex min-h-screen max-w-md flex-col">
+        <div className="mx-auto flex min-h-screen max-w-md flex-col lg:max-w-2xl">
           <Header />
           <LoginRequired className="flex-1 justify-center py-0" returnUrl="/app/profile/edit" />
         </div>
@@ -26,7 +26,7 @@ export default async function ProfileEditPage() {
 
   return (
     <main className="min-h-screen bg-neutral-100">
-      <div className="relative mx-auto flex min-h-screen max-w-md flex-col">
+      <div className="relative mx-auto flex min-h-screen max-w-md flex-col lg:max-w-2xl">
         <Header />
         <EditForm
           initialName={me?.name ?? ''}

@@ -23,7 +23,10 @@ interface HeaderProps {
    * 채팅방처럼 PC 에서 패널 안에 헤더를 넣는 화면용.
    */
   staticOnPc?: boolean;
-  /** PC(lg 이상)에서 본문을 넓게 쓰는 화면이면 헤더 폭도 맞춰 넓힌다(우측 슬롯이 본문 끝에 붙게). */
+  /**
+   * PC(lg 이상)에서 목록·그리드처럼 본문을 화면 폭(screen-lg)으로 쓰는 화면이면 헤더도 맞춰 넓힌다.
+   * 기본 PC 폭은 폼·상세 화면 폭(2xl).
+   */
   wideOnPc?: boolean;
   className?: string;
 }
@@ -87,7 +90,8 @@ export function Header({
         {/* 좌우 4px 은 Figma header_title 실측(아이콘 44x44 가 각각 x=4, x=327, 프레임 375). */}
         <div
           className={cn(
-            'relative mx-auto flex h-[52px] max-w-md items-center justify-between px-1',
+            // PC 기본 폭은 폼·상세 화면 폭(2xl)에 맞춘다.
+            'relative mx-auto flex h-[52px] max-w-md items-center justify-between px-1 lg:max-w-2xl',
             wideOnPc && 'lg:max-w-screen-lg',
           )}
         >

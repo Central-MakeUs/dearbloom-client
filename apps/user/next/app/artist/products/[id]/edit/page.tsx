@@ -14,7 +14,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         {header}
         <LoginRequired
           description="작가 계정으로 로그인해 주세요."
@@ -27,7 +27,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
   const art = await getMyArtwork(id, { token }).catch(() => null);
   if (!art) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         {header}
         <p className="px-4 py-16 text-center text-body-6 text-neutral-500">작품을 불러오지 못했어요.</p>
       </div>
@@ -35,7 +35,7 @@ export default async function EditArtworkPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {header}
       <EditForm
         id={art.artworkId}

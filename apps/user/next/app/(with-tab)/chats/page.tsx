@@ -14,7 +14,7 @@ export default async function ChatsPage() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header showBack={false} title="채팅 목록" />
         <LoginRequired
           description="로그인하고 작가님께 문의를 시작해 보세요."

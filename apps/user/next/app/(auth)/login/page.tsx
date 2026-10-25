@@ -11,6 +11,8 @@ import { getMemberHome } from '@/src/lib/memberHome';
 
 import { LoginCloseButton } from '../LoginCloseButton';
 import { SocialLoginButtons } from '../SocialLoginButtons';
+import { cn } from '@dearbloom/ui';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 type LoginPageProps = {
   searchParams: Promise<{ auth?: string; forceOnboarding?: string; returnUrl?: string }>;
@@ -92,8 +94,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <>
       <meta content="rgb(229 235 232)" name="theme-color" />
-      <main className="min-h-dvh bg-primary-100">
-        <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+      <main className={cn('min-h-dvh bg-primary-100', PC_FLOW_BACKDROP)}>
+        <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden', PC_FLOW_CARD, 'lg:bg-primary-100')}>
           {/* 로그인은 보던 화면 위에 얹히는 단계라 항상 닫고 나갈 길을 둔다. */}
           <LoginCloseButton fallbackHref={returnUrl ?? '/snaps'} />
           <div className="absolute left-1/2 top-[121px] -translate-x-1/2">{brand}</div>

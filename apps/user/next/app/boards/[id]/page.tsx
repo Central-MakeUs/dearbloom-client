@@ -126,8 +126,8 @@ export default function BoardDetailPage() {
 
   if (!board) {
     return (
-      <div className="board-detail-background mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드" />
+      <div className="board-detail-background mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100 lg:max-w-screen-lg">
+        <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드" wideOnPc />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-500">
           보드를 찾을 수 없어요.
         </p>
@@ -290,7 +290,7 @@ export default function BoardDetailPage() {
   );
 
   const grid = (
-    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3 lg:grid-cols-4 lg:gap-x-4 lg:gap-y-8">
       {getRankedSharedArtworks(board.sharedArtworkList).map(({ artwork, rank }) => (
         <div key={artwork.sharedArtworkId} className="flex flex-col">
           <div className="relative mb-2 aspect-[4/5] overflow-hidden rounded-lg bg-neutral-200">
@@ -356,7 +356,7 @@ export default function BoardDetailPage() {
   );
 
   const addBar = (
-    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 pb-6 pt-2">
+    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 pb-6 pt-2 lg:max-w-screen-lg">
       <BottomButtonBar leading={<ShareButton onClick={() => setShareOpen(true)} />}>
         <BottomButton
           color={board.hasMySharedArtworks ? 'black' : 'green'}
@@ -674,12 +674,13 @@ export default function BoardDetailPage() {
   );
 
   return (
-    <div className="board-detail-background relative mx-auto min-h-dvh max-w-md bg-neutral-100">
+    <div className="board-detail-background relative mx-auto min-h-dvh max-w-md bg-neutral-100 lg:max-w-screen-lg">
       <AppBackHeader
         showBack
         fallbackHref="/app/saved?tab=board"
         title={board.sharedBoardName}
         right={headerActions}
+        wideOnPc
       />
       {members}
       {board.sharedArtworkCount === 0 ? emptyBody : grid}

@@ -24,6 +24,7 @@ import { getOnboardingCompletionPath } from '@/src/lib/onboardingRoute';
 import boardTourImage from '../../public/images/onboarding-tour-board.png';
 import exploreTourImage from '../../public/images/onboarding-tour-explore.png';
 import inquiryTourImage from '../../public/images/onboarding-tour-inquiry.png';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD, PC_FLOW_MIN_H } from '@/src/lib/pcFrame';
 
 type OnboardingStep = 'complete' | 'name' | 'region' | 'school' | 'tour';
 
@@ -55,8 +56,8 @@ function OnboardingComplete({ onExploreFeatures }: { onExploreFeatures: () => vo
   );
 
   return (
-    <main className="min-h-dvh bg-primary-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden">
+    <main className={cn('min-h-dvh bg-primary-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden', PC_FLOW_CARD, 'lg:bg-primary-100')}>
         <section className="flex flex-col items-center px-4 pt-[160px] text-center">
           <Image alt="" className="size-[72px]" priority src={completeIcon} />
           <div className="mt-6 flex w-[185px] flex-col items-center gap-2">
@@ -171,10 +172,14 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
   );
 
   return (
-    <main className="min-h-dvh bg-primary-100">
+    <main className={cn('min-h-dvh bg-primary-100', PC_FLOW_BACKDROP)}>
       <div
         aria-label="디어블룸 기능 둘러보기"
-        className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden touch-pan-y focus:outline-none"
+        className={cn(
+          'relative mx-auto min-h-dvh max-w-[375px] overflow-hidden touch-pan-y focus:outline-none',
+          PC_FLOW_CARD,
+          'lg:bg-primary-100',
+        )}
         onTouchCancel={() => {
           swipeStart.current = null;
         }}
@@ -185,12 +190,15 @@ function OnboardingTour({ onFinish }: { onFinish: () => void }) {
         <div className="absolute left-1/2 top-[67px] z-20 flex -translate-x-1/2 gap-1">{dots}</div>
         <div
           aria-live="polite"
-          className="flex min-h-dvh w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none"
+          className={cn(
+            'flex min-h-dvh w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none',
+            PC_FLOW_MIN_H,
+          )}
           style={{ transform: `translateX(-${slideIndex * (100 / 3)}%)` }}
         >
           {slides}
         </div>
-        <div className="fixed inset-x-0 bottom-0 z-20 bg-primary-100">
+        <div className="fixed inset-x-0 bottom-0 z-20 bg-primary-100 lg:absolute lg:rounded-b-xl">
           <div className="mx-auto max-w-[375px] px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
             {actionButton}
           </div>
@@ -219,7 +227,7 @@ function StepHeader({
 
   return (
     <div>
-      <Header onBack={onBack} right={skipButton} />
+      <Header onBack={onBack} right={skipButton} staticOnPc />
       <OnboardingProgress step={step} total={4} />
     </div>
   );
@@ -300,8 +308,8 @@ export function CustomerOnboardingForm({
   }
 
   const pageShell = (header: ReactNode, content: ReactNode, footer: ReactNode) => (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24', PC_FLOW_CARD, 'lg:bg-neutral-100')}>
         {header}
         {content}
         {footer}

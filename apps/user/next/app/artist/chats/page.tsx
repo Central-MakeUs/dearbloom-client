@@ -14,7 +14,7 @@ export default async function ArtistChatsPage() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header showBack={false} title="채팅 목록" />
         <LoginRequired
           description="작가 계정으로 로그인하면 문의 채팅을 볼 수 있어요."

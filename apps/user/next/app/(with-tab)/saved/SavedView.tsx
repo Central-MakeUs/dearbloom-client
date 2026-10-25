@@ -258,7 +258,7 @@ export function SavedView({
   const activeBody = tab === 'saved' ? savedBody : boardBody;
 
   const editBar = editing ? (
-    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md border-t border-neutral-200 bg-neutral-0 px-4 pb-4 pt-3">
+    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md lg:max-w-screen-lg border-t border-neutral-200 bg-neutral-0 px-4 pb-4 pt-3">
       {selected.size > 0 && (
         <p className="mb-3 text-center text-body-5 text-neutral-600">{selected.size}개의 작품이 선택되었습니다.</p>
       )}

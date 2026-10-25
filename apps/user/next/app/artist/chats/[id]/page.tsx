@@ -23,7 +23,7 @@ export default async function ArtistChatDetailPage({ params }: { params: Promise
 
   if (!token || expired) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header title="채팅" showBack={false} />
         <LoginRequired
           description="작가 계정으로 로그인하면 대화를 이어갈 수 있어요."

@@ -258,7 +258,7 @@ export function FilterSettingsView({ initial, variant = 'page', view }: Props) {
     <div
       className={cn(
         'flex gap-2',
-        isSidebar ? 'px-5' : 'fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 p-2',
+        isSidebar ? 'px-5' : 'fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 p-2 lg:max-w-2xl',
       )}
     >
       <button
@@ -291,7 +291,7 @@ export function FilterSettingsView({ initial, variant = 'page', view }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {tabBar}
       {/*
         하단 여백은 고정 CTA(68px)에 마지막 칩이 가리지 않을 만큼만 둔다.
