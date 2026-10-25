@@ -18,6 +18,13 @@ interface HeaderProps {
   showBack?: boolean;
   /** 우측 슬롯(메뉴/아이콘 등). */
   right?: ReactNode;
+  /**
+   * PC(lg 이상)에서 고정을 풀고 흐름 안에 둔다(spacer 도 숨김).
+   * 채팅방처럼 PC 에서 패널 안에 헤더를 넣는 화면용.
+   */
+  staticOnPc?: boolean;
+  /** PC(lg 이상)에서 본문을 넓게 쓰는 화면이면 헤더 폭도 맞춰 넓힌다(우측 슬롯이 본문 끝에 붙게). */
+  wideOnPc?: boolean;
   className?: string;
 }
 
@@ -39,6 +46,8 @@ export function Header({
   backHref,
   showBack = true,
   right,
+  staticOnPc = false,
+  wideOnPc = false,
   className,
 }: HeaderProps) {
   const backIcon = <ChevronLeft size={28} strokeWidth={2} aria-hidden />;
@@ -71,17 +80,23 @@ export function Header({
         className={cn(
           // PC 에서 GNB 가 떠 있으면 그 바로 아래에 붙는다.
           'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)] lg:with-gnb:top-gnb',
+          staticOnPc && 'lg:static',
           className,
         )}
       >
         {/* 좌우 4px 은 Figma header_title 실측(아이콘 44x44 가 각각 x=4, x=327, 프레임 375). */}
-        <div className="relative mx-auto flex h-[52px] max-w-md items-center justify-between px-1">
+        <div
+          className={cn(
+            'relative mx-auto flex h-[52px] max-w-md items-center justify-between px-1',
+            wideOnPc && 'lg:max-w-screen-lg',
+          )}
+        >
           {backButton}
           {titleNode}
           {rightSlot}
         </div>
       </header>
-      <div className="h-[calc(52px+env(safe-area-inset-top))]" aria-hidden />
+      <div className={cn('h-[calc(52px+env(safe-area-inset-top))]', staticOnPc && 'lg:hidden')} aria-hidden />
     </>
   );
 }

@@ -22,8 +22,8 @@ export default async function SavedPage({
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
-        <Header showBack={false} title="저장 목록" />
+      <div className="mx-auto max-w-md lg:max-w-screen-lg">
+        <Header showBack={false} title="저장 목록" wideOnPc />
         <Tabs defaultValue={tab === 'board' ? 'board' : 'saved'}>
           <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 lg:with-gnb:top-[calc(theme(spacing.gnb)+52px)] border-neutral-400 bg-neutral-100">
             <TabsTrigger

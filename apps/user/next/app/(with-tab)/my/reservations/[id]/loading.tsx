@@ -4,7 +4,7 @@ import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 /** 문의 상세도 force-dynamic 이라 응답 전까지 빈 화면이 뜬다. */
 export default function ReservationDetailLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
+    <div className="mx-auto max-w-md lg:max-w-none" aria-busy>
       <AppBackHeader fallbackHref="/app/my/reservations" title="문의 상세" />
       <div className="px-4 py-3">
         <div className="flex flex-col gap-4 rounded-lg bg-neutral-0 p-4">

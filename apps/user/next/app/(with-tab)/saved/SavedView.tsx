@@ -161,9 +161,9 @@ export function SavedView({
   const showEditIcon = tab === 'saved' && items.length > 0;
   // 편집 모드에선 빠져나올 뒤로가기가 필요해 타이틀이 '내 저장 편집'으로 바뀝니다.
   const header = editing ? (
-    <Header showBack onBack={exitEdit} title="내 저장 편집" />
+    <Header showBack onBack={exitEdit} title="내 저장 편집" wideOnPc />
   ) : (
-    <Header showBack={false} title="저장 목록" right={showEditIcon ? editIcon : undefined} />
+    <Header showBack={false} title="저장 목록" right={showEditIcon ? editIcon : undefined} wideOnPc />
   );
 
   const emptySaved = (
@@ -181,7 +181,7 @@ export function SavedView({
   const grid = (
     <>
     {!editing && <p className="px-4 pb-3 pt-3 text-body-5 text-neutral-600">전체 {items.length}</p>}
-    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6 lg:grid-cols-4 lg:gap-x-4 lg:gap-y-8">
       {items.map((a) => (
         <ArtworkCard
           key={a.artworkId}
@@ -216,7 +216,7 @@ export function SavedView({
 
   // 공동보드 카드(콜라주) + 생성 FAB.
   const createFab = (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 lg:bottom-0 mx-auto flex max-w-md justify-end px-4 py-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 mx-auto flex max-w-md justify-end px-4 py-3 lg:bottom-0 lg:max-w-screen-lg">
       <Button
         asChild
         size="icon"
@@ -238,7 +238,7 @@ export function SavedView({
           <p className="max-w-[170px] text-body-5 text-neutral-800">새 보드를 만들고 친구들과<br/>함께 의견을 나눠보세요.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4 lg:grid-cols-4 lg:gap-x-4 lg:gap-y-8">
           {initialBoards.map((board) => (
             <AppLink key={board.sharedBoardId} href={`/app/boards/${board.sharedBoardId}`} className="flex flex-col">
               <BoardCollage
@@ -297,8 +297,9 @@ export function SavedView({
     </AlertDialog>
   );
 
+  // PC(lg 이상)는 폭을 넓혀 4열 그리드로 보여준다.
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-screen-lg">
       {header}
       <Tabs value={tab} onValueChange={changeTab}>
         {!editing && (
