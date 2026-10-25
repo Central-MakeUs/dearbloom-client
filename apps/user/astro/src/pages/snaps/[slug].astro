@@ -152,16 +152,20 @@ if (artwork && token) {
                   ) : (
                     /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
                     <a href={imageGalleryHref} class="shrink-0 snap-start">
-                      {/* PC 는 3열 그리드라 한 장이 ~280px — srcset 으로 큰 폭을 따로 받는다. */}
-                      <img
-                        src={optimizedImageUrl(p.fileUrl, 190)}
-                        srcset={`${optimizedImageUrl(p.fileUrl, 190)} 380w, ${optimizedImageUrl(p.fileUrl, 280)} 560w`}
-                        sizes="(min-width: 1024px) 280px, 190px"
-                        alt={artwork.title}
-                        loading={i === 0 ? 'eager' : 'lazy'}
-                        fetchpriority={i === 0 ? 'high' : undefined}
-                        class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover lg:w-full"
-                      />
+                      {/*
+                        PC 는 3열 그리드라 한 장이 ~280px — PC 일 때만 큰 폭을 받는다.
+                        srcset+sizes 로 두면 DPR 3 폰이 큰 후보를 골라 모바일 LCP 이미지가 커진다.
+                      */}
+                      <picture>
+                        <source media="(min-width: 1024px)" srcset={optimizedImageUrl(p.fileUrl, 280)} />
+                        <img
+                          src={optimizedImageUrl(p.fileUrl, 190)}
+                          alt={artwork.title}
+                          loading={i === 0 ? 'eager' : 'lazy'}
+                          fetchpriority={i === 0 ? 'high' : undefined}
+                          class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover lg:w-full"
+                        />
+                      </picture>
                     </a>
                   ),
                 )}

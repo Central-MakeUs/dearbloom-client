@@ -5,8 +5,11 @@ import { MainTopNav, TopNav } from '@dearbloom/ui';
 import { ARTIST_TABS } from './AppArtistBottomTab';
 import { AppLink } from './AppLink';
 
-/** 가입·로그인 흐름은 메뉴로 빠져나가면 안 되는 화면이라 GNB 를 띄우지 않습니다. */
-const HIDDEN_PREFIXES = ['/login', '/onboarding', '/role', '/dev'];
+/**
+ * 가입·로그인·초대·문의 작성 흐름은 메뉴로 빠져나가면 안 되는 화면이라 GNB 를 띄우지 않습니다.
+ * 이 화면들은 PC 에서 가운데 카드(pcFrame)로 그려지고, 카드 높이도 GNB 가 없다고 보고 잡혀 있습니다.
+ */
+const HIDDEN_PREFIXES = ['/login', '/onboarding', '/role', '/dev', '/invite', '/inquiries'];
 
 const LOGO_SRC = '/app/images/dearbloom-logo.svg';
 
