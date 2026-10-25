@@ -7,3 +7,6 @@ export const SITE_URL = 'https://dearbloom.co.kr';
 export const SITE_NAME = 'DearBloom';
 
 export const DEFAULT_DESCRIPTION = '디어블룸에서 졸업스냅 작가의 작품을 둘러보고 비교해 보세요.';
+
+/** 작품 사진이 없는 페이지의 공유 미리보기(1200×630). 원본은 public/og-default.png */
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
