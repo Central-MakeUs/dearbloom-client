@@ -9,8 +9,11 @@ import { SnapMoreMenu } from '@/components/SnapMoreMenu';
 import { SnapBackButton } from '@/components/SnapBackButton';
 import { SmartInquiryCta } from '@/components/SmartInquiryCta';
 import { getArtworkBackHref } from '@/lib/artworkReturnPath';
+import { pageStatusForFetchError } from '@/lib/fetchErrorStatus';
 import { optimizedImageUrl } from '@/lib/imageUrl';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 import {
+  ApiError,
   getArtwork,
   getArtworkReported,
   fetchPublicWithAuthFallback,
@@ -44,15 +47,27 @@ try {
 } catch (e) {
   console.error('[snaps/:id] getArtwork 실패', slug, e);
   artwork = null;
+  Astro.response.status = pageStatusForFetchError(e instanceof ApiError ? e.status : undefined);
 }
 
 const won = (n: number) => `${n.toLocaleString()}원`;
 const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.sortOrder) : [];
-const shareImageUrl = photos.find((photo) => photo.fileType === 'IMAGE')?.fileUrl;
-const shareTitle = `${artwork?.title ?? '작품'} · DearBloom`;
+const imageUrls = photos.filter((photo) => photo.fileType === 'IMAGE').map((photo) => photo.fileUrl);
+const shareImageUrl = imageUrls[0];
+// 작품 제목은 작가가 자유롭게 짓는 값이라 겹치기 쉽다 — 작가명과 '졸업스냅'을 붙여 검색어와 구분을 보탠다.
+const shareTitle = artwork
+  ? `${artwork.title} - ${artwork.artist.nickname} 졸업스냅 · ${SITE_NAME}`
+  : `작품 · ${SITE_NAME}`;
 const shareDescription =
   artwork?.description?.trim() || '디어블룸에서 졸업스냅 작품을 확인해 보세요.';
-const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
+/*
+  Astro.url.origin 은 Vercel 함수 안에서 공개 도메인이 아니라(https://localhost) 정식 주소로 고정한다.
+  경로도 응답의 artworkId 로 만들어 /snaps/012·/snaps/12/ 같은 변형이 sitemap 주소 하나로 모이게 한다.
+*/
+const canonicalUrl = new URL(
+  artwork ? `/snaps/${artwork.artworkId}` : Astro.url.pathname,
+  SITE_URL,
+).toString();
 
 // 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
@@ -62,7 +77,8 @@ const shootPlaces = artwork
   : [];
 
 const packages = artwork?.packageList ?? [];
-const lowestPrice = packages.length > 0 ? Math.min(...packages.map((p) => p.price)) : null;
+const prices = packages.map((p) => p.price);
+const lowestPrice = prices.length > 0 ? Math.min(...prices) : null;
 const headCountLabel =
   artwork?.minHeadCount == null
     ? null
@@ -71,6 +87,47 @@ const headCountLabel =
       : artwork.minHeadCount === artwork.maxHeadCount
         ? `${artwork.minHeadCount}인`
         : `${artwork.minHeadCount}~${artwork.maxHeadCount}인`;
+
+/*
+  구조화 데이터 — 이동경로는 항상, Product 는 가격(패키지)이 있을 때만 넣는다.
+  Google 은 Product 에 offers·review 중 하나가 없으면 오류로 본다.
+*/
+const jsonLd = artwork
+  ? {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: '작품 탐색', item: `${SITE_URL}/snaps` },
+            { '@type': 'ListItem', position: 2, name: artwork.title, item: canonicalUrl },
+          ],
+        },
+        ...(lowestPrice !== null
+          ? [
+              {
+                '@type': 'Product',
+                name: artwork.title,
+                description: shareDescription,
+                url: canonicalUrl,
+                // 영상만 있는 작품은 빈 배열 대신 필드를 빼야 Search Console 이 잘못된 값으로 보지 않는다.
+                ...(imageUrls.length > 0 ? { image: imageUrls } : {}),
+                brand: { '@type': 'Brand', name: artwork.artist.nickname },
+                offers: {
+                  '@type': 'AggregateOffer',
+                  priceCurrency: 'KRW',
+                  lowPrice: lowestPrice,
+                  highPrice: Math.max(...prices),
+                  offerCount: prices.length,
+                },
+              },
+            ]
+          : []),
+      ],
+    }
+  : null;
+// JSON 안의 '<' 를 이스케이프해 작가 입력값이 </script> 로 태그를 닫지 못하게 한다.
+const jsonLdHtml = jsonLd && JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 
 // 신고 여부 — 로그인 상태에서만 조회(실패해도 상세 노출을 막지 않는다).
 let reported = false;
@@ -89,7 +146,7 @@ if (artwork && token) {
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{shareTitle}</title>
     <meta name="description" content={shareDescription} />
-    <link rel="canonical" href={canonicalUrl} />
+    {artwork && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="DearBloom" />
     <meta property="og:title" content={shareTitle} />
@@ -100,6 +157,8 @@ if (artwork && token) {
     <meta name="twitter:title" content={shareTitle} />
     <meta name="twitter:description" content={shareDescription} />
     {shareImageUrl && <meta name="twitter:image" content={shareImageUrl} />}
+    {!artwork && <meta name="robots" content="noindex" />}
+    {jsonLdHtml && <script type="application/ld+json" set:html={jsonLdHtml} />}
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     {
@@ -116,7 +175,8 @@ if (artwork && token) {
           <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-1">
             <SnapBackButton fallbackHref={backHref} client:idle />
             {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
-            <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
+            {/* 페이지 h1 은 아래 작품 제목. 헤더 문구는 모든 작품에 같아 제목 태그로 두지 않는다. */}
+            <p class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</p>
             <div class="flex items-center">
               <SnapShareButton
                 title={artwork.title}
@@ -148,7 +208,7 @@ if (artwork && token) {
                     <a href={imageGalleryHref} class="shrink-0 snap-start">
                       <img
                         src={optimizedImageUrl(p.fileUrl, 190)}
-                        alt={artwork.title}
+                        alt={`${artwork.title} ${i + 1}번 사진`}
                         loading={i === 0 ? 'eager' : 'lazy'}
                         fetchpriority={i === 0 ? 'high' : undefined}
                         class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover"
@@ -161,7 +221,7 @@ if (artwork && token) {
 
             {/* 제목 아래 작가명·지역 — Figma 2817:14892 */}
             <div class="px-5 pt-4">
-              <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
+              <h1 class="text-head-1 text-neutral-900">{artwork.title}</h1>
               <div class="mt-2 flex flex-wrap items-center gap-3">
                 <p class="text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
                 {artwork.artist.regionList?.length > 0 && (
@@ -180,7 +240,7 @@ if (artwork && token) {
             {/* 작품 정보 — 기본 가격 + 촬영 인원 + 촬영 경험 학교 (Figma) */}
             {(lowestPrice != null || headCountLabel || shootPlaces.length > 0) && (
               <section class="mb-8">
-                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">작품 정보</h3>
+                <h2 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">작품 정보</h2>
                 <div class="mx-4 rounded-md bg-neutral-0 p-5">
                   <dl class="flex flex-col gap-4">
                     {lowestPrice != null && (
@@ -211,7 +271,7 @@ if (artwork && token) {
             {/* 패키지 구분 — 패키지 카드 리스트 + 더보기 토글 (Figma) */}
             {packages.length > 0 && (
               <section class="mb-8">
-                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">패키지 구분</h3>
+                <h2 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">패키지 구분</h2>
                 <PackageList packages={packages} client:visible />
               </section>
             )}
@@ -219,7 +279,7 @@ if (artwork && token) {
             {/* 출장비 안내 */}
             {artwork.artist.travelFee && (
               <section class="mb-8">
-                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">출장비 안내</h3>
+                <h2 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">출장비 안내</h2>
                 <div class="mx-4 rounded-md bg-neutral-0 p-5">
                   <p class="whitespace-pre-line text-body-5 text-neutral-700">{artwork.artist.travelFee}</p>
                 </div>
@@ -229,7 +289,7 @@ if (artwork && token) {
             {/* 이용 안내 — 작가 소개 + 작품 안내 통합 카드 (Figma) */}
             {(artwork.artist.intro || artwork.description) && (
               <section class="mb-8">
-                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h3>
+                <h2 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이용 안내</h2>
                 <div class="mx-4 flex flex-col gap-6 rounded-md bg-neutral-0 p-5">
                   {artwork.artist.intro && (
                     <div class="flex flex-col gap-3">
@@ -250,7 +310,7 @@ if (artwork && token) {
             {/* 이 작가의 다른 작품 (Figma: 최하단 가로 캐러셀, CTA 위) */}
             {artwork.otherArtworkList?.length > 0 && (
               <section class="mb-8">
-                <h3 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h3>
+                <h2 class="mb-2 px-5 text-head-3 font-bold text-neutral-900">이 작가의 다른 작품</h2>
                 <div class="flex snap-x scroll-pl-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {artwork.otherArtworkList.map((o) => (
                     <a href={`/snaps/${o.artworkId}${returnQuery}`} class="block w-[137px] shrink-0 snap-start">
