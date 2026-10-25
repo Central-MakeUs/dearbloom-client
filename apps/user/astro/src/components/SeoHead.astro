@@ -3,12 +3,12 @@
   공통 SEO 태그 — title·description·canonical·OG·robots·구조화 데이터.
   레이아웃뿐 아니라 자체 <head> 를 쓰는 작품 상세·이미지 화면도 이 컴포넌트를 씁니다.
 */
-import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
+import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
 
 interface Props {
   title: string;
   description?: string;
-  /** 공유 미리보기 이미지(절대 URL). 있으면 큰 카드로 보입니다. */
+  /** 공유 미리보기 이미지(절대 URL). 비우면 사이트 기본 이미지 */
   image?: string;
   /**
    * canonical 경로. 비우면 요청 경로를 씁니다.
@@ -23,7 +23,7 @@ interface Props {
 const {
   title,
   description = DEFAULT_DESCRIPTION,
-  image,
+  image = DEFAULT_OG_IMAGE,
   canonicalPath = Astro.url.pathname,
   noindex = false,
   jsonLd,
@@ -42,6 +42,6 @@ const canonicalUrl = new URL(canonicalPath, SITE_URL).toString();
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalUrl} />
-{image && <meta property="og:image" content={image} />}
-<meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+<meta property="og:image" content={image} />
+<meta name="twitter:card" content="summary_large_image" />
 {jsonLdHtml && <script type="application/ld+json" set:html={jsonLdHtml} />}
