@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { RotateCw } from 'lucide-react';
+import { cn } from '@dearbloom/ui';
 import {
   ARTIST_REGION_OPTIONS,
   ARTWORK_DATE_RANGE_MAX_DAYS,
@@ -7,7 +8,7 @@ import {
   type ArtistRegionCode,
   type ArtworkListParams,
 } from '@dearbloom/shared';
-import { daysBetween, toQueryString } from '@/lib/artworkFilter';
+import { daysBetween, toQueryString, type ArtworkView } from '@/lib/artworkFilter';
 import { FilterCalendar, toDateKey } from './FilterCalendar';
 
 const TABS = [
@@ -32,13 +33,21 @@ function addDays(dateKey: string, days: number): string {
 interface Props {
   /** 진입 시점의 필터(URL 에서 읽은 값). 취소하고 돌아가면 이 값이 그대로 유지됩니다. */
   initial: ArtworkListParams;
+  /**
+   * page(기본) — 모바일 필터 설정 화면(탭바 + 하단 고정 CTA).
+   * sidebar — PC 탐색 화면 왼쪽 패널. 탭바 없이 섹션을 쌓고 버튼은 패널 맨 아래에 둡니다.
+   */
+  variant?: 'page' | 'sidebar';
+  /** 적용 후에도 유지할 보기 방식(grid/list). */
+  view?: ArtworkView;
 }
 
 /**
  * 필터 설정 화면 — Figma 1062:17201 실측. 날짜·지역·인원을 한 스크롤에 두고 탭은 앵커로 씁니다.
  * 적용을 눌러야 URL 이 바뀌므로, 고르는 중에는 목록이 흔들리지 않습니다.
  */
-export function FilterSettingsView({ initial }: Props) {
+export function FilterSettingsView({ initial, variant = 'page', view }: Props) {
+  const isSidebar = variant === 'sidebar';
   const today = toDateKey(new Date());
 
   const [start, setStart] = useState<string | null>(initial.startDate ?? null);
@@ -61,6 +70,8 @@ export function FilterSettingsView({ initial }: Props) {
    * 교차 상태가 안 바뀌어 마지막 탭에 고착됩니다.
    */
   useEffect(() => {
+    // 사이드바엔 탭바가 없어 따라갈 탭도 없다.
+    if (isSidebar) return;
     const sync = () => {
       if (clickedTab.current) return;
       // 더 스크롤할 곳이 없으면 마지막 섹션을 보고 있는 것으로 봅니다.
@@ -92,7 +103,7 @@ export function FilterSettingsView({ initial }: Props) {
       window.removeEventListener('touchmove', releaseClickedTab);
       window.removeEventListener('keydown', releaseClickedTab);
     };
-  }, []);
+  }, [isSidebar]);
 
   /**
    * 날짜 탭 규칙 — 첫 클릭은 시작일, 다음 클릭은 종료일. 이미 기간이 잡혀 있거나
@@ -129,7 +140,7 @@ export function FilterSettingsView({ initial }: Props) {
     }
     if (region) params.region = region;
     if (headCount !== undefined) params.headCount = headCount;
-    window.location.href = `/snaps${toQueryString(params)}`;
+    window.location.href = `/snaps${toQueryString(params, view)}`;
   };
 
   const scrollToSection = (key: TabKey) => {
@@ -144,7 +155,7 @@ export function FilterSettingsView({ initial }: Props) {
   };
 
   const chipClass = (selected: boolean) =>
-    `h-[33px] rounded-[20px] border-[1.2px] px-3 text-body-5 ${
+    `h-[33px] whitespace-nowrap rounded-[20px] border-[1.2px] px-3 text-body-5 ${
       selected
         ? 'border-primary bg-primary-200 font-semibold text-primary'
         : 'border-transparent bg-neutral-200 text-neutral-800'
@@ -179,7 +190,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const dateSection = (
-    <section id="date" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
+    <section id={isSidebar ? undefined : 'date'} className={cn('flex scroll-mt-[100px] flex-col gap-5', isSidebar ? 'px-5' : 'px-4')}>
       {sectionHeading('날짜 설정', '설정한 날짜에 예약 가능한 곳만 볼 수 있어요.')}
       <FilterCalendar
         month={month}
@@ -189,7 +200,7 @@ export function FilterSettingsView({ initial }: Props) {
         onSelect={selectDate}
         minDate={today}
       />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {QUICK_RANGES.map((days) => (
           <button
             key={days}
@@ -205,7 +216,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const regionSection = (
-    <section id="region" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
+    <section id={isSidebar ? undefined : 'region'} className={cn('flex scroll-mt-[100px] flex-col gap-5', isSidebar ? 'px-5' : 'px-4')}>
       {sectionHeading('지역 설정', '원하는 촬영 지역을 선택해 주세요.')}
       <div className="flex flex-wrap gap-2">
         {ARTIST_REGION_OPTIONS.map((option) => (
@@ -225,7 +236,7 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const headCountSection = (
-    <section id="headCount" className="flex scroll-mt-[100px] flex-col gap-5 px-4">
+    <section id={isSidebar ? undefined : 'headCount'} className={cn('flex scroll-mt-[100px] flex-col gap-5', isSidebar ? 'px-5' : 'px-4')}>
       {sectionHeading('인원 설정', '촬영 희망 인원을 설정해 주세요.')}
       <div className="flex flex-wrap gap-2">
         {HEAD_COUNTS.map((n) => (
@@ -244,7 +255,12 @@ export function FilterSettingsView({ initial }: Props) {
   );
 
   const bottomBar = (
-    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto flex max-w-md gap-2 bg-neutral-100 p-2">
+    <div
+      className={cn(
+        'flex gap-2',
+        isSidebar ? 'px-5' : 'fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 p-2',
+      )}
+    >
       <button
         type="button"
         onClick={reset}
@@ -262,6 +278,17 @@ export function FilterSettingsView({ initial }: Props) {
       </button>
     </div>
   );
+
+  if (isSidebar) {
+    return (
+      <div className="flex flex-col gap-10 rounded-lg bg-neutral-0 py-6">
+        {dateSection}
+        {regionSection}
+        {headCountSection}
+        {bottomBar}
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-md">

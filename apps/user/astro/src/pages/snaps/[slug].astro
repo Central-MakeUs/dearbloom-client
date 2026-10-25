@@ -114,7 +114,7 @@ if (artwork && token) {
           {/* Header */}
           {/* Figma header_title/Variant3 — 375x52, 좌우 여백 4, 뒤로가기 44x44(아이콘 28) + 우측 아이콘 2개(공유·더보기).
               저장(하트)은 헤더가 빽빽해져 하단 CTA 좌측으로 내렸다(QA, 디자이너 확정). */}
-          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-1 lg:with-gnb:top-gnb">
+          <header class="sticky top-0 z-20 flex h-[52px] items-center justify-between bg-neutral-100 px-1 lg:with-gnb:top-gnb lg:mx-auto lg:max-w-screen-xl lg:px-9">
             <SnapBackButton fallbackHref={backHref} client:idle />
             {/* 좌(44) 우(88) 폭이 달라 flex 흐름에 두면 가운데로 안 온다 — 헤더 전체 기준 중앙에 절대배치. */}
             <h1 class="pointer-events-none absolute inset-x-0 mx-auto w-max max-w-[60%] truncate text-center text-head-3 text-neutral-950">작품 상세</h1>
@@ -134,34 +134,44 @@ if (artwork && token) {
             </div>
           </header>
 
-          {/* 상단 블록: 캐러셀 + 제목 + 탭 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
-          <div>
+          {/*
+            PC(lg 이상): 왼쪽 열 = 사진 + 정보 섹션, 오른쪽 열 = 제목·작가·CTA 를 담은 sticky 패널.
+            DOM 순서는 모바일 그대로 두고 그리드 배치만 바꾼다(사진 → 제목 → 섹션).
+          */}
+          <div class="lg:mx-auto lg:grid lg:max-w-screen-xl lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-x-12 lg:px-10 lg:pt-4">
+          {/* 상단 블록: 캐러셀 + 제목 (Figma 는 페이지 배경 그대로, 흰색은 정보 카드에만) */}
+          <div class="lg:col-start-1 lg:row-start-1">
             {/* scroll-pl-4: 스냅이 좌측 패딩을 건너뛰어 첫 장이 화면 끝에 붙는 것 방지 */}
             {/* bg-neutral-200: 사진이 오기 전까지 빈칸 대신 회색 자리로 (아래 '다른 작품' 그리드와 같은 처리) */}
             {photos.length > 0 && (
-              <div class="flex snap-x scroll-pl-4 gap-1 overflow-x-auto px-4">
+              <div class="flex snap-x scroll-pl-4 gap-1 overflow-x-auto px-4 lg:grid lg:grid-cols-3 lg:gap-2 lg:overflow-visible lg:px-0">
                 {photos.map((p, i) =>
                   p.fileType === 'VIDEO' ? (
                     // preload=metadata: 재생 전에 본문까지 받지 않게 — 캐러셀에 여러 장이 깔릴 수 있다.
-                    <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover" controls />
+                    <video src={p.fileUrl} preload="metadata" class="aspect-[3/4] w-[190px] shrink-0 snap-start rounded-lg bg-neutral-200 object-cover lg:w-full" controls />
                   ) : (
                     /* 첫 장은 이 화면의 LCP — lazy 로 두면 발견이 한 박자 늦어지므로 eager + 높은 우선순위. */
                     <a href={imageGalleryHref} class="shrink-0 snap-start">
+                      {/* PC 는 3열 그리드라 한 장이 ~280px — srcset 으로 큰 폭을 따로 받는다. */}
                       <img
                         src={optimizedImageUrl(p.fileUrl, 190)}
+                        srcset={`${optimizedImageUrl(p.fileUrl, 190)} 380w, ${optimizedImageUrl(p.fileUrl, 280)} 560w`}
+                        sizes="(min-width: 1024px) 280px, 190px"
                         alt={artwork.title}
                         loading={i === 0 ? 'eager' : 'lazy'}
                         fetchpriority={i === 0 ? 'high' : undefined}
-                        class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover"
+                        class="aspect-[3/4] w-[190px] rounded-lg bg-neutral-200 object-cover lg:w-full"
                       />
                     </a>
                   ),
                 )}
               </div>
             )}
+          </div>
 
-            {/* 제목 아래 작가명·지역 — Figma 2817:14892 */}
-            <div class="px-5 pt-4">
+          {/* 제목 아래 작가명·지역 — Figma 2817:14892. PC 에선 CTA 까지 담은 오른쪽 sticky 패널. */}
+          <div class="lg:sticky lg:top-[calc(theme(spacing.gnb)+68px)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-6 lg:rounded-lg lg:bg-neutral-0 lg:p-6">
+            <div class="px-5 pt-4 lg:p-0">
               <h2 class="text-head-1 text-neutral-900">{artwork.title}</h2>
               <div class="mt-2 flex flex-wrap items-center gap-3">
                 <p class="text-body-5 text-neutral-800">{artwork.artist.nickname}</p>
@@ -174,10 +184,20 @@ if (artwork && token) {
                 )}
               </div>
             </div>
-            <div class="mt-9 border-t border-neutral-200" aria-hidden="true"></div>
+            <div class="mt-9 border-t border-neutral-200 lg:hidden" aria-hidden="true"></div>
+            {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입.
+                모바일은 화면 하단 고정(fixed)이라 DOM 위치와 무관하고, PC 에선 이 패널 안에 놓인다.
+                CTA 는 이 화면의 주 동작이라 client:load 를 유지한다 — client:idle 은 load 이벤트를
+                기다리므로 눌러도 시트가 안 열리는 구간이 생긴다. */}
+            <SmartInquiryCta
+              packages={packages}
+              artworkId={artwork.artworkId}
+              initialSaved={!!artwork.isSaved}
+              client:load
+            />
           </div>
 
-          <div class="pb-28 pt-4">
+          <div class="pb-28 pt-4 lg:col-start-1 lg:row-start-2 lg:pb-16 lg:pt-10">
             {/* 작품 정보 — 기본 가격 + 촬영 인원 + 촬영 경험 학교 (Figma) */}
             {(lowestPrice != null || headCountLabel || shootPlaces.length > 0) && (
               <section class="mb-8">
@@ -268,16 +288,7 @@ if (artwork && token) {
               </section>
             )}
           </div>
-
-          {/* 하단 sticky CTA — 패키지 선택 시트를 거쳐 next 앱 문의 플로우로 진입.
-              CTA 는 이 화면의 주 동작이라 client:load 를 유지한다 — client:idle 은 load 이벤트를
-              기다리므로 눌러도 시트가 안 열리는 구간이 생긴다. */}
-          <SmartInquiryCta
-            packages={packages}
-            artworkId={artwork.artworkId}
-            initialSaved={!!artwork.isSaved}
-            client:load
-          />
+          </div>
         </>
       )
     }

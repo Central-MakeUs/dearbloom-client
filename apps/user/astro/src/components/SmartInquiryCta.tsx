@@ -24,7 +24,7 @@ interface SmartInquiryCtaProps {
 }
 
 /**
- * 작품 상세 하단 sticky CTA — '스마트 문의하기'(island).
+ * 작품 상세 하단 sticky CTA — '스마트 문의하기'(island). PC 에선 상세 오른쪽 패널 안의 일반 버튼 줄.
  * 패키지를 하나 고른 뒤 next 앱의 문의 플로우로 넘긴다. 로그인 여부는 이동한 페이지에서 판정한다.
  */
 export function SmartInquiryCta({
@@ -46,9 +46,10 @@ export function SmartInquiryCta({
   }
 
   // 높이 = border 1 + padding 16 + 버튼 52 + padding 16 = 85(+safe-area).
+  // PC(lg 이상)에선 고정을 풀어 상세의 오른쪽 패널 안에 그대로 놓인다.
   const trigger = (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-100 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto max-w-md">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-neutral-100 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] lg:static lg:border-0 lg:bg-transparent lg:p-0">
+      <div className="mx-auto max-w-md lg:max-w-none">
         <BottomButtonBar
           leading={
             <SaveHeart
