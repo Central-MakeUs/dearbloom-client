@@ -216,7 +216,7 @@ export function SavedView({
 
   // 공동보드 카드(콜라주) + 생성 FAB.
   const createFab = (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 mx-auto flex max-w-md justify-end px-4 py-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 lg:bottom-0 mx-auto flex max-w-md justify-end px-4 py-3">
       <Button
         asChild
         size="icon"
@@ -302,7 +302,7 @@ export function SavedView({
       {header}
       <Tabs value={tab} onValueChange={changeTab}>
         {!editing && (
-          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 border-neutral-400 bg-neutral-100">
+          <TabsList className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 lg:with-gnb:top-[calc(theme(spacing.gnb)+52px)] border-neutral-400 bg-neutral-100">
             <TabsTrigger
               value="saved"
               className="data-[state=inactive]:border-neutral-400 data-[state=active]:border-b-2 data-[state=active]:tracking-[-0.01em]"

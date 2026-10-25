@@ -32,6 +32,7 @@ export * from './components/AppHeader';
 export * from './components/SearchResultItem';
 export * from './components/TabButton';
 export * from './components/BottomTab';
+export * from './components/TopNav';
 export * from './components/Spinner';
 export * from './components/SaveHeart';
 export * from './components/LoginRequiredDialog';

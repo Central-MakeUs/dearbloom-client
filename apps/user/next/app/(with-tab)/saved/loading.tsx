@@ -14,7 +14,7 @@ export default function SavedLoading() {
     <div className="mx-auto max-w-md" aria-busy>
       <Header showBack={false} title="저장 목록" />
 
-      <div className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 flex w-full border-b border-neutral-400 bg-neutral-100">
+      <div className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 lg:with-gnb:top-[calc(theme(spacing.gnb)+52px)] flex w-full border-b border-neutral-400 bg-neutral-100">
         <span
           className={
             isBoardTab

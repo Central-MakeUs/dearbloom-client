@@ -152,7 +152,7 @@ export function FilterSettingsView({ initial }: Props) {
 
   // 헤더가 fixed 52px 이므로 탭바는 그 아래에 붙인다(top-0 이면 헤더 뒤로 깔려 사라진다).
   const tabBar = (
-    <div className="sticky top-[52px] z-30 flex h-12 bg-neutral-100">
+    <div className="sticky top-[52px] z-30 flex h-12 bg-neutral-100 lg:with-gnb:top-[calc(theme(spacing.gnb)+52px)]">
       {TABS.map((tab) => {
         const active = tab.key === activeTab;
         return (

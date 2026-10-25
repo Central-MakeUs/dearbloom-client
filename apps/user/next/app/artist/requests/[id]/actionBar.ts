@@ -19,5 +19,5 @@ export function hasInquiryActions(status: InquiryStatus): boolean {
  */
 export const ACTION_BAR_OFFSET = 'pb-[calc(88px+env(safe-area-inset-bottom))]';
 
-/** 하단탭(60px + safe-area) 바로 위에 붙는다. */
-export const ACTION_BAR_BOTTOM = 'bottom-[calc(60px+env(safe-area-inset-bottom))]';
+/** 하단탭(60px + safe-area) 바로 위에 붙는다. PC(lg 이상)는 하단탭이 없어 바닥에 붙는다. */
+export const ACTION_BAR_BOTTOM = 'bottom-[calc(60px+env(safe-area-inset-bottom))] lg:bottom-0';

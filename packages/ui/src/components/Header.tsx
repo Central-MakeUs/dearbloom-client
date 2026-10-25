@@ -69,7 +69,8 @@ export function Header({
     <>
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)]',
+          // PC 에서 GNB 가 떠 있으면 그 바로 아래에 붙는다.
+          'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)] lg:with-gnb:top-gnb',
           className,
         )}
       >

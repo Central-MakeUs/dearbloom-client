@@ -1,6 +1,7 @@
 import './globals.css';
 import { AppToaster, NativeExitDialog } from '@dearbloom/ui';
 import { createNavigationHistoryScript } from '@/src/lib/appNavigation';
+import { AppTopNav } from '@/src/components/common/AppTopNav';
 
 export const metadata = { title: 'DearBloom' };
 
@@ -25,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans text-ink">
+        {/* PC(lg 이상)에서만 보이는 상단 GNB. 모바일은 각 레이아웃의 하단탭이 맡습니다. */}
+        <AppTopNav />
         {children}
         <NativeExitDialog />
         <AppToaster />
