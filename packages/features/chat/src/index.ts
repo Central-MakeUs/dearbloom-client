@@ -1,6 +1,7 @@
 // 채팅 컴포넌트 (Customer/Artist 공유)
 export { ChatListEditButton } from './ChatListEditButton';
 export { ChatRoomList } from './ChatRoomList';
+export { ChatEmptyPane, ChatSplitLayout } from './ChatSplitLayout';
 export { ChatRoomView } from './ChatRoomView';
 export { ChatRoomMenu } from './ChatRoomMenu';
 export { ChatToast } from './ChatToast';

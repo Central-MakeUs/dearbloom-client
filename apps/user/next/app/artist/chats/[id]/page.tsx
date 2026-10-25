@@ -1,9 +1,10 @@
 import { cookies } from 'next/headers';
 import { ApiError, getChatMessages, getChatRooms } from '@dearbloom/shared';
-import { ChatRoomView } from '@dearbloom/features-chat';
+import { ChatRoomList, ChatRoomView } from '@dearbloom/features-chat';
 import { Header } from '@dearbloom/ui';
 import { LoginRequired } from '../../../(auth)/LoginRequired';
 import { AppBackHeader } from '@/src/components/common/AppBackHeader';
+import { AppLink } from '@/src/components/common/AppLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,15 @@ export default async function ArtistChatDetailPage({ params }: { params: Promise
       peerName={room?.peerName ?? '채팅'}
       initialMessages={messages}
       backHref="/app/artist/chats"
-      header={<AppBackHeader fallbackHref="/app/artist/chats" title={room?.peerName ?? '채팅'} />}
+      header={<AppBackHeader fallbackHref="/app/artist/chats" title={room?.peerName ?? '채팅'} staticOnPc />}
+      sidebar={
+        <ChatRoomList
+          rooms={rooms}
+          roomHref={(roomId) => `/app/artist/chats/${roomId}`}
+          linkComponent={AppLink}
+          activeRoomId={Number(id)}
+        />
+      }
     />
   );
 }

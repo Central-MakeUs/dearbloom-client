@@ -6,6 +6,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { Header, Spinner } from '@dearbloom/ui';
 import { isReadBy, type ChatMessage, type ChatReadEvent, type ChatRole } from '@dearbloom/shared';
 import { ChatComposer } from './ChatComposer';
+import { ChatSplitLayout } from './ChatSplitLayout';
 // import { ChatRoomMenu } from './ChatRoomMenu';
 // import { ChatToast } from './ChatToast';
 import { MessageRow } from './MessageRow';
@@ -25,6 +26,8 @@ interface ChatRoomViewProps {
   backHref: string;
   /** 프록시 라우트 prefix. */
   apiBase?: string;
+  /** PC(lg 이상) 왼쪽 패널에 띄울 채팅 목록. 모바일에선 숨는다. */
+  sidebar?: ReactNode;
 }
 
 /**
@@ -41,6 +44,7 @@ export function ChatRoomView({
   initialMessages,
   backHref,
   apiBase = '/app/api',
+  sidebar,
 }: ChatRoomViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [hasMore, setHasMore] = useState(initialMessages.length >= PAGE_SIZE);
@@ -188,7 +192,7 @@ export function ChatRoomView({
       onScroll={(e) => {
         if (e.currentTarget.scrollTop < 40) void loadOlder();
       }}
-      className="h-[calc(100dvh-113px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto pb-4 pl-2 pr-4 pt-2"
+      className="h-[calc(100dvh-113px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto pb-4 pl-2 pr-4 pt-2 lg:h-auto lg:min-h-0 lg:flex-1"
     >
       {loadingOlder && (
         <div className="flex justify-center pb-3">
@@ -218,9 +222,11 @@ export function ChatRoomView({
 
   // 채팅방은 (with-tab) 레이아웃 밖이라 배경을 직접 준다.
   // 이게 없으면 페이지가 흰 바탕이 되어 수신 말풍선(neutral-0)이 배경에 묻힌다.
+  // PC(lg 이상)에선 ChatSplitLayout 의 오른쪽 패널을 채우고, 헤더·입력창도 패널 안에 둔다.
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100">
-      {header ?? <Header title={peerName} onBack={() => (window.location.href = backHref)} />}
+    <ChatSplitLayout sidebar={sidebar} sidebarTitle="채팅 목록">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-neutral-100 lg:mx-0 lg:min-h-0 lg:max-w-none lg:flex-1">
+      {header ?? <Header title={peerName} onBack={() => (window.location.href = backHref)} staticOnPc />}
       {list}
       <ChatComposer onSendText={sendText} onSendImage={sendImage} />
       {/*
@@ -236,5 +242,6 @@ export function ChatRoomView({
         <ChatToast message={toast} onDismiss={dismissToast} />
       */}
     </div>
+    </ChatSplitLayout>
   );
 }
