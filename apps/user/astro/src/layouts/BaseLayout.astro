@@ -6,8 +6,10 @@ interface Props {
   title: string;
   /** 검색 결과·공유 미리보기 설명. 비우면 사이트 기본 설명 */
   description?: string;
+  /** 검색 결과에서 뺄 페이지(아직 내용이 없는 플레이스홀더 등) */
+  noindex?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="ko">
@@ -24,7 +26,7 @@ const { title, description } = Astro.props;
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
-    <SeoHead title={title} description={description} />
+    <SeoHead title={title} description={description} noindex={noindex} />
   </head>
   <body class="font-sans text-ink">
     {/* PC(lg 이상) 상단 GNB — 약관·안내 페이지에서도 서비스로 돌아갈 길을 둔다. */}
