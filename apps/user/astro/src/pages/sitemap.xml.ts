@@ -2,6 +2,7 @@ export const prerender = false; // 작품 목록을 요청 시 API 로 가져옴
 
 import type { APIRoute } from 'astro';
 import { ARTWORK_PAGE_SIZE, getArtworkPage } from '@dearbloom/shared';
+import { REGION_LINKS } from '@/lib/regionSlug';
 import { SITE_URL } from '@/lib/site';
 
 /** 실제 콘텐츠가 있는 정적 페이지. 작가·검색·카테고리 등은 아직 플레이스홀더라 넣지 않습니다. */
@@ -31,7 +32,8 @@ export const GET: APIRoute = async () => {
     console.error('[sitemap] getArtworkPage 실패', e);
   }
 
-  const urls = [...STATIC_PATHS, ...artworkPaths]
+  // 한글 경로(/region/서울)는 new URL 이 퍼센트 인코딩해 sitemap 규격에 맞춘다.
+  const urls = [...STATIC_PATHS, ...REGION_LINKS.map((region) => region.href), ...artworkPaths]
     .map((path) => `  <url><loc>${new URL(path, SITE_URL).toString()}</loc></url>`)
     .join('\n');
   const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;

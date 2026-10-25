@@ -1,8 +1,35 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
+export const prerender = false; // 서버 렌더 (작품 목록을 요청 시 API 로 가져옴)
+
+/*
+  홈 — "졸업사진 사이트·스냅사진 사이트" 검색어를 받는 랜딩. 시안이 없어 /snaps 목록에 H1·소개·지역 링크만 얹습니다.
+  필터·정렬·보기 전환을 누르면 /snaps 로 이어집니다.
+*/
+import AppShellLayout from '@/layouts/AppShellLayout.astro';
+import { AppHeader } from '@dearbloom/ui';
+import ArtworkExplore from '@/components/ArtworkExplore.astro';
+import ExploreIntro from '@/components/ExploreIntro.astro';
+import { loadFirstArtworkPage } from '@/lib/artworkExplore';
+import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
+
+const filter = {};
+const { page, loadFailed } = await loadFirstArtworkPage(Astro, filter);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'WebSite', name: SITE_NAME, alternateName: '디어블룸', url: `${SITE_URL}/` },
+    { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/`, logo: `${SITE_URL}/favicon.png` },
+  ],
+};
 ---
-<BaseLayout title="홈">
-  <h1>홈 (랜딩) 페이지</h1>
-  <p>route: /</p>
-  <p>deploy check</p>
-</BaseLayout>
+
+<AppShellLayout title="졸업사진·스냅사진 작가 비교 사이트" description={DEFAULT_DESCRIPTION} jsonLd={jsonLd} navVariant="light">
+  <AppHeader logoHref="/snaps" />
+  <ArtworkExplore page={page} loadFailed={loadFailed} filter={filter} view="grid">
+    <ExploreIntro
+      heading="졸업사진·스냅사진 작가를 한눈에 비교하는 사이트"
+      description="졸업스냅 작가의 작품과 가격, 촬영 지역을 비교하고 마음에 드는 작가에게 바로 문의해 보세요."
+    />
+  </ArtworkExplore>
+</AppShellLayout>
