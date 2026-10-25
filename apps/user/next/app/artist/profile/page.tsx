@@ -12,7 +12,7 @@ export default async function ArtistProfilePage() {
   const header = <AppBackHeader fallbackHref="/app/artist/products" title="작가 프로필" />;
 
   const prompt = (title: string, description: string) => (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {header}
       <LoginRequired title={title} description={description} returnUrl="/app/artist/profile" />
     </div>
@@ -24,7 +24,7 @@ export default async function ArtistProfilePage() {
   if (!me) return prompt('작가 정보를 불러오지 못했어요', '작가 계정으로 로그인했는지 확인해 주세요.');
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {header}
       <ProfileForm initial={me} />
     </div>

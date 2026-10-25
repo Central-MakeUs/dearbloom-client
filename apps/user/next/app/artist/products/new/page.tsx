@@ -12,7 +12,7 @@ export default async function NewArtworkPage() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         {header}
         <LoginRequired
           description="작가 계정으로 로그인해야 작품을 등록할 수 있어요."
@@ -23,7 +23,7 @@ export default async function NewArtworkPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {header}
       <ArtworkForm />
     </div>

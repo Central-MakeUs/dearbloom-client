@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import type { University } from '@dearbloom/shared';
-import { DeleteButton, Header, TextField } from '@dearbloom/ui';
+import { DeleteButton, Header, TextField, cn } from '@dearbloom/ui';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 export const getUniversityLabel = (university: University) => university.name;
 
@@ -117,9 +118,9 @@ export function UniversitySearchScreen({
   );
 
   return (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden">
-        <Header onBack={onBack} title="학교명 검색" />
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden', PC_FLOW_CARD, 'lg:bg-neutral-100')}>
+        <Header onBack={onBack} title="학교명 검색" staticOnPc />
         <div className="px-4 pt-3">
           <TextField
             aria-label="학교명 검색"

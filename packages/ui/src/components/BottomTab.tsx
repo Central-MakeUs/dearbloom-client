@@ -4,7 +4,7 @@ import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { TabButton } from './TabButton';
 
-interface Tab {
+export interface NavTab {
   key: string;
   label: string;
   href: string;
@@ -12,7 +12,8 @@ interface Tab {
   Icon: () => ReactNode;
 }
 
-const TABS: Tab[] = [
+/** 고객 메인 내비게이션 탭 — 모바일 하단탭과 PC 상단 GNB(`MainTopNav`)가 같이 씁니다. */
+export const MAIN_NAV_TABS: NavTab[] = [
   {
     key: 'explore',
     label: '탐색',
@@ -79,14 +80,15 @@ export function BottomTab({ currentPath, variant = 'light', className, linkCompo
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch',
+        // PC(lg 이상)에선 상단 GNB 가 대신하므로 숨긴다.
+        'fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch lg:hidden',
         'pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]',
         surface[variant],
         className,
       )}
       aria-label="주요 네비게이션"
     >
-      {TABS.map((tab) => (
+      {MAIN_NAV_TABS.map((tab) => (
         <TabButton
           key={tab.key}
           href={tab.href}

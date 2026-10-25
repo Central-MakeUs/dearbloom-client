@@ -1,6 +1,6 @@
 ---
 import SeoHead from '@/components/SeoHead.astro';
-import { AppToaster, BottomTab, NativeExitDialog } from '@dearbloom/ui';
+import { AppToaster, BottomTab, MainTopNav, NativeExitDialog } from '@dearbloom/ui';
 
 interface Props {
   title: string;
@@ -33,7 +33,9 @@ const currentPath = Astro.url.pathname;
     />
     <SeoHead title={title} description={description} />
   </head>
-  <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950">
+  <body class="min-h-screen bg-neutral-100 pb-20 font-sans text-neutral-950 lg:pb-0">
+    {/* PC(lg 이상) 상단 GNB — 하단탭과 같은 순수 마크업이라 client 디렉티브 없이 서버 렌더만. */}
+    <MainTopNav currentPath={currentPath} />
     <slot />
     {/* 훅·이벤트 핸들러가 없는 순수 마크업(링크 4개)이라 client 디렉티브 없이
         서버 렌더 HTML 로만 끝냅니다 — 아일랜드로 두면 하이드레이션 비용만 듭니다. */}

@@ -111,7 +111,7 @@ export default function EditBoardNamePage() {
           event.preventDefault();
           submit();
         }}
-        className="mx-auto flex min-h-dvh max-w-md flex-col"
+        className="mx-auto flex min-h-dvh max-w-md flex-col lg:max-w-2xl"
       >
         <AppBackHeader fallbackHref={`/app/boards/${id}`} showBack title="보드 이름 변경하기" />
         {nameField}

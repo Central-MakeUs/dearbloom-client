@@ -5,7 +5,7 @@ import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 export default function ProfileEditLoading() {
   return (
     <main className="min-h-screen bg-neutral-100" aria-busy>
-      <div className="mx-auto flex min-h-screen max-w-md flex-col">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col lg:max-w-2xl">
         <AppBackHeader fallbackHref="/app/my" title="프로필 수정하기" />
         <div className="flex flex-1 flex-col gap-5 px-4 pt-5">
           {[0, 1, 2].map((item) => (

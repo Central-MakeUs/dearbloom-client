@@ -13,7 +13,7 @@ export default async function ReservationsPage() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-none">
         <Header />
         <LoginRequired
           description="로그인하고 문의 내역을 확인해 보세요."
@@ -26,7 +26,7 @@ export default async function ReservationsPage() {
   const items = await getMyInquiries({ token }).catch(() => [] as CustomerInquiryListItem[]);
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-none">
       <Header />
       <InquiryHistoryList items={items} />
     </div>

@@ -56,7 +56,7 @@ export function WithdrawForm() {
   );
 
   const cta = (
-    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
+    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[375px] bg-neutral-100 lg:max-w-2xl px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
       <BottomButton
         color="green"
         disabled={!isAgreed || isWithdrawing}

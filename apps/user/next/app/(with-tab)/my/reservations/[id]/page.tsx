@@ -49,7 +49,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
   const d = token ? await getMyInquiry(id, { token }).catch(() => null) : null;
   if (!d) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-none">
         <Header />
         <p className="px-4 py-16 text-center text-body-5 text-neutral-500">문의를 불러오지 못했어요.</p>
       </div>
@@ -100,7 +100,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
   );
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-none">
       <Header />
       <div className="px-4 py-3">
         <div className="flex flex-col gap-4 rounded-lg bg-neutral-0 p-4">

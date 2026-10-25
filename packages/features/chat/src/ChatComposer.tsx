@@ -93,7 +93,7 @@ export function ChatComposer({ onSendText, onSendImage, disabled = false }: Chat
   );
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-neutral-200 bg-neutral-100 px-4 py-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-neutral-200 bg-neutral-100 px-4 py-2 pb-[calc(8px+env(safe-area-inset-bottom))] lg:static lg:mx-0 lg:max-w-none lg:pb-2">
       <div className="relative h-11">
         <input
           value={text}

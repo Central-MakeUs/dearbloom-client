@@ -9,6 +9,7 @@ import { BottomButton, Checkbox, cn } from '@dearbloom/ui';
 import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { getOnboardingFormPath } from '@/src/lib/onboardingRoute';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 export function TermsAgreementForm({
   forceOnboarding,
@@ -152,9 +153,9 @@ export function TermsAgreementForm({
   );
 
   return (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
-        <AppBackHeader fallbackHref="/app/api/auth/cancel-onboarding" />
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24', PC_FLOW_CARD, 'lg:bg-neutral-100')}>
+        <AppBackHeader fallbackHref="/app/api/auth/cancel-onboarding" staticOnPc />
         <OnboardingProgress step={1} total={role === 'CUSTOMER' ? 4 : 3} />
         <section className="px-5 pt-4">
           <div className="py-3">

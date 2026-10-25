@@ -13,6 +13,7 @@ import customerRoleIcon from '../../public/images/role-customer.svg';
 import { withFlashToast } from '@/src/lib/flashToast';
 import { getOnboardingTermsPath } from '@/src/lib/onboardingRoute';
 import { getRoleLoginDestination, getRoleReturnUrl } from '@/src/lib/returnUrl';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 const fallbackApiBaseUrl = 'https://dev-api.dearbloom.co.kr';
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? fallbackApiBaseUrl).replace(/\/$/, '');
@@ -253,9 +254,9 @@ export function RoleSelectionForm({
   );
 
   return (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-20">
-        <AppBackHeader fallbackHref="/snaps" />
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-20', PC_FLOW_CARD, 'lg:bg-neutral-100')}>
+        <AppBackHeader fallbackHref="/snaps" staticOnPc />
         <section className="px-4 pt-2">
           <h1 className="px-1 py-3 text-head-1 text-neutral-950">
             디어블룸 이용 방식을 선택해 주세요.

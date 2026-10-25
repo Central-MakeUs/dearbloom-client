@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@dearbloom/ui';
 import { isArtistTabHidden } from './artistTab';
 
-/** 작가 화면 공통 껍데기 — 하단탭이 뜨는 화면은 본문이 탭에 가리지 않도록 pb-20. */
+/** 작가 화면 공통 껍데기 — 하단탭이 뜨는 화면은 본문이 탭에 가리지 않도록 pb-20(PC 는 하단탭이 없어 0). */
 export function ArtistShell({ children }: { children: ReactNode }) {
   const tabHidden = isArtistTabHidden(usePathname() ?? '/');
 
   return (
-    <div className={cn('min-h-screen bg-neutral-100', !tabHidden && 'pb-20')}>
+    <div className={cn('min-h-screen bg-neutral-100', !tabHidden && 'pb-20 lg:pb-0')}>
       {children}
     </div>
   );

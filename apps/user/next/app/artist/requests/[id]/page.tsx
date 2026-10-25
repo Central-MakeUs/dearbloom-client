@@ -43,7 +43,7 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
   const d = token ? await getReceivedInquiry(id, { token }).catch(() => null) : null;
   if (!d) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-2xl">
         <Header />
         <p className="px-4 py-16 text-center text-body-5 text-neutral-500">문의를 불러오지 못했어요.</p>
       </div>
@@ -109,7 +109,7 @@ export default async function ArtistRequestDetailPage({ params }: { params: Prom
 
   return (
     // 하단 고정 액션바가 콘텐츠를 덮지 않도록, 버튼이 뜨는 상태에서만 그만큼 여백을 준다.
-    <div className={cn('mx-auto max-w-md', hasInquiryActions(d.status) && ACTION_BAR_OFFSET)}>
+    <div className={cn('mx-auto max-w-md lg:max-w-2xl', hasInquiryActions(d.status) && ACTION_BAR_OFFSET)}>
       <Header />
       {requester}
       {detail}

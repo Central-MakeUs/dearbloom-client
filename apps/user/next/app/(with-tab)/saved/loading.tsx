@@ -11,10 +11,10 @@ export default function SavedLoading() {
   const isBoardTab = useSearchParams().get('tab') === 'board';
 
   return (
-    <div className="mx-auto max-w-md" aria-busy>
-      <Header showBack={false} title="저장 목록" />
+    <div className="mx-auto max-w-md lg:max-w-screen-lg" aria-busy>
+      <Header showBack={false} title="저장 목록" wideOnPc />
 
-      <div className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 flex w-full border-b border-neutral-400 bg-neutral-100">
+      <div className="sticky top-[calc(52px+env(safe-area-inset-top))] z-30 lg:with-gnb:top-[calc(theme(spacing.gnb)+52px)] flex w-full border-b border-neutral-400 bg-neutral-100">
         <span
           className={
             isBoardTab
@@ -38,7 +38,7 @@ export default function SavedLoading() {
       <div className="px-4 pb-3 pt-3">
         <Skeleton className="h-4 w-12" />
       </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6 lg:grid-cols-4 lg:gap-x-4 lg:gap-y-8">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="flex flex-col">
             <Skeleton className="mb-2 aspect-[4/5] w-full rounded-lg" />

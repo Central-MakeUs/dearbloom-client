@@ -95,6 +95,10 @@ export default {
       boxShadow: {
         elevation: '0px 4px 20px 0px rgba(0, 0, 0, 0.1)',
       },
+      spacing: {
+        // PC(lg 이상) 상단 GNB(TopNav) 높이. 고정 헤더·sticky 요소는 `lg:with-gnb:top-gnb` 로 이 아래에 붙습니다.
+        gnb: '64px',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
@@ -111,5 +115,10 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    // `with-gnb:` — 페이지에 PC GNB(TopNav, data-top-nav)가 있을 때만 적용. GNB 를 안 띄우는
+    // 화면(로그인·온보딩 등)에선 고정 헤더가 그대로 top-0 에 남도록 lg: 와 함께 씁니다.
+    ({ addVariant }) => addVariant('with-gnb', 'html:has([data-top-nav]) &'),
+  ],
 };
