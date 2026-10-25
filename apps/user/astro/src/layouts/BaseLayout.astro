@@ -26,8 +26,7 @@ const { title, description, noindex = false } = Astro.props;
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
-    <SeoHead title={title} description={description} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    <SeoHead title={title} description={description} noindex={noindex} />
   </head>
   <body class="font-sans text-ink p-10">
     <slot />

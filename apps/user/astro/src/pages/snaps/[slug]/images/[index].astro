@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { ApiError, getArtwork, type ArtworkDetail } from '@dearbloom/shared';
 import { ArtworkImageViewer } from '@/components/ArtworkImageViewer';
+import SeoHead from '@/components/SeoHead.astro';
 import { pageStatusForFetchError } from '@/lib/fetchErrorStatus';
 import { getInitialImageIndex } from '@/lib/imageViewer';
 
@@ -35,9 +36,8 @@ const initialIndex = getInitialImageIndex(index, images.length);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>{artwork?.title ?? '작품'} 이미지 · DearBloom</title>
     {/* 작품 상세와 같은 사진을 한 장씩 보는 화면이라 색인은 상세에 맡긴다. */}
-    <meta name="robots" content="noindex, follow" />
+    <SeoHead title={`${artwork?.title ?? '작품'} 이미지`} noindex />
   </head>
   <body class="overflow-hidden bg-neutral-100 font-sans text-neutral-950">
     {
