@@ -3,12 +3,12 @@ import { Card, Header, Skeleton } from '@dearbloom/ui';
 /** 내 작품 자리표시자 — MyArtworkList 의 행 모양을 따른다. */
 export default function ArtistProductsLoading() {
   return (
-    <div className="mx-auto max-w-md pb-10" aria-busy>
-      <Header showBack={false} title="내 작품" />
+    <div className="mx-auto max-w-md pb-10 lg:max-w-screen-lg" aria-busy>
+      <Header showBack={false} title="내 작품" wideOnPc />
       <div className="mb-3 px-4 pt-1">
         <Skeleton className="h-4 w-10" />
       </div>
-      <div className="flex flex-col gap-2 px-4">
+      <div className="flex flex-col gap-2 px-4 lg:grid lg:grid-cols-2 lg:gap-3">
         {[0, 1, 2, 3].map((i) => (
           <Card key={i} className="flex items-center gap-3 p-2">
             <Skeleton className="size-16 shrink-0" />

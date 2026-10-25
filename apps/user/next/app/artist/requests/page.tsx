@@ -9,11 +9,11 @@ export const dynamic = 'force-dynamic';
 export default async function ArtistRequestsPage() {
   const token = (await cookies()).get('accessToken')?.value;
 
-  const header = <Header showBack={false} title="신청 관리" />;
+  const header = <Header showBack={false} title="신청 관리" wideOnPc />;
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md lg:max-w-screen-lg">
         {header}
         <LoginRequired
           description="작가 계정으로 로그인하면 받은 문의를 볼 수 있어요."
@@ -27,7 +27,7 @@ export default async function ArtistRequestsPage() {
   const items = await getReceivedInquiries({ token }).catch(() => null);
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-screen-lg">
       {header}
       {items === null ? (
         <p className="px-6 py-24 text-center text-body-5 text-neutral-500">

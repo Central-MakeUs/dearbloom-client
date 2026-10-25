@@ -14,10 +14,11 @@ const items: { label: string; desc: string; href?: string }[] = [
 
 export default function ArtistDashboardPage() {
   return (
-    <div className="mx-auto max-w-md">
-      <Header showBack={false} title="대시보드" />
+    <div className="mx-auto max-w-md lg:max-w-screen-lg">
+      <Header showBack={false} title="대시보드" wideOnPc />
 
-      <div className="mt-2 flex flex-col gap-2 px-4">
+      {/* PC(lg 이상)는 카드 2열. */}
+      <div className="mt-2 flex flex-col gap-2 px-4 lg:grid lg:grid-cols-2 lg:gap-4">
         {items.map((it) =>
           it.href ? (
             <AppLink
