@@ -19,7 +19,7 @@ export default async function WithdrawPage({
 
   const page = (children: ReactNode) => (
     <div className="min-h-screen bg-neutral-100">
-      <div className="mx-auto flex min-h-screen max-w-md flex-col">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col lg:max-w-2xl">
         <AppBackHeader fallbackHref={backHref} title="탈퇴하기" />
         {children}
       </div>

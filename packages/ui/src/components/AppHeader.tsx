@@ -58,7 +58,8 @@ export function AppHeader({
     <>
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)]',
+          // PC 에선 상단 GNB 가 로고까지 갖고 있어 숨긴다.
+          'fixed inset-x-0 top-0 z-40 bg-neutral-100 pt-[env(safe-area-inset-top)] lg:hidden',
           className,
         )}
       >
@@ -67,7 +68,7 @@ export function AppHeader({
           {rightSlot}
         </div>
       </header>
-      <div className="h-[calc(44px+env(safe-area-inset-top))]" aria-hidden />
+      <div className="h-[calc(44px+env(safe-area-inset-top))] lg:hidden" aria-hidden />
     </>
   );
 }

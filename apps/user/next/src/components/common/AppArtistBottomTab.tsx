@@ -7,10 +7,11 @@ import { AppLink } from './AppLink';
 
 /**
  * 작가 전용 하단 탭. IA 도메인(대시보드/신청/작품/채팅/마이) 기준.
+ * PC(lg 이상)에선 숨고 같은 탭 정의(ARTIST_TABS)로 상단 GNB(AppTopNav)가 대신합니다.
  * 포인트는 대시보드·마이에서 접근. 폼/상세 화면에선 숨겨집니다.
  * usePathname() 은 basePath('/app') 를 제외한 경로('/artist/...')를 반환합니다.
  */
-const TABS = [
+export const ARTIST_TABS = [
   { key: 'home', label: '홈', href: '/app/artist/dashboard', match: (p: string) => p.startsWith('/artist/dashboard') || p.startsWith('/artist/schedule'), Icon: HomeIcon },
   { key: 'requests', label: '신청', href: '/app/artist/requests', match: (p: string) => p.startsWith('/artist/requests'), Icon: InboxIcon },
   { key: 'products', label: '작품', href: '/app/artist/products', match: (p: string) => p.startsWith('/artist/products'), Icon: GridIcon },
@@ -27,10 +28,10 @@ export function AppArtistBottomTab() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch border-t border-neutral-200 bg-neutral-100 pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[60px] items-stretch lg:hidden border-t border-neutral-200 bg-neutral-100 pb-[var(--dearbloom-safe-area-bottom,env(safe-area-inset-bottom))]"
       aria-label="작가 네비게이션"
     >
-      {TABS.map((tab) => (
+      {ARTIST_TABS.map((tab) => (
         <TabButton
           key={tab.key}
           href={tab.href}

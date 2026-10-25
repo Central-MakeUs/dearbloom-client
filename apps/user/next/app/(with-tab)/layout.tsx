@@ -7,7 +7,7 @@ export default async function WithTabLayout({ children }: { children: ReactNode 
   const isLoggedIn = (await cookies()).has('accessToken');
 
   return (
-    <div className="min-h-screen bg-neutral-100 pb-20">
+    <div className="min-h-screen bg-neutral-100 pb-20 lg:pb-0">
       {children}
       <AppBottomTab />
       {/* 앱에서만 동작. 로그인 상태에서 FCM 토큰을 받아 등록한다. */}

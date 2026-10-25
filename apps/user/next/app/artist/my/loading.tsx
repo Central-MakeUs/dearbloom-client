@@ -8,7 +8,7 @@ import { MyMenuRow } from '@/src/components/common/MyMenuRow';
  */
 export default function ArtistMyLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
+    <div className="mx-auto max-w-md lg:max-w-2xl" aria-busy>
       <Header showBack={false} title="마이페이지" />
 
       <section className="flex items-center justify-between px-4 pt-5">

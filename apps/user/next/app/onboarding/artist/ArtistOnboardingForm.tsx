@@ -5,19 +5,20 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { nicknameSchema, type ArtistRegionCode } from '@dearbloom/shared';
-import { BottomButton, Header, Spinner, TextField } from '@dearbloom/ui';
+import { BottomButton, Header, Spinner, TextField, cn } from '@dearbloom/ui';
 
 import { ArtistRegionField } from '@/src/components/common/ArtistRegionField';
 import { OnboardingProgress } from '@/src/components/common/OnboardingProgress';
 import { withFlashToast } from '@/src/lib/flashToast';
 import { navigateAppBack } from '@/src/lib/appNavigation';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
 function StepHeader({ onBack, step }: { onBack: () => void; step: 2 | 3 }) {
   return (
     <div>
-      <Header onBack={onBack} />
+      <Header onBack={onBack} staticOnPc />
       <OnboardingProgress step={step} total={3} />
     </div>
   );
@@ -249,8 +250,8 @@ export function ArtistOnboardingForm({
   );
 
   const pageShell = (header: ReactNode, content: ReactNode, footer: ReactNode) => (
-    <main className="min-h-dvh bg-neutral-100">
-      <div className="relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24">
+    <main className={cn('min-h-dvh bg-neutral-100', PC_FLOW_BACKDROP)}>
+      <div className={cn('relative mx-auto min-h-dvh max-w-[375px] overflow-hidden pb-24', PC_FLOW_CARD, 'lg:bg-neutral-100')}>
         {header}
         {content}
         {footer}

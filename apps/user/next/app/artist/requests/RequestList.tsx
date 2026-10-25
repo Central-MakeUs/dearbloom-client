@@ -132,7 +132,7 @@ export function RequestList({ items }: { items: ArtistInquiryListItem[] }) {
     shown.length === 0 ? (
       <p className="px-6 py-24 text-center text-body-5 text-neutral-500">{filter.empty}</p>
     ) : (
-      <ul className="flex flex-col gap-2 px-4 pb-4">
+      <ul className="flex flex-col gap-2 px-4 pb-4 lg:grid lg:grid-cols-2 lg:gap-3">
         {shown.map((it) => (
           <li key={it.inquiryId}>{card(it)}</li>
         ))}

@@ -77,18 +77,19 @@ export function ArtworkFeed({ initialPage, query, selectedRegion, view = 'grid' 
 
   const list = (
     // 아이템 간 20(시안). 사진 스트립이 화면 끝까지 흐르도록 좌우 패딩은 각 행이 처리한다.
-    <div className="flex flex-col gap-5 px-4 pb-6">
+    <div className="flex flex-col gap-5 px-4 pb-6 lg:px-0">
       {items.map((a) => (
         <ArtworkListRow key={a.artworkId} artwork={a} selectedRegion={selectedRegion} />
       ))}
     </div>
   );
 
-  // 카드 폭 = (컨테이너 max-w-md 448 - 좌우 패딩 32 - 열 간격 8) / 2 ≈ 204
+  // 카드 폭 = (컨테이너 max-w-md 448 - 좌우 패딩 32 - 열 간격 8) / 2 ≈ 204.
+  // PC(3~4열)도 카드 폭이 200~230px 대라 같은 크기로 받는다.
   const CARD_WIDTH = 204;
 
   const grid = (
-    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-6 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-8 lg:px-0 xl:grid-cols-4">
       {items.map((a) => {
         const { shownRegions, hiddenRegionCount } = summarizeExploreRegions(a.artistRegionList, selectedRegion);
 

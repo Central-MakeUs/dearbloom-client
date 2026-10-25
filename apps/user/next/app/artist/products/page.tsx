@@ -29,7 +29,7 @@ export default async function ArtistProductsPage() {
       </Button>
     ) : undefined;
 
-  const header = <Header showBack={false} title="내 작품" right={registerButton} />;
+  const header = <Header showBack={false} title="내 작품" right={registerButton} wideOnPc />;
 
   const body = needLogin ? (
     <LoginRequired
@@ -46,7 +46,7 @@ export default async function ArtistProductsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-md pb-10">
+    <div className="mx-auto max-w-md pb-10 lg:max-w-screen-lg">
       {header}
       {body}
     </div>

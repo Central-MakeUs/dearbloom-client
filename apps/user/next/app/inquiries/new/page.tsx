@@ -7,7 +7,7 @@ import { SmartInquiryForm } from './SmartInquiryForm';
 export const dynamic = 'force-dynamic';
 
 const Shell = ({ children }: { children: React.ReactNode }) => (
-  <div className="mx-auto max-w-md">
+  <div className="mx-auto max-w-md lg:max-w-2xl">
     <Header title="스마트 문의하기" showBack={false} />
     {children}
   </div>

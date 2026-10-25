@@ -8,6 +8,8 @@ interface ChatRoomListProps {
   roomHref: (roomId: number) => string;
   /** 링크를 그릴 컴포넌트. 기본은 `<a>`(문서 이동). Next 앱은 AppLink 를 넘겨 클라이언트 라우팅합니다. */
   linkComponent?: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
+  /** 지금 열린 방. PC 2단 화면에서 왼쪽 목록에 표시합니다. */
+  activeRoomId?: number;
 }
 
 /**
@@ -16,7 +18,7 @@ interface ChatRoomListProps {
  * Figma 233:6353 실측 — 좌우 16, 헤더 아래 20, 행 간격 32(구분선 없음),
  * 아바타 52 원형, 아바타↔본문 12, 이름↔미리보기 4.
  */
-export function ChatRoomList({ rooms, roomHref, linkComponent }: ChatRoomListProps) {
+export function ChatRoomList({ rooms, roomHref, linkComponent, activeRoomId }: ChatRoomListProps) {
   if (rooms.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 pt-[172px] text-center">
@@ -34,7 +36,12 @@ export function ChatRoomList({ rooms, roomHref, linkComponent }: ChatRoomListPro
     <ul className="flex flex-col gap-8 px-4 pt-5">
       {rooms.map((room) => (
         <li key={room.roomId}>
-          <Anchor href={roomHref(room.roomId)} className="flex items-center gap-3">
+          {/* 열린 방은 outline 으로 배경을 넓혀 칠한다 — 패딩을 바꾸면 행 간격(Figma 32)이 흔들린다. */}
+          <Anchor
+            href={roomHref(room.roomId)}
+            aria-current={room.roomId === activeRoomId ? 'page' : undefined}
+            className="flex items-center gap-3 rounded-lg aria-[current=page]:bg-primary-50 aria-[current=page]:outline aria-[current=page]:outline-8 aria-[current=page]:outline-primary-50"
+          >
             {/* 프로필이 없으면 SkeletonImage 가 회색 원만 남긴다 — 없는 이미지를 깜빡이게 두지 않는다. */}
             <SkeletonImage
               src={room.peerImageUrl ?? undefined}

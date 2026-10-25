@@ -12,7 +12,7 @@ export default async function MyPage() {
   const token = cookieStore.get('accessToken')?.value;
 
   const login = (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-none">
       <Header showBack={false} title="마이페이지" />
       <LoginRequired returnUrl="/app/my" />
     </div>
@@ -28,7 +28,7 @@ export default async function MyPage() {
   if (!customer || !member) return login;
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-none">
       <Header showBack={false} title="마이페이지" />
 
       {/* 프로필 — Figma 실측: 헤더 아래 20px, 좌우 16px, 아바타 48 + gap 12 */}
@@ -48,8 +48,8 @@ export default async function MyPage() {
         </AppLink>
       </section>
 
-      {/* 메뉴 + 로그아웃 모달 */}
-      <MyMenu />
+      {/* 메뉴 + 로그아웃 모달. PC 에선 레이아웃 사이드바가 같은 메뉴를 보여준다. */}
+      <MyMenu className="lg:hidden" />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Button } from '@dearbloom/ui';
+import { Button, cn } from '@dearbloom/ui';
 import {
   fetchPublicWithAuthFallback,
   getSharedBoardInvite,
@@ -12,6 +12,7 @@ import { getInviteView } from './inviteView';
 import { JoinBoardButton } from './JoinBoardButton';
 import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 import { getMetadataOrigin } from '@/src/lib/metadataOrigin';
+import { PC_FLOW_BACKDROP, PC_FLOW_CARD } from '@/src/lib/pcFrame';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,7 @@ export default async function InvitePage({
 
   if (!invite) {
     return (
-      <main className="mx-auto min-h-dvh max-w-md bg-neutral-100">
+      <main className="mx-auto min-h-dvh max-w-md bg-neutral-100 lg:max-w-2xl">
         <AppBackHeader showBack fallbackHref="/app/saved?tab=board" title="공동보드 초대" />
         <p className="px-6 py-24 text-center text-body-4 text-neutral-600">
           유효하지 않은 초대 링크예요.
@@ -92,8 +93,8 @@ export default async function InvitePage({
       <>
         {appBanner}
         <meta content="rgb(229 235 232)" name="theme-color" />
-        <main className="min-h-dvh bg-primary-100">
-          <div className="mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden">
+        <main className={cn('min-h-dvh bg-primary-100', PC_FLOW_BACKDROP)}>
+          <div className={cn('mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden', PC_FLOW_CARD, 'lg:bg-primary-100')}>
             <section className="flex flex-col items-center px-4 pt-[113px] text-center">
               <img
                 alt=""
@@ -133,8 +134,8 @@ export default async function InvitePage({
     <>
       {appBanner}
       <meta content="rgb(238 243 240)" name="theme-color" />
-      <main className="min-h-dvh bg-primary-50">
-        <div className="mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden">
+      <main className={cn('min-h-dvh bg-primary-50', PC_FLOW_BACKDROP)}>
+        <div className={cn('mx-auto flex min-h-dvh max-w-[375px] flex-col overflow-hidden', PC_FLOW_CARD, 'lg:bg-primary-50')}>
           <section className="flex flex-col items-center px-4 pt-14 text-center">
             <h1 className="w-64 text-[22px] font-bold leading-[1.4] tracking-[-0.005em] text-neutral-900">
               <span className="text-primary">{invite.ownerName}</span>님의

@@ -78,7 +78,7 @@ export default function NewBoardPage() {
           event.preventDefault();
           submit();
         }}
-        className="mx-auto flex min-h-screen max-w-md flex-col"
+        className="mx-auto flex min-h-screen max-w-md flex-col lg:max-w-2xl"
       >
         <AppBackHeader fallbackHref="/app/saved?tab=board" showBack title="공동보드 만들기" />
         {nameField}

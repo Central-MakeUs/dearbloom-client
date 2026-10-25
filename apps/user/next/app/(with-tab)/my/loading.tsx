@@ -9,7 +9,7 @@ import { MyMenu } from './MyMenu';
  */
 export default function MyLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
+    <div className="mx-auto max-w-md lg:max-w-none" aria-busy>
       <Header showBack={false} title="마이페이지" />
 
       <section className="flex items-center justify-between px-4 pt-5">

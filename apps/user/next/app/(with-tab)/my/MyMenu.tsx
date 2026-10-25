@@ -1,9 +1,10 @@
+import { cn } from '@dearbloom/ui';
 import { MemberLogoutButton } from '@/src/components/common/MemberLogoutButton';
 import { MyMenuRow } from '@/src/components/common/MyMenuRow';
 
-export function MyMenu() {
+export function MyMenu({ className }: { className?: string }) {
   return (
-    <nav className="mt-5 flex flex-col gap-1 px-5">
+    <nav className={cn('mt-5 flex flex-col gap-1 px-5', className)}>
       <MyMenuRow label="문의 내역" href="/app/my/reservations" />
       <MyMenuRow label="개인정보 처리방침" href="/privacy-policy" />
       <MemberLogoutButton />

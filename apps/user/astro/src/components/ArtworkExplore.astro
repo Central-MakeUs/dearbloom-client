@@ -7,6 +7,7 @@
 import type { ArtworkListParams, ArtworkPage } from '@dearbloom/shared';
 import { ArtworkFeed } from '@/components/ArtworkFeed';
 import { ArtworkSortSheet } from '@/components/ArtworkSortSheet';
+import { FilterSettingsView } from '@/components/FilterSettingsView';
 import ViewToggleIcon from '@/components/ViewToggleIcon.astro';
 import { toIslandPage } from '@/lib/artworkExplore';
 import {
@@ -38,19 +39,34 @@ const filterHref = `/snaps/filter${toQueryString(filter, view)}`;
 // 정렬 시트는 정렬만 갈아끼우므로, 정렬을 뺀 나머지(보기 방식 포함)를 넘긴다.
 const filterOnlyQuery = toSearchParams({ ...pathFilter, sort: undefined }, view).toString();
 
+// PC 제목 — 지역·홈 랜딩은 slot 에 자기 H1 을 넣으므로 그때는 그리지 않는다.
+const showPcTitle = !Astro.slots.has('default');
+
 const CHIP_CLASS =
   'flex h-8 shrink-0 items-center gap-0.5 rounded-[6px] border border-neutral-400 bg-neutral-100 py-1 pl-2 pr-0.5 text-body-5 text-neutral-800';
 ---
 
-<div class="mx-auto max-w-md">
-  <slot />
+{/* PC(lg 이상): 왼쪽 필터 사이드바 + 오른쪽 피드. 모바일은 필터 설정 화면(/snaps/filter)으로 이동한다. */}
+<div class="mx-auto max-w-md lg:flex lg:max-w-screen-xl lg:items-start lg:gap-10 lg:px-10 lg:pt-6">
+  <aside
+    aria-label="필터"
+    class="hidden lg:sticky lg:top-[calc(theme(spacing.gnb)+24px)] lg:block lg:max-h-[calc(100vh-theme(spacing.gnb)-48px)] lg:w-[320px] lg:shrink-0 lg:overflow-y-auto"
+  >
+    {/* PC 에서만 하이드레이트 — 모바일엔 숨겨진 패널이라 JS 를 보내지 않는다. */}
+    <FilterSettingsView initial={filter} variant="sidebar" view={view} client:media="(min-width: 1024px)" />
+  </aside>
 
-  <div class="sticky top-[calc(44px+env(safe-area-inset-top))] z-30 bg-neutral-100">
+  <div class="lg:min-w-0 lg:flex-1">
+  <slot />
+  {showPcTitle && <h1 class="hidden pb-2 text-head-1 text-neutral-950 lg:block">작품 탐색</h1>}
+
+  <div class="sticky top-[calc(44px+env(safe-area-inset-top))] z-30 bg-neutral-100 lg:with-gnb:top-gnb">
   {/*
     필터 칩바 — Figma 437:7705. 어느 칩을 눌러도 필터 설정으로 가고, 해시로 해당 섹션에 붙는다.
     세로 위치는 실측(상태바 제외): 헤더 하단 44 → 칩바 52~84 → 정렬행 87~127 → 그리드 129.
   */}
-  <div class="flex items-center gap-1 overflow-x-auto px-4 pt-2">
+  {/* PC 는 사이드바가 필터를 맡아 칩바를 숨긴다. */}
+  <div class="flex items-center gap-1 overflow-x-auto px-4 pt-2 lg:hidden">
     <a
       href={filterHref}
       aria-label="필터 설정"
@@ -81,7 +97,7 @@ const CHIP_CLASS =
 
   {/* 전체 개수 + 정렬 — Figma 1035:11052 / 443:9624. 좌 20 / 우 8 은 시안 실측값. */}
   {!loadFailed && (
-    <div class="mb-0.5 mt-[3px] flex h-10 items-center justify-between pl-5 pr-2">
+    <div class="mb-0.5 mt-[3px] flex h-10 items-center justify-between pl-5 pr-2 lg:px-0">
       <span class="text-body-5 text-neutral-600">전체 {page.totalCount}</span>
       <div class="flex items-center">
         {/* 정렬은 보조 조작 — 첫 렌더를 막지 않고 유휴 시간에 붙인다. */}
@@ -124,4 +140,5 @@ const CHIP_CLASS =
   ) : (
     <ArtworkFeed initialPage={islandPage} query={query} selectedRegion={filter.region} view={view} client:load />
   )}
+  </div>
 </div>

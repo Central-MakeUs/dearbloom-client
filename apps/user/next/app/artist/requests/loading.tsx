@@ -3,14 +3,14 @@ import { Card, Header, Skeleton } from '@dearbloom/ui';
 /** force-dynamic 서버 페치라 응답 전까지 빈 화면이 뜬다 — 목록 모양의 자리표시자를 먼저 보여준다. */
 export default function ArtistRequestsLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
-      <Header showBack={false} title="신청 관리" />
+    <div className="mx-auto max-w-md lg:max-w-screen-lg" aria-busy>
+      <Header showBack={false} title="신청 관리" wideOnPc />
       <div className="flex gap-2 px-4 py-3">
         {[0, 1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-10 w-20 shrink-0 rounded-full" />
         ))}
       </div>
-      <ul className="flex flex-col gap-2 px-4 pb-4">
+      <ul className="flex flex-col gap-2 px-4 pb-4 lg:grid lg:grid-cols-2 lg:gap-3">
         {[0, 1, 2].map((i) => (
           <li key={i}>
             <Card className="flex flex-col gap-2 p-4">

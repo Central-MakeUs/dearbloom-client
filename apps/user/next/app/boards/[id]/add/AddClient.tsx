@@ -100,7 +100,7 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
         </a>
       </div>
     ) : (
-      <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-4 pb-28 pt-3 lg:grid-cols-4 lg:gap-x-4 lg:gap-y-8">
         {orderedItems.map(({ artworkSummaryResponse: a }) => (
           <ArtworkCard
             key={a.artworkId}
@@ -119,15 +119,16 @@ export function AddClient({ boardId, items }: { boardId: string; items: SharedSa
     );
 
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-neutral-100">
+    <div className="mx-auto min-h-screen max-w-md bg-neutral-100 lg:max-w-screen-lg">
       <AppBackHeader
         fallbackHref={`/app/boards/${boardId}`}
         showBack
         title="내 후보 추가하기"
         right={infoButton}
+        wideOnPc
       />
       {body}
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2">
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-neutral-100 px-4 py-2 lg:max-w-screen-lg">
         <BottomButton type="button" onClick={submit} disabled={!hasChanges || submitting}>
           {submitting ? <Spinner className="size-5 text-current" label="" /> : null}
           보드에 추가하기 {selectedIds.size}/3

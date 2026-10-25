@@ -28,7 +28,8 @@ export function LoginRequired({
   className,
 }: LoginRequiredProps) {
   return (
-    <div className={cn('flex flex-col items-center px-6 py-[120px] text-center', className)}>
+    // data-login-required: 마이 레이아웃이 이 안내가 뜬 화면에선 PC 사이드바를 숨기는 데 씁니다.
+    <div data-login-required className={cn('flex flex-col items-center px-6 py-[120px] text-center', className)}>
       <h2 className="text-head-3 text-neutral-950">{title}</h2>
       <p className="mt-2 text-body-6 text-neutral-600">{description}</p>
       <Button asChild className="mt-4">

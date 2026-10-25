@@ -6,7 +6,7 @@ import { Header } from '@dearbloom/ui';
  */
 export function ComingSoon({ title }: { title?: string }) {
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md lg:max-w-2xl">
       {title && <Header showBack={false} title={title} />}
       <div className="flex flex-col items-center gap-2 px-6 py-24 text-center">
         <p className="text-body-4 text-neutral-500">준비 중인 기능이에요.</p>

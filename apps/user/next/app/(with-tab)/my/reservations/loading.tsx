@@ -7,7 +7,7 @@ import { AppBackHeader } from '@/src/components/common/AppBackHeader';
  */
 export default function ReservationsLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
+    <div className="mx-auto max-w-md lg:max-w-none" aria-busy>
       <AppBackHeader fallbackHref="/app/my" title="문의 내역" />
 
       <div className="flex border-b border-neutral-400">

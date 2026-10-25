@@ -117,7 +117,7 @@ export function InquiryActions({ id, status }: { id: number; status: InquiryStat
   return (
     <>
       <div className={cn('fixed inset-x-0 z-20 border-t border-neutral-200 bg-neutral-0 p-4', ACTION_BAR_BOTTOM)}>
-        <div className="mx-auto flex max-w-md gap-2">{buttons}</div>
+        <div className="mx-auto flex max-w-md gap-2 lg:max-w-2xl">{buttons}</div>
       </div>
       <ConfirmDialog
         isOpen={pending !== undefined}

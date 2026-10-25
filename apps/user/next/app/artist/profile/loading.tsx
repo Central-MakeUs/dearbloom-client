@@ -4,7 +4,7 @@ import { AppBackHeader } from '@/src/components/common/AppBackHeader';
 /** 작가 프로필 — 기존 값(닉네임·소개·지역·기타)을 받아 채우는 폼이라 필드 모양만 먼저 둔다. */
 export default function ArtistProfileLoading() {
   return (
-    <div className="mx-auto max-w-md" aria-busy>
+    <div className="mx-auto max-w-md lg:max-w-2xl" aria-busy>
       <AppBackHeader fallbackHref="/app/artist/products" title="작가 프로필" />
       <div className="flex flex-col gap-5 px-4 pt-5">
         {[
