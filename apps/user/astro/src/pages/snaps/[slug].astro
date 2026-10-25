@@ -8,10 +8,11 @@ import { SchoolChipsExpander } from '@/components/SchoolChipsExpander';
 import { SnapMoreMenu } from '@/components/SnapMoreMenu';
 import { SnapBackButton } from '@/components/SnapBackButton';
 import { SmartInquiryCta } from '@/components/SmartInquiryCta';
+import SeoHead from '@/components/SeoHead.astro';
 import { getArtworkBackHref } from '@/lib/artworkReturnPath';
 import { pageStatusForFetchError } from '@/lib/fetchErrorStatus';
 import { optimizedImageUrl } from '@/lib/imageUrl';
-import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { SITE_URL } from '@/lib/site';
 import {
   ApiError,
   getArtwork,
@@ -55,19 +56,12 @@ const photos = artwork ? [...artwork.photoList].sort((a, b) => a.sortOrder - b.s
 const imageUrls = photos.filter((photo) => photo.fileType === 'IMAGE').map((photo) => photo.fileUrl);
 const shareImageUrl = imageUrls[0];
 // 작품 제목은 작가가 자유롭게 짓는 값이라 겹치기 쉽다 — 작가명과 '졸업스냅'을 붙여 검색어와 구분을 보탠다.
-const shareTitle = artwork
-  ? `${artwork.title} - ${artwork.artist.nickname} 졸업스냅 · ${SITE_NAME}`
-  : `작품 · ${SITE_NAME}`;
+const seoTitle = artwork ? `${artwork.title} - ${artwork.artist.nickname} 졸업스냅` : '작품';
 const shareDescription =
   artwork?.description?.trim() || '디어블룸에서 졸업스냅 작품을 확인해 보세요.';
-/*
-  Astro.url.origin 은 Vercel 함수 안에서 공개 도메인이 아니라(https://localhost) 정식 주소로 고정한다.
-  경로도 응답의 artworkId 로 만들어 /snaps/012·/snaps/12/ 같은 변형이 sitemap 주소 하나로 모이게 한다.
-*/
-const canonicalUrl = new URL(
-  artwork ? `/snaps/${artwork.artworkId}` : Astro.url.pathname,
-  SITE_URL,
-).toString();
+// 응답의 artworkId 로 만들어 /snaps/012·/snaps/12/ 같은 변형이 sitemap 주소 하나로 모이게 한다.
+const canonicalPath = artwork ? `/snaps/${artwork.artworkId}` : undefined;
+const canonicalUrl = canonicalPath && `${SITE_URL}${canonicalPath}`;
 
 // 촬영 경험 학교: schoolNameList 우선, 없으면 사진 대학명에서 도출
 const shootPlaces = artwork
@@ -125,9 +119,7 @@ const jsonLd = artwork
           : []),
       ],
     }
-  : null;
-// JSON 안의 '<' 를 이스케이프해 작가 입력값이 </script> 로 태그를 닫지 못하게 한다.
-const jsonLdHtml = jsonLd && JSON.stringify(jsonLd).replace(/</g, '\\u003c');
+  : undefined;
 
 // 신고 여부 — 로그인 상태에서만 조회(실패해도 상세 노출을 막지 않는다).
 let reported = false;
@@ -144,21 +136,14 @@ if (artwork && token) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>{shareTitle}</title>
-    <meta name="description" content={shareDescription} />
-    {artwork && <link rel="canonical" href={canonicalUrl} />}
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="DearBloom" />
-    <meta property="og:title" content={shareTitle} />
-    <meta property="og:description" content={shareDescription} />
-    <meta property="og:url" content={canonicalUrl} />
-    {shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={shareTitle} />
-    <meta name="twitter:description" content={shareDescription} />
-    {shareImageUrl && <meta name="twitter:image" content={shareImageUrl} />}
-    {!artwork && <meta name="robots" content="noindex" />}
-    {jsonLdHtml && <script type="application/ld+json" set:html={jsonLdHtml} />}
+    <SeoHead
+      title={seoTitle}
+      description={shareDescription}
+      image={shareImageUrl}
+      canonicalPath={canonicalPath}
+      noindex={!artwork}
+      jsonLd={jsonLd}
+    />
   </head>
   <body class="min-h-screen bg-neutral-100 font-sans text-neutral-950">
     {
