@@ -34,6 +34,12 @@ const neutral = {
   950: '#1F1F1F',
 };
 
+/** 꽃잎(포인트) 표시용 — 작가 모집 랜딩의 꽃잎 아이콘·차감 수치 */
+const petal = {
+  DEFAULT: '#E9A5B4',
+  ink: '#8C3A4E',
+};
+
 const semantic = {
   error: '#EC4141',
   danger: '#EA0E2F',
@@ -54,6 +60,7 @@ export default {
     extend: {
       colors: {
         primary,
+        petal,
         neutral,
         profile,
         ...semantic,

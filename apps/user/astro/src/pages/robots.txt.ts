@@ -16,6 +16,7 @@ export const GET: APIRoute = () => {
         'Disallow: /api/',
         'Disallow: /app',
         'Disallow: /snaps/filter',
+        'Disallow: /for-artists/admin',
         '',
         `Sitemap: ${SITE_URL}/sitemap.xml`,
       ]

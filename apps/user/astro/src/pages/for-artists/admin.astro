@@ -1,0 +1,318 @@
+---
+/*
+  작가 사전등록 관리(/for-artists/admin) — 백엔드 로그인 없이 비밀번호 하나로 들어온다.
+  비밀번호는 Vercel 환경변수 ARTIST_APPLY_ADMIN_PASSWORD. 브라우저 탭을 닫으면 다시 입력해야 한다(sessionStorage).
+  데이터는 /api/admin/artist-applications 에서 가져온다.
+*/
+import SeoHead from '@/components/SeoHead.astro';
+import { APPLICATION_STATUSES, STATUS_LABELS } from '@/lib/artistApplications';
+
+const statusOptions = APPLICATION_STATUSES.map((value) => ({ value, label: STATUS_LABELS[value] }));
+---
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <SeoHead title="작가 사전등록 관리" noindex />
+  </head>
+  <body class="bg-neutral-100 font-sans text-neutral-900">
+    <main class="mx-auto max-w-[1100px] px-4 py-8">
+      <h1 class="text-head-1 font-bold text-primary">작가 사전등록 관리</h1>
+
+      <form id="login" class="mt-6 flex max-w-md flex-wrap gap-2">
+        <label for="password" class="sr-only">관리자 비밀번호</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="관리자 비밀번호"
+          class="min-w-0 flex-1 rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2.5"
+        />
+        <button class="rounded-md bg-primary px-4 py-2.5 font-semibold text-neutral-0">들어가기</button>
+        <p id="login-error" class="w-full text-body-5 text-error" role="alert"></p>
+      </form>
+
+      <div id="board" class="mt-6 hidden">
+        <div class="flex flex-wrap items-center gap-2">
+          <label for="filter-status" class="sr-only">상태</label>
+          <select id="filter-status" class="rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2">
+            <option value="">전체 상태</option>
+            {statusOptions.map((option) => <option value={option.value}>{option.label}</option>)}
+          </select>
+          <label for="filter-q" class="sr-only">검색</label>
+          <input
+            id="filter-q"
+            type="search"
+            placeholder="작가명·인스타·번호 검색"
+            class="min-w-0 flex-1 rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2"
+          />
+          <button id="refresh" class="rounded-md border border-neutral-300 bg-neutral-0 px-3 py-2 font-semibold">새로고침</button>
+          <button id="csv" class="rounded-md bg-primary px-3 py-2 font-semibold text-neutral-0">CSV 내보내기</button>
+          <button id="logout" class="px-2 py-2 text-body-5 text-neutral-600 underline">나가기</button>
+        </div>
+        <p id="counts" class="mt-4 text-body-4 text-neutral-700"></p>
+        <p id="board-message" class="mt-2 text-body-5 text-error" role="status"></p>
+
+        <div class="mt-3 overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-0">
+          <table class="w-full min-w-[860px] text-left text-body-5">
+            <thead class="border-b border-neutral-200 bg-neutral-100 text-caption-1 text-neutral-700">
+              <tr>
+                <th class="px-3 py-2">신청일</th>
+                <th class="px-3 py-2">작가명</th>
+                <th class="px-3 py-2">인스타그램</th>
+                <th class="px-3 py-2">휴대폰</th>
+                <th class="px-3 py-2">유입</th>
+                <th class="px-3 py-2">상태</th>
+                <th class="px-3 py-2">메모</th>
+                <th class="px-3 py-2"><span class="sr-only">삭제</span></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <template id="status-options">
+      {statusOptions.map((option) => <option value={option.value}>{option.label}</option>)}
+    </template>
+
+    <script>
+      type Row = {
+        id: string;
+        name: string;
+        instagram: string | null;
+        phone: string;
+        status: string;
+        memo: string | null;
+        utm_source: string | null;
+        utm_campaign: string | null;
+        created_at: string;
+      };
+
+      const API = '/api/admin/artist-applications';
+      const TOKEN_KEY = 'artistApplyAdminToken';
+      const LABELS: Record<string, string> = { new: '신규', contacted: '연락함', joined: '가입 완료', rejected: '제외' };
+
+      const loginForm = document.getElementById('login') as HTMLFormElement;
+      const passwordInput = document.getElementById('password') as HTMLInputElement;
+      const loginError = document.getElementById('login-error') as HTMLElement;
+      const board = document.getElementById('board') as HTMLElement;
+      const rowsEl = document.getElementById('rows') as HTMLElement;
+      const countsEl = document.getElementById('counts') as HTMLElement;
+      const messageEl = document.getElementById('board-message') as HTMLElement;
+      const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
+      const queryInput = document.getElementById('filter-q') as HTMLInputElement;
+      const statusTemplate = document.getElementById('status-options') as HTMLTemplateElement;
+
+      function readToken() {
+        try {
+          return sessionStorage.getItem(TOKEN_KEY) ?? '';
+        } catch {
+          return '';
+        }
+      }
+      let token = readToken();
+
+      function saveToken(value: string) {
+        token = value;
+        try {
+          if (value) sessionStorage.setItem(TOKEN_KEY, value);
+          else sessionStorage.removeItem(TOKEN_KEY);
+        } catch {
+          /* 저장이 막힌 브라우저 — 이 탭에서만 유지 */
+        }
+      }
+
+      function api(path: string, init: RequestInit = {}) {
+        return fetch(path, {
+          ...init,
+          headers: { ...(init.headers ?? {}), Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+      }
+
+      function query() {
+        const params = new URLSearchParams();
+        if (statusFilter.value) params.set('status', statusFilter.value);
+        if (queryInput.value.trim()) params.set('q', queryInput.value.trim());
+        return params;
+      }
+
+      function formatDate(iso: string) {
+        const d = new Date(iso);
+        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      }
+
+      function formatPhone(digits: string) {
+        return digits.length === 11
+          ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+          : `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+
+      function cell(content: string | Node, className = '') {
+        const td = document.createElement('td');
+        td.className = `px-3 py-2 align-top ${className}`;
+        if (typeof content === 'string') td.textContent = content;
+        else td.append(content);
+        return td;
+      }
+
+      async function patch(id: string, body: Record<string, string>) {
+        const response = await api(API, { method: 'PATCH', body: JSON.stringify({ id, ...body }) });
+        messageEl.textContent = response.ok ? '' : '저장하지 못했어요. 새로고침 후 다시 시도해 주세요.';
+      }
+
+      function renderRow(row: Row) {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-200 last:border-b-0';
+
+        const insta = document.createElement(row.instagram ? 'a' : 'span');
+        insta.textContent = row.instagram ? `@${row.instagram}` : '-';
+        if (row.instagram && insta instanceof HTMLAnchorElement) {
+          insta.href = `https://instagram.com/${encodeURIComponent(row.instagram)}`;
+          insta.target = '_blank';
+          insta.rel = 'noopener noreferrer';
+          insta.className = 'text-primary underline';
+        }
+
+        const select = document.createElement('select');
+        select.className = 'rounded-md border border-neutral-300 px-2 py-1';
+        select.setAttribute('aria-label', `${row.name} 상태`);
+        select.append(statusTemplate.content.cloneNode(true));
+        select.value = row.status;
+        select.addEventListener('change', () => patch(row.id, { status: select.value }));
+
+        const memo = document.createElement('textarea');
+        memo.className = 'w-56 rounded-md border border-neutral-300 px-2 py-1';
+        memo.rows = 2;
+        memo.value = row.memo ?? '';
+        memo.setAttribute('aria-label', `${row.name} 메모`);
+        memo.addEventListener('change', () => patch(row.id, { memo: memo.value }));
+
+        // 삭제는 두 번 눌러야 한다(브라우저 confirm 대신 버튼이 '정말 삭제'로 바뀐다).
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'whitespace-nowrap text-caption-1 text-neutral-600 underline';
+        remove.textContent = '삭제';
+        let armed = false;
+        remove.addEventListener('click', async () => {
+          if (!armed) {
+            armed = true;
+            remove.textContent = '정말 삭제';
+            remove.classList.add('text-error');
+            setTimeout(() => {
+              armed = false;
+              remove.textContent = '삭제';
+              remove.classList.remove('text-error');
+            }, 4000);
+            return;
+          }
+          const response = await api(`${API}?id=${row.id}`, { method: 'DELETE' });
+          if (response.ok) tr.remove();
+          else messageEl.textContent = '삭제하지 못했어요.';
+        });
+
+        const source = [row.utm_source, row.utm_campaign].filter(Boolean).join(' / ') || '-';
+        tr.append(
+          cell(formatDate(row.created_at), 'whitespace-nowrap tabular-nums'),
+          cell(row.name, 'font-semibold'),
+          cell(insta),
+          cell(formatPhone(row.phone), 'whitespace-nowrap tabular-nums'),
+          cell(source, 'text-neutral-600'),
+          cell(select),
+          cell(memo),
+          cell(remove),
+        );
+        return tr;
+      }
+
+      async function load() {
+        messageEl.textContent = '';
+        const response = await api(`${API}?${query()}`);
+        const result = (await response.json().catch(() => ({}))) as {
+          rows?: Row[];
+          counts?: { status: string; count: number }[];
+          error?: string;
+        };
+        if (response.status === 401 || response.status === 429) {
+          saveToken('');
+          board.classList.add('hidden');
+          loginForm.classList.remove('hidden');
+          loginError.textContent = result.error ?? '다시 로그인해 주세요.';
+          return;
+        }
+        if (!response.ok) {
+          loginForm.classList.remove('hidden');
+          loginError.textContent = result.error ?? '불러오지 못했어요.';
+          return;
+        }
+
+        loginForm.classList.add('hidden');
+        board.classList.remove('hidden');
+        const total = (result.counts ?? []).reduce((sum, c) => sum + c.count, 0);
+        countsEl.textContent = [
+          `전체 ${total}명`,
+          ...(result.counts ?? []).map((c) => `${LABELS[c.status] ?? c.status} ${c.count}`),
+        ].join(' · ');
+
+        rowsEl.replaceChildren();
+        const rows = result.rows ?? [];
+        if (rows.length === 0) {
+          const empty = document.createElement('tr');
+          empty.append(cell('아직 사전등록이 없어요.', 'py-8 text-center text-neutral-600'));
+          (empty.firstChild as HTMLTableCellElement).colSpan = 8;
+          rowsEl.append(empty);
+          return;
+        }
+        rowsEl.append(...rows.map(renderRow));
+      }
+
+      loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        loginError.textContent = '';
+        saveToken(passwordInput.value);
+        passwordInput.value = '';
+        load();
+      });
+
+      document.getElementById('refresh')?.addEventListener('click', load);
+      statusFilter.addEventListener('change', load);
+      let searchTimer: ReturnType<typeof setTimeout> | undefined;
+      queryInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(load, 300);
+      });
+
+      document.getElementById('logout')?.addEventListener('click', () => {
+        saveToken('');
+        rowsEl.replaceChildren();
+        board.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+      });
+
+      document.getElementById('csv')?.addEventListener('click', async () => {
+        const params = query();
+        params.set('format', 'csv');
+        const response = await api(`${API}?${params}`);
+        if (!response.ok) {
+          messageEl.textContent = 'CSV 를 만들지 못했어요.';
+          return;
+        }
+        const url = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `artist-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      if (token) load();
+    </script>
+  </body>
+</html>
