@@ -97,7 +97,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
     />
     <SeoHead title={TITLE} description={DESCRIPTION} canonicalPath="/for-artists" jsonLd={jsonLd} />
   </head>
-  <body class="bg-primary-50 font-sans text-primary-900 [word-break:keep-all]">
+  <body class="bg-primary-50 font-sans text-neutral-900 [word-break:keep-all]">
     <div class="mx-auto max-w-[1040px] px-4">
       <header class="flex items-center justify-between gap-3 py-4">
         <a href="/" class="inline-flex items-center gap-2 text-caption-1 font-semibold text-neutral-700">
@@ -133,8 +133,8 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
               >
             </div>
             <p class="flex flex-wrap gap-x-5 gap-y-1 text-body-4 text-neutral-700">
-              <span>채팅·문의 <b class="text-primary-900">무료</b></span>
-              <span>오픈 혜택 최대 {FREE_BOOKINGS}건의 예약 <b class="text-primary-900">무료</b></span>
+              <span>채팅·문의 <b class="text-neutral-900">무료</b></span>
+              <span>오픈 혜택 최대 {FREE_BOOKINGS}건의 예약 <b class="text-neutral-900">무료</b></span>
             </p>
           </div>
 
@@ -173,7 +173,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
             {
               screens.map((screen) => (
                 <figure class="m-0 grid w-[min(36vw,150px)] shrink-0 snap-start content-start gap-2 md:w-auto md:gap-3">
-                  <div class="rounded-[18px] bg-primary-900 p-[5px] shadow-elevation md:rounded-[26px] md:p-[7px]">
+                  <div class="rounded-[18px] bg-neutral-900 p-[5px] shadow-elevation md:rounded-[26px] md:p-[7px]">
                     <img
                       src={screen.src}
                       alt={screen.alt}
@@ -193,7 +193,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
 
         <section class={sectionCls} aria-labelledby="benefit-title">
           <h2 id="benefit-title" class={h2Cls}>먼저 오신 작가님께 예약 {FREE_BOOKINGS}건을 드려요</h2>
-          <ul class="border-t-2 border-primary-900 tabular-nums">
+          <ul class="border-t-2 border-neutral-900 tabular-nums">
             {
               benefits.map((benefit) => (
                 <li
@@ -210,7 +210,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
                   <span
                     class:list={[
                       'text-body-5 md:text-right',
-                      benefit.highlight ? 'font-semibold text-primary-900' : 'text-neutral-700',
+                      benefit.highlight ? 'font-semibold text-neutral-900' : 'text-neutral-700',
                     ]}
                   >
                     {benefit.note}
@@ -337,7 +337,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
               placeholder="작가명 (예: 봄날스냅)"
               required
               aria-describedby="err-name"
-              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-primary-900"
+              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-neutral-900"
             />
             <p id="err-name" class="hidden text-caption-1 text-primary-100" data-error="name"></p>
 
@@ -349,7 +349,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
               maxlength="80"
               autocomplete="off"
               placeholder="인스타그램 계정 (선택)"
-              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-primary-900"
+              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-neutral-900"
             />
 
             <label for="fa-phone" class="sr-only">휴대폰 번호</label>
@@ -363,7 +363,7 @@ const h2Cls = 'text-[1.5rem] font-extrabold leading-snug tracking-[-0.02em] text
               placeholder="휴대폰 번호 (010-1234-5678)"
               required
               aria-describedby="err-phone"
-              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-primary-900"
+              class="w-full rounded-md bg-neutral-0 px-3.5 py-3 text-neutral-900"
             />
             <p id="err-phone" class="hidden text-caption-1 text-primary-100" data-error="phone"></p>
 
