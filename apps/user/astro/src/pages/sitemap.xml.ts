@@ -5,7 +5,7 @@ import { ARTWORK_PAGE_SIZE, getArtworkPage } from '@dearbloom/shared';
 import { SITE_URL } from '@/lib/site';
 
 /** 실제 콘텐츠가 있는 정적 페이지. 작가·검색·카테고리 등은 아직 플레이스홀더라 넣지 않습니다. */
-const STATIC_PATHS = ['/', '/snaps', '/privacy-policy'];
+const STATIC_PATHS = ['/', '/snaps', '/for-artists', '/privacy-policy'];
 
 /** 커서 루프 상한(40 × 50 = 2,000개). API 가 hasNext 를 잘못 내려줘도 무한 호출하지 않게 합니다. */
 const MAX_PAGES = 50;
