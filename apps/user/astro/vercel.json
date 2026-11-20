@@ -4,29 +4,29 @@
     {
       "source": "/api/auth/callback",
       "has": [{ "type": "host", "value": "dearbloom.co.kr" }],
-      "destination": "https://dearbloom-next-dearbloom.vercel.app/app/api/auth/callback"
+      "destination": "https://dearbloom-next-dearbloom1.vercel.app/app/api/auth/callback"
     },
     {
       "source": "/app",
       "has": [{ "type": "host", "value": "dearbloom.co.kr" }],
-      "destination": "https://dearbloom-next-dearbloom.vercel.app/app"
+      "destination": "https://dearbloom-next-dearbloom1.vercel.app/app"
     },
     {
       "source": "/app/:path*",
       "has": [{ "type": "host", "value": "dearbloom.co.kr" }],
-      "destination": "https://dearbloom-next-dearbloom.vercel.app/app/:path*"
+      "destination": "https://dearbloom-next-dearbloom1.vercel.app/app/:path*"
     },
     {
       "source": "/api/auth/callback",
-      "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app/api/auth/callback"
+      "destination": "https://dearbloom-next-git-develop-dearbloom1.vercel.app/app/api/auth/callback"
     },
     {
       "source": "/app",
-      "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app"
+      "destination": "https://dearbloom-next-git-develop-dearbloom1.vercel.app/app"
     },
     {
       "source": "/app/:path*",
-      "destination": "https://dearbloom-next-git-develop-dearbloom.vercel.app/app/:path*"
+      "destination": "https://dearbloom-next-git-develop-dearbloom1.vercel.app/app/:path*"
     }
   ],
   "headers": [
